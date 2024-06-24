@@ -1,0 +1,16 @@
+.delivery-option-container {
+  gap: 20px;
+  background-color: white;
+  border-radius: 10px;
+  height: 100%;
+  width: 500px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 3ch;
+  padding-bottom: 60px;
+  margin-top: 50px;
+}
+
+.deliver-option-h2 {
+  margin-left: 20px;
+}
