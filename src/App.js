@@ -4,6 +4,7 @@ import Register from "./Pages/Register/Register";
 import Address from "./Pages/Address/Address";
 import Profile from "./Pages/Profile/Profile";
 import MainComponent from "./Components/MainComponent/MainComponent";
+import Delivery from "./Components/Delivery/Delivery";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route path="/address" element={<Address />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/maincomponent" element={<MainComponent />} />
+          <Route path="/delivery" element={<Delivery />} />
         </Routes>
       </BrowserRouter>
     </div>
