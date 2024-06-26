@@ -88,3 +88,25 @@
 .custom-file-upload:hover {
   background-color: #0056b3;
 }
+
+.uploaded-image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.delete-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 6px 12px;
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.delete-button:hover {
+  background-color: darkred;
+}

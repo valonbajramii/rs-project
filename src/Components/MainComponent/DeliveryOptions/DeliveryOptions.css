@@ -11,6 +11,40 @@
   margin-top: 50px;
 }
 
+.delivery-option-container hr {
+  border: none;
+  border-top: 2px solid #9f9e9e;
+}
 .deliver-option-h2 {
   margin-left: 20px;
+}
+
+.delivery-option2 {
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  justify-self: center;
+  align-items: center;
+  text-align: center;
+  justify-content: space-around;
+  height: 100px;
+}
+
+.delivery-option hr {
+  border: none;
+  border-top: 2px solid #9f9e9e;
+}
+
+.car-icon {
+  width: 100px;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+}
+
+.rating svg {
+  color: gold;
+  margin-right: 2px;
 }
