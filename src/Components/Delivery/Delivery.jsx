@@ -237,7 +237,7 @@ const Delivery = () => {
               alt="Uploaded"
             />
             <button className="delete-button" onClick={handleImageDelete}>
-              Delete
+              x
             </button>
           </div>
         )}
