@@ -364,7 +364,6 @@ const Profile = ({ user }) => {
         <div className="text-info">
           <h1 className="profile-h1">{user.name}</h1>
           <h3 className="profile-h3">{user.email}</h3>
-          <h3 className="profile-h3">{user.number}</h3>
         </div>
         <div className="input-container11">
           <button className="input11" onClick={openModal}>
@@ -400,23 +399,25 @@ const Profile = ({ user }) => {
         </div>
       </div>
 
-      <PersonalInfoModal isVisible={isModalVisible} onClose={closeModal}>
-        <h2 className="personal-info-h2">
-          <img className="person-icon-modal" src={PersonFill} alt="icon" />
-          Personal Information
-        </h2>
-        <p>Legal name: {user.name}</p>
-        <p>Birthday: {user.birthday}</p>
-        <p>Email: {user.email}</p>
-        <p>Mobile: {user.number}</p>
-        <h2 className="address-info-h2">
-          <img className="geoalt-icon" src={GeoaltIcon} alt="icon" />
-          Address Information
-        </h2>
-        <p>Street & Nr: {user.street}</p>
-        <p>ZIP Code: {user.zip}</p>
-        <p> State: {user.state}</p>
-      </PersonalInfoModal>
+      {isModalVisible && (
+        <PersonalInfoModal isVisible={isModalVisible} onClose={closeModal}>
+          <h2 className="personal-info-h2">
+            <img className="person-icon-modal" src={PersonFill} alt="icon" />
+            Personal Information
+          </h2>
+          <p>Legal name: {user.name}</p>
+          <p>Birthday: {user.dateOfBirth}</p>
+          <p>Email: {user.email}</p>
+          <p>Mobile: {user.mobileNumber}</p>
+          <h2 className="address-info-h2">
+            <img className="geoalt-icon" src={GeoaltIcon} alt="icon" />
+            Address Information
+          </h2>
+          <p>Street & Nr: {user.address}</p>
+          <p>ZIP Code: {user.zip}</p>
+          <p> State: {user.state}</p>
+        </PersonalInfoModal>
+      )}
     </div>
   );
 };
