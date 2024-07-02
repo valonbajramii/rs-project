@@ -304,7 +304,7 @@ import LogoutIcon from "../../icons/box-arrow-left.svg";
 import GeoaltIcon from "../../icons/geo-alt.svg";
 import PersonalInfoModal from "../../Components/PersonalInfoModal/PersonalInfoModal";
 
-const Profile = ({ user }) => {
+const Profile = ({ user, setUser }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
 
@@ -329,6 +329,10 @@ const Profile = ({ user }) => {
 
   const handleImageDelete = () => {
     setUploadedImage(null);
+  };
+
+  const handleLogout = () => {
+    setUser(null); // Reset user state to null
   };
 
   return (
@@ -392,7 +396,7 @@ const Profile = ({ user }) => {
           </button>
         </div>
         <div className="button-container11">
-          <button className="button11">
+          <button className="button11" onClick={handleLogout}>
             <img className="logout-icon" src={LogoutIcon} alt="Log out" />
             Log out
           </button>

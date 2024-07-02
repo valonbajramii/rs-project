@@ -88,13 +88,7 @@ import Address from "./Pages/Address/Address";
 import Profile from "./Pages/Profile/Profile";
 import MainComponent from "./Components/MainComponent/MainComponent";
 import Delivery from "./Components/Delivery/Delivery";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-  useNavigate,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
 
 function App() {
@@ -141,7 +135,13 @@ function App() {
           />
           <Route
             path="/profile"
-            element={user ? <Profile user={user} /> : <Navigate to="/login" />}
+            element={
+              user ? (
+                <Profile user={user} setUser={setUser} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
           />
           <Route path="/maincomponent" element={<MainComponent />} />
           <Route path="/delivery" element={<Delivery />} />
