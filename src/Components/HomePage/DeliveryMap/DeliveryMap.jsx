@@ -1,91 +1,3 @@
-// import React from "react";
-// import "./DeliveryMap.css";
-
-// const DeliveryMap = () => {
-//   return (
-//     <div className="map-container">
-//       {/* Map integration code here */}
-//       <h2>Map</h2>
-//       <div id="map"></div>
-//     </div>
-//   );
-// };
-
-// export default DeliveryMap;
-
-// import React, { useState, useEffect } from "react";
-// import {
-//   MapContainer,
-//   TileLayer,
-//   Marker,
-//   Popup,
-//   useMapEvents,
-// } from "react-leaflet";
-// import "leaflet/dist/leaflet.css";
-// import "./DeliveryMap.css";
-
-// import L from "leaflet";
-// import icon from "leaflet/dist/images/marker-icon.png";
-// import iconShadow from "leaflet/dist/images/marker-shadow.png";
-
-// let DefaultIcon = L.icon({
-//   iconUrl: icon,
-//   shadowUrl: iconShadow,
-// });
-
-// L.Marker.prototype.options.icon = DefaultIcon;
-
-// const LocationMarker = ({ setDestination }) => {
-//   const [position, setPosition] = useState(null);
-//   const map = useMapEvents({
-//     click(e) {
-//       setDestination(e.latlng);
-//     },
-//     locationfound(e) {
-//       setPosition(e.latlng);
-//       map.flyTo(e.latlng, map.getZoom());
-//     },
-//   });
-
-//   useEffect(() => {
-//     map.locate();
-//   }, [map]);
-
-//   return position === null ? null : (
-//     <Marker position={position}>
-//       <Popup>You are here</Popup>
-//     </Marker>
-//   );
-// };
-
-// const DeliveryMap = () => {
-//   const [destination, setDestination] = useState(null);
-
-//   return (
-//     <div className="map-container">
-//       <h2>Map</h2>
-//       <MapContainer
-//         center={[51.505, -0.09]}
-//         zoom={13}
-//         style={{ height: "500px", width: "100%" }}
-//       >
-//         <TileLayer
-//           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-//           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-//         />
-//         <LocationMarker setDestination={setDestination} />
-//         {destination && (
-//           <Marker position={destination}>
-//             <Popup>Destination</Popup>
-//           </Marker>
-//         )}
-//       </MapContainer>
-//     </div>
-//   );
-// };
-
-// export default DeliveryMap;
-
 import React, { useState, useEffect } from "react";
 import {
   MapContainer,
@@ -160,7 +72,7 @@ const DeliveryMap = () => {
 
   return (
     <div className="map-container">
-      <h2>Map</h2>
+    
       <MapContainer
         center={[51.505, -0.09]}
         zoom={13}

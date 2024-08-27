@@ -1,28 +1,3 @@
-// import React from "react";
-// import "./Address.css";
-
-// const Address = () => {
-//   return (
-//     <div className="container">
-//       <div className="content-container">
-//         <h1>Address Check</h1>
-//         <div className="input-container">
-//           <input className="input" placeholder="Address" />
-//           <div className="input1-container">
-//             <input className="input1" placeholder="State" />
-//             <input className="input2" placeholder=" ZIP Code" />
-//           </div>
-//         </div>
-//         <div className="button-container">
-//           <button className="button">Confirm</button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Address;
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Address.css";
@@ -47,7 +22,7 @@ const Address = ({ onRegister }) => {
     e.preventDefault();
     // Call the onRegister function passed as a prop
     onRegister(addressData);
-    navigate("/profile");
+    navigate("/homepage");
   };
 
   return (

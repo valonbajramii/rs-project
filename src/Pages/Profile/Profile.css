@@ -2,11 +2,22 @@
   display: flex;
   flex-direction: column;
   background-color: rgb(240, 240, 240);
-  align-items: center;
+  align-items: left;
   justify-content: center;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+.container2 {
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(240, 240, 240);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border-radius: 10px;
   width: 100%;
 }
 
@@ -194,4 +205,19 @@
 .geoalt-icon {
   width: 25px;
   margin-right: 10px;
+}
+
+
+.profile-backbutton-container{
+  display: flex;
+  justify-content: left;
+  align-items: left;
+}
+
+.back-button{
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background-color: #b9b5b5;
+  color: white;
 }

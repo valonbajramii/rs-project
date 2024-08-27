@@ -1,9 +1,0 @@
-.main-container {
-  display: flex;
-  gap: 40px;
-  background-color: rgb(222, 224, 225);
-  width: 100%;
-  min-height: 100vh;
-  justify-content: center;
-  justify-content: space-around;
-}

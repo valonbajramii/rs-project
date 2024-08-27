@@ -3,12 +3,13 @@
   background-color: white;
   border-radius: 10px;
   height: 100%;
-  width: 500px;
+  max-height: 500px; /* Set a max height for the container */
+  overflow-y: auto;
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 3ch;
   padding-bottom: 60px;
-  margin-top: 50px;
+  margin-top: 10px;
 }
 
 .delivery-option-container hr {

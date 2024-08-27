@@ -1,0 +1,36 @@
+.Homepage-container {
+  display: flex;
+  background-color: rgb(222, 224, 225);
+  width: 100%;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.homepage-header {
+  display: flex;
+  padding: 10px;
+  justify-content: space-between;
+  padding-left: 20px;
+  padding-right: 20px;
+  background-color: rgb(191, 195, 196);
+}
+
+.Components-container {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.profile-icon {
+  width: 50px;
+}
+
+.add-delivery-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.add-delivery-icon {
+  width: 30px;
+}

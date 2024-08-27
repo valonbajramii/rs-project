@@ -1,23 +1,54 @@
+.delivery-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it's above other content */
+}
+
+.delivery-modal-content {
+  background-color: rgb(222, 224, 225);
+  border-radius: 10px;
+  padding: 10px;
+  padding-bottom: 30px;
+  width: 80%;
+  position: relative;
+}
+
+.delivery-close-modal {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
 .delivery-container {
   display: flex;
   justify-content: space-around;
   background-color: rgb(222, 224, 225);
   width: 100%;
-  min-height: 100vh;
   gap: 50px;
 }
 
 .delivery-content {
   gap: 20px;
-  background-color: white;
+  background-color: rgb(255, 255, 255);
   border-radius: 10px;
   height: 100%;
   width: 400px;
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 3ch;
-  padding-bottom: 60px;
-  margin-top: 50px;
+  padding-bottom: 30px;
+  margin-top: 20px;
   margin-left: 15px;
 }
 
@@ -50,7 +81,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: white;
+  background-color: rgb(255, 255, 255);
   border-radius: 10px;
   height: 100%;
   width: 800px;
@@ -58,7 +89,7 @@
   padding-right: 5px;
   padding-top: 2.5ch;
   padding-bottom: 15px;
-  margin-top: 50px;
+  margin-top: 20px;
   margin-right: 15px;
   overflow: hidden;
 }
@@ -74,13 +105,13 @@
   object-fit: contain;
 }
 
-.custom-file-upload {
+.deliver-custom-file-upload {
   display: inline-block;
   text-align: center;
   padding: 6px 12px;
   cursor: pointer;
-  background-color: #007bff;
-  color: white;
+  background-color: #257fdf;
+  color: rgb(255, 255, 255);
   border: none;
   border-radius: 15px;
   font-size: 14px;
@@ -93,8 +124,8 @@
   font-size: 20px;
 }
 
-.custom-file-upload:hover {
-  background-color: #0056b3;
+.deliver-custom-file-upload:hover {
+  background-color: #1877ec;
 }
 
 .delete-button {
@@ -108,6 +139,27 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
+}
+
+.Container-delivery-button {
+  width: 100%;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.delivery-button {
+  text-align: center;
+  padding: 1px 5px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  font-size: 14px;
+  line-height: 60px;
+  vertical-align: middle;
+  font-size: 20px;
+  width: 50%;
 }
 /* 
 .delete-button:hover {
