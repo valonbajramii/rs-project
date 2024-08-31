@@ -46,7 +46,7 @@ const Login = ({ setUser }) => {
     if (matchedUser) {
       // If user is found, set the user in state and navigate to profile
       setUser(matchedUser);
-      navigate("/profile");
+      navigate("/homepage");
     } else {
       alert("Invalid email or password!"); // Show error if no matching user is found
     }

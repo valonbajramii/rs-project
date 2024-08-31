@@ -9,14 +9,15 @@
   justify-content: center;
   align-items: center;
   z-index: 1000; /* Ensure it's above other content */
+  padding: 10px; /* Add padding to prevent modal content from touching the edges on smaller screens */
 }
 
 .delivery-modal-content {
   background-color: rgb(222, 224, 225);
   border-radius: 10px;
-  padding: 10px;
-  padding-bottom: 30px;
-  width: 80%;
+  padding: 20px;
+  width: 100%;
+  max-width: 900px; /* Set a max width for larger screens */
   position: relative;
 }
 
@@ -32,34 +33,32 @@
 
 .delivery-container {
   display: flex;
-  justify-content: space-around;
+  flex-direction: column; /* Stack elements vertically on smaller screens */
+  gap: 20px;
   background-color: rgb(222, 224, 225);
   width: 100%;
-  gap: 50px;
 }
 
 .delivery-content {
   gap: 20px;
   background-color: rgb(255, 255, 255);
   border-radius: 10px;
-  height: 100%;
-  width: 400px;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 3ch;
-  padding-bottom: 30px;
-  margin-top: 20px;
-  margin-left: 15px;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box; /* Include padding and border in the element's width */
 }
 
 .delivery-h2 {
-  margin-left: 20px;
+  text-align: center; /* Center align the title for better visual appeal */
+  margin-bottom: 20px;
 }
 
 .delivery-inputs-container {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  max-height: 70vh; /* Set max height to limit the height of the input container */
+  overflow-y: auto; /* Add vertical scroll if content overflows */
 }
 
 .delivery-input {
@@ -75,6 +74,7 @@
   outline: none;
   text-align: left;
   font-size: 18px;
+  
 }
 
 .delivery-img-container {
@@ -83,14 +83,9 @@
   align-items: center;
   background-color: rgb(255, 255, 255);
   border-radius: 10px;
-  height: 100%;
-  width: 800px;
-  padding-left: 5px;
-  padding-right: 5px;
-  padding-top: 2.5ch;
-  padding-bottom: 15px;
-  margin-top: 20px;
-  margin-right: 15px;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box; /* Include padding and border in the element's width */
   overflow: hidden;
 }
 
@@ -101,27 +96,24 @@
 
 .deliveri-image {
   max-width: 100%;
-  max-height: 700px;
+  max-height: 400px; /* Adjusted max height for better responsiveness */
   object-fit: contain;
 }
 
 .deliver-custom-file-upload {
   display: inline-block;
   text-align: center;
-  padding: 6px 12px;
+  padding: 12px 24px;
   cursor: pointer;
   background-color: #257fdf;
   color: rgb(255, 255, 255);
   border: none;
   border-radius: 15px;
-  font-size: 14px;
-  margin-top: 325px;
-  margin-bottom: 300px;
-  height: 60px;
-  width: 40%;
-  line-height: 60px;
-  vertical-align: middle;
-  font-size: 20px;
+  font-size: 16px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 80%;
+  max-width: 250px; /* Set a max width for better responsiveness */
 }
 
 .deliver-custom-file-upload:hover {
@@ -148,18 +140,53 @@
 }
 
 .delivery-button {
-  text-align: center;
-  padding: 1px 5px;
+  padding: 15px 30px;
   cursor: pointer;
   background-color: #007bff;
   color: white;
   border: none;
   border-radius: 15px;
-  font-size: 14px;
-  line-height: 60px;
-  vertical-align: middle;
-  font-size: 20px;
-  width: 50%;
+  font-size: 18px;
+  width: 100%;
+  max-width: 200px; /* Set a max width for better responsiveness */
+  margin: 0 auto; /* Center align button */
+}
+
+/* Media Queries for Responsive Design */
+@media (min-width: 768px) {
+  .delivery-container {
+    flex-direction: row; /* Side-by-side layout for larger screens */
+    justify-content: space-between;
+  }
+
+  .delivery-content,
+  .delivery-img-container {
+    width: 48%; /* Make both content and image container occupy equal space */
+  }
+
+  .delivery-img-container {
+    height: auto; /* Adjust height based on content */
+  }
+}
+
+@media (max-width: 480px) {
+  .delivery-modal-content {
+    padding: 10px;
+  }
+
+  .delivery-input {
+    font-size: 16px; /* Smaller font size on smaller screens */
+    height: 45px;
+  }
+
+  .deliver-custom-file-upload {
+    width: 100%; /* Full width on smaller screens */
+  }
+
+  .delivery-button {
+    font-size: 16px;
+    padding: 10px 20px;
+  }
 }
 /* 
 .delete-button:hover {

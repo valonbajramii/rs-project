@@ -49,3 +49,14 @@
   color: gold;
   margin-right: 2px;
 }
+
+.delivery-options-info {
+  display: flex; /* Use flexbox for better control over alignment and spacing */
+  flex-direction: column; /* Stack the <p> elements vertically */
+  gap: 0; /* Remove any default gap that may be applied by flexbox */
+}
+
+.delivery-options-info p {
+  margin: 5px; /* Remove margin */
+  padding: 0; /* Remove padding */
+}

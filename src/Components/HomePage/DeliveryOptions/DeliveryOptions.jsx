@@ -35,8 +35,10 @@ const DeliveryOptions = ({ deliveryOptions }) => {
                 alt="Delivery Icon"
                 onClick={() => handleIconClick(option)}
               />
-              <div>
+              <div className="delivery-options-info">
                 <p>{option.name}</p>
+                <p>{option.destination}</p>
+                <p>Dead Line:{option.deadline}</p>
               </div>
               <p className="deliver-price">{option.price}.- CHF</p>
             </div>

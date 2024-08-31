@@ -53,13 +53,20 @@
 
 .DeliveryInfoModal-content {
   background: white;
-  padding: 40px;
+  padding: 30px;
   border-radius: 12px;
-  text-align: center;
-  position: relative;
+  text-align: right;
   width: 450px;
   max-width: 90%;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  opacity: 1; /* Ensure the content is visible */
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.DeliveryInfoModal-content2{
+  background: white;
+  text-align: center;
+  position: relative;
   opacity: 1; /* Ensure the content is visible */
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
@@ -85,7 +92,7 @@
   line-height: 1.5;
 }
 
-.DeliveryInfoModal-content button {
+/* .DeliveryInfoModal-content button {
   margin-top: 20px;
   padding: 12px 24px;
   background-color: #007bff;
@@ -108,5 +115,88 @@
 }
 
 .DeliveryInfoModal-content button:active {
+  transform: scale(0.95);
+} */
+
+/* .requestclose-buttons-container{
+gap:10;
+} */
+
+.infomodal-request-button{
+  margin-top: 20px;
+  margin-right: 10px;
+  padding: 12px 24px;
+  background-color: #e44736;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.infomodal-request-button:hover{
+  background-color: #b31e00;
+  transform: scale(1.05);
+}
+
+.infomodal-request-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 13, 0, 0.5);
+}
+
+.infomodal-request-button:active {
+  transform: scale(0.95);
+}
+
+.infomodal-close-button{
+  margin-top: 20px;
+  padding: 12px 24px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.infomodal-close-button:hover{
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+.infomodal-close-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
+}
+
+.infomodal-close-button:active {
+  transform: scale(0.95);
+}
+
+
+.info-modal-xbutton{
+  background-color: #bbbfc3;
+  padding: 5px 13px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.info-modal-xbutton:hover{
+  background-color: #9ba0a4;
+  transform: scale(1.05);
+}
+
+.info-modal-xbutton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(137, 154, 172, 0.5);
+}
+
+.info-modal-xbutton:active {
   transform: scale(0.95);
 }

@@ -1,10 +1,17 @@
 import React, { useState } from "react";
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 import "./Delivery.css";
 
 const Delivery = ({ onClose, addNewDelivery }) => {
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [inputType, setInputType] = useState({
+    pickupTim: 'text',
+    deadline: 'text',
+  });
   const [newDelivery, setNewDelivery] = useState({
     image: null,
+    name: "",
     location: "",
     destination: "",
     description: "",
@@ -14,6 +21,7 @@ const Delivery = ({ onClose, addNewDelivery }) => {
     height: "",
     width: "",
     pickupTim: "",
+    deadline: "",
   });
 
   const handleImageUpload = (event) => {
@@ -38,6 +46,12 @@ const Delivery = ({ onClose, addNewDelivery }) => {
     setNewDelivery({ ...newDelivery, [name]: value });
   };
 
+  const handleDateChange = (date) => {
+    // Custom formatting can be applied here if needed.
+    const formattedDate = date.toISOString().slice(5, 16); // Remove the year from the formatted date string
+    setNewDelivery({ ...newDelivery, deadline: formattedDate });
+  };
+
   const handleAddDelivery = () => {
     addNewDelivery(newDelivery);
     onClose(); // Close the modal after adding
@@ -53,6 +67,14 @@ const Delivery = ({ onClose, addNewDelivery }) => {
           <div className="delivery-content">
             <h2 className="delivery-h2">Add Delivery</h2>
             <div className="delivery-inputs-container">
+              <input
+                className="delivery-input"
+                type="text"
+                name="name"
+                placeholder="Delivery Name"
+                value={newDelivery.name}
+                onChange={handleInputChange}
+              />
               <input
                 className="delivery-input"
                 type="text"
@@ -119,17 +141,24 @@ const Delivery = ({ onClose, addNewDelivery }) => {
               />
               <input
                 className="delivery-input"
-                type="datetime-local"
+                type={inputType.pickupTim}
                 name="pickupTim"
                 placeholder="Pickup Time"
                 value={newDelivery.pickupTim}
+                onFocus={() => setInputType({ ...inputType, pickupTim: 'datetime-local' })}
+                onBlur={() => newDelivery.pickupTim === '' && setInputType({ ...inputType, pickupTim: 'text' })}
                 onChange={handleInputChange}
               />
-              <div className="Container-delivery-button">
-                <button className="delivery-button" onClick={handleAddDelivery}>
-                  Add
-                </button>
-              </div>
+               <DatePicker
+                className="delivery-input"
+                selected={newDelivery.deadline ? new Date(`2024-${newDelivery.deadline}`) : null}
+                onChange={handleDateChange}
+                showTimeSelect
+                showMonthDropdown
+                showDayDropdown
+                dateFormat="MMMM d, h:mm aa"
+                placeholderText="Deadline"
+              />
             </div>
           </div>
           <div className="delivery-img-container">
@@ -163,6 +192,11 @@ const Delivery = ({ onClose, addNewDelivery }) => {
             )}
           </div>
         </div>
+        <div className="Container-delivery-button">
+                <button className="delivery-button" onClick={handleAddDelivery}>
+                  Add
+                </button>
+              </div>
       </div>
     </div>
   );
