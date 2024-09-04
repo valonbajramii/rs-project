@@ -1,7 +1,7 @@
 import React from "react";
 import "./DeliveryInfoModal.css";
 
-const DeliveryInfoModal = ({ show, onClose, deliveryDetails }) => {
+const DeliveryInfoModal = ({ show, onClose, deliveryDetails, user }) => {
   if (!show) {
     return null; // Do not render the modal if `show` is false
   }
@@ -29,7 +29,12 @@ const DeliveryInfoModal = ({ show, onClose, deliveryDetails }) => {
           <p>Width: {deliveryDetails.width} cm</p>
           <p>Pickup Time: {deliveryDetails.pickupTim}</p>
           <p>Dead Line: {deliveryDetails.deadline}</p>
-          <button className="infomodal-request-button">Request</button>
+
+          {/* Request button visible only if the delivery was not created by the current user */}
+          {deliveryDetails.createdBy !== user.email && (
+            <button className="infomodal-request-button">Request</button>
+          )}
+
           <button className="infomodal-close-button" onClick={onClose}>
             Close
           </button>

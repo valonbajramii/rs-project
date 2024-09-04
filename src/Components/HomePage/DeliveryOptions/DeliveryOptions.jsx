@@ -3,7 +3,7 @@ import "./DeliveryOptions.css";
 // import CarIcon from "../../../icons/car-front-fill.svg";
 import DeliveryInfoModal from "../../DeliveryInfoModal/DeliveryInfoModal";
 
-const DeliveryOptions = ({ deliveryOptions }) => {
+const DeliveryOptions = ({ deliveryOptions, deleteDelivery, user  }) => {
   const [showModal, setShowModal] = useState(false);
   const [selectedDelivery, setSelectedDelivery] = useState(null);
 
@@ -41,6 +41,11 @@ const DeliveryOptions = ({ deliveryOptions }) => {
                 <p>Dead Line:{option.deadline}</p>
               </div>
               <p className="deliver-price">{option.price}.- CHF</p>
+
+              {/* Delete button visible only if the delivery was created by the current user */}
+              {option.createdBy === user.email && (
+                <button onClick={() => deleteDelivery(index)}>Delete</button>
+              )}
             </div>
             <hr />
           </div>
@@ -52,6 +57,7 @@ const DeliveryOptions = ({ deliveryOptions }) => {
           show={showModal}
           onClose={closeModal}
           deliveryDetails={selectedDelivery}
+          user={user} // Pass the user prop to the modal
         />
       )}
     </div>

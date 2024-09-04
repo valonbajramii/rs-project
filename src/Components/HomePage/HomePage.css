@@ -25,6 +25,11 @@
 .profile-icon {
   width: 50px;
 }
+.add-buttons-container{
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
 
 .add-delivery-container {
   display: flex;
