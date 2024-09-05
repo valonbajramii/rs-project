@@ -7,9 +7,10 @@ import Delivery from "../Delivery/Delivery";
 import profileImg from "../../icons/person-circle.svg";
 import addDeliveryIcon from "../../icons/plus-circle-dotted.svg";
 import { useNavigate } from "react-router-dom";
-import audiImage from '../../images/2025_audi_q7_4dr-suv_prestige_fq_oem_1_1600.avif';
-import mercedesImage from '../../images/2023-mercedes-amg-c63-s-e-performance-114-65d79698b0e26.avif';
+import audiImage from "../../images/2025_audi_q7_4dr-suv_prestige_fq_oem_1_1600.avif";
+import mercedesImage from "../../images/2023-mercedes-amg-c63-s-e-performance-114-65d79698b0e26.avif";
 import MyProductModal from "./MyProductModal/MyProductModal";
+import { v4 as uuidv4 } from "uuid";
 
 const HomePage = ({ user }) => {
   const navigate = useNavigate();
@@ -19,55 +20,55 @@ const HomePage = ({ user }) => {
   // Function to initialize deliveries with 'createdBy' if missing
   const initializeDeliveries = () => {
     const storedDeliveries = localStorage.getItem("deliveries");
-    let deliveries = storedDeliveries ? JSON.parse(storedDeliveries) : [
-      {
-        name: "Car",
-        image: audiImage,
-        price: "100",
-        location: "Kamenic",
-        destination: "Prishtin",
-        description: "Description",
-        weightinKg: "20",
-        length: "50cm",
-        height: "50cm",
-        width: "50cm",
-        pickupTim: "2024-08-28T17:00",
-        deadline: "08-09 T12:55",
-        createdBy: user.email, // Add createdBy to default deliveries
-      },
-      {
-        name: "Car",
-        image: mercedesImage,
-        price: "200",
-        location: "Kamenic",
-        destination: "Prishtin",
-        description: "Description",
-        weightinKg: "20",
-        length: "50cm",
-        height: "50cm",
-        width: "50cm",
-        pickupTim: "2024-08-28T17:00",
-        deadline: "08-09 T05:55",
-        createdBy: user.email, // Add createdBy to default deliveries
-      },
-    ];
+    let deliveries = storedDeliveries
+      ? JSON.parse(storedDeliveries)
+      : [
+          {
+            id: uuidv4(), // Add a unique id
+            name: "Car",
+            image: audiImage,
+            price: "100",
+            location: "Kamenic",
+            destination: "Prishtin",
+            description: "Description",
+            weightinKg: "20",
+            length: "50cm",
+            height: "50cm",
+            width: "50cm",
+            pickupTim: "2024-08-28T17:00",
+            deadline: "08-09 T12:55",
+            createdBy: user.email,
+          },
+          {
+            id: uuidv4(), // Add a unique id
+            name: "Car",
+            image: mercedesImage,
+            price: "200",
+            location: "Kamenic",
+            destination: "Prishtin",
+            description: "Description",
+            weightinKg: "20",
+            length: "50cm",
+            height: "50cm",
+            width: "50cm",
+            pickupTim: "2024-08-28T17:00",
+            deadline: "08-09 T05:55",
+            createdBy: user.email,
+          },
+        ];
 
-    // Check each delivery for 'createdBy' and add it if missing
     deliveries = deliveries.map((delivery) => {
       if (!delivery.createdBy) {
-        return { ...delivery, createdBy: user.email };
+        return { ...delivery, createdBy: user.email, id: uuidv4() }; // Ensure each delivery has an id
       }
       return delivery;
     });
 
-    // Update localStorage with deliveries containing 'createdBy'
     localStorage.setItem("deliveries", JSON.stringify(deliveries));
     return deliveries;
   };
 
-  // Initialize state with deliveries from localStorage
   const [deliveryOptions, setDeliveryOptions] = useState(initializeDeliveries);
-
   const [filterCriteria, setFilterCriteria] = useState({});
   const [filteredOptions, setFilteredOptions] = useState(deliveryOptions);
 
@@ -78,17 +79,21 @@ const HomePage = ({ user }) => {
 
   // Handler to add a new delivery
   const addNewDelivery = (newDelivery) => {
-    const deliveryWithUser = { ...newDelivery, createdBy: user.email };
+    const deliveryWithUser = {
+      ...newDelivery,
+      createdBy: user.email,
+      id: uuidv4(),
+    }; // Add a unique id
     const updatedDeliveryOptions = [...deliveryOptions, deliveryWithUser];
     setDeliveryOptions(updatedDeliveryOptions);
-    localStorage.setItem("deliveries", JSON.stringify(updatedDeliveryOptions));
   };
 
-  // Handler to delete a delivery
-  const deleteDelivery = (index) => {
-    const updatedDeliveryOptions = deliveryOptions.filter((_, i) => i !== index);
+  // Handler to delete a delivery using id
+  const deleteDelivery = (deletedDelivery) => {
+    const updatedDeliveryOptions = deliveryOptions.filter(
+      (delivery) => delivery.id !== deletedDelivery.id // Use id for comparison
+    );
     setDeliveryOptions(updatedDeliveryOptions);
-    localStorage.setItem("deliveries", JSON.stringify(updatedDeliveryOptions));
   };
 
   // Function to update filter criteria
@@ -102,32 +107,37 @@ const HomePage = ({ user }) => {
       let filtered = deliveryOptions;
 
       if (filterCriteria.location) {
-        filtered = filtered.filter(option =>
-          option.location.toLowerCase().includes(filterCriteria.location.toLowerCase())
+        filtered = filtered.filter((option) =>
+          option.location
+            .toLowerCase()
+            .includes(filterCriteria.location.toLowerCase())
         );
       }
 
       if (filterCriteria.destination) {
-        filtered = filtered.filter(option =>
-          option.destination.toLowerCase().includes(filterCriteria.destination.toLowerCase())
+        filtered = filtered.filter((option) =>
+          option.destination
+            .toLowerCase()
+            .includes(filterCriteria.destination.toLowerCase())
         );
       }
 
       if (filterCriteria.length) {
-        filtered = filtered.filter(option =>
-          parseInt(option.length) >= parseInt(filterCriteria.length)
+        filtered = filtered.filter(
+          (option) => parseInt(option.length) >= parseInt(filterCriteria.length)
         );
       }
 
       if (filterCriteria.height) {
-        filtered = filtered.filter(option =>
-          parseInt(option.height) >= parseInt(filterCriteria.height)
+        filtered = filtered.filter(
+          (option) => parseInt(option.height) >= parseInt(filterCriteria.height)
         );
       }
 
       if (filterCriteria.pickupTime) {
-        filtered = filtered.filter(option =>
-          new Date(option.pickupTim) >= new Date(filterCriteria.pickupTime)
+        filtered = filtered.filter(
+          (option) =>
+            new Date(option.pickupTim) >= new Date(filterCriteria.pickupTime)
         );
       }
 
@@ -146,7 +156,7 @@ const HomePage = ({ user }) => {
   };
 
   const toggleProductModal = () => {
-    setIsProductModalOpen(!isProductModalOpen); // Toggle MyProductModal
+    setIsProductModalOpen(!isProductModalOpen);
   };
 
   return (
@@ -160,23 +170,24 @@ const HomePage = ({ user }) => {
           style={{ cursor: "pointer" }}
         />
         <div className="add-buttons-container">
-        <div className="add-delivery-container">
-          <img className="add-delivery-icon" src={addDeliveryIcon} alt="" onClick={toggleProductModal} />
-          My Products
-        </div>
-        <div className="add-delivery-container" onClick={toggleModal}>
-          <img className="add-delivery-icon" src={addDeliveryIcon} alt="" />
-          Add Delivery
-        </div>
+          <div className="add-delivery-container">
+            <img
+              className="add-delivery-icon"
+              src={addDeliveryIcon}
+              alt=""
+              onClick={toggleProductModal}
+            />
+            My Products
+          </div>
+          <div className="add-delivery-container" onClick={toggleModal}>
+            <img className="add-delivery-icon" src={addDeliveryIcon} alt="" />
+            Add Delivery
+          </div>
         </div>
       </header>
       <div className="Components-container">
         <DeliveryForm updateFilterCriteria={updateFilterCriteria} />
-        <DeliveryOptions
-          deliveryOptions={filteredOptions}
-          deleteDelivery={deleteDelivery}
-          user={user}
-        />
+        <DeliveryOptions deliveryOptions={filteredOptions} user={user} />
         <DeliveryMap />
       </div>
       {isModalOpen && (
@@ -186,7 +197,11 @@ const HomePage = ({ user }) => {
         />
       )}
       {isProductModalOpen && (
-        <MyProductModal onClose={toggleProductModal} /> // Render MyProductModal
+        <MyProductModal
+          onClose={toggleProductModal}
+          user={user}
+          deleteDelivery={deleteDelivery} // Pass deleteDelivery function to modal
+        />
       )}
     </div>
   );
