@@ -25,7 +25,7 @@ const DeliveryInfoModal = ({ show, onClose, deliveryDetails, user }) => {
           <p>Price: {deliveryDetails.price}.- CHF</p>
           <p>Weight: {deliveryDetails.weightinKg} Kg</p>
           <p>Length: {deliveryDetails.length} cm</p>
-          <p>Height: {deliveryDetails.hight} cm</p>
+          <p>Height: {deliveryDetails.height} cm</p>
           <p>Width: {deliveryDetails.width} cm</p>
           <p>Pickup Time: {deliveryDetails.pickupTim}</p>
           <p>Dead Line: {deliveryDetails.deadline}</p>

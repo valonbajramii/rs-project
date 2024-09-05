@@ -19,6 +19,8 @@
   width: 500px;
   max-width: 90%;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-height: 600px; /* Set a max height for the container */
+  overflow-y: auto;
 }
 
 .modal-h2 {
@@ -46,6 +48,11 @@
   width: 100px;
 }
 
+.myproductmodal-buttons {
+  display: flex;
+  flex-direction: column;
+}
+
 .myproductmodal-delete-button {
   background-color: #f44336;
   color: white;
@@ -59,6 +66,26 @@
 
 .myproductmodal-delete-button:hover {
   background-color: #d32f2f;
+}
+
+hr {
+  border: none;
+  border-top: 2px solid #9f9e9e;
+}
+
+.myproductmodal-edit-button {
+  background-color: #6bd7d8;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px; /* Space between price and button */
+}
+
+.myproductmodal-edit-button:hover {
+  background-color: #50bdbf;
 }
 
 hr {

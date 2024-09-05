@@ -1,0 +1,86 @@
+.edit-modal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 10px; /* Added padding to avoid modal touching screen edges */
+}
+
+/* Content area for the modal */
+.edit-modal-content {
+  background-color: white;
+  padding: 30px 20px; /* More padding for better spacing */
+  border-radius: 10px;
+  width: 100%;
+  max-width: 500px; /* Increased width for better layout */
+  position: relative;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Slightly stronger shadow */
+  overflow: auto; /* Ensure content scrolls if it overflows */
+  max-height: 90vh; /* Restrict modal height to viewport */
+}
+
+/* Modal header styles */
+.edit-modal-content h2 {
+  margin: 0 0 20px 0;
+  font-size: 24px;
+  text-align: center;
+  color: #333;
+}
+
+/* Input fields */
+.edit-modal-content input[type="text"],
+.edit-modal-content input[type="number"],
+.edit-modal-content input[type="datetime-local"] {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  color: #333;
+  box-sizing: border-box; /* Ensure padding is included in width */
+}
+
+/* File input field */
+.edit-modal-content input[type="file"] {
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+/* Save and Close buttons */
+.edit-modal-content .action-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.edit-modal-content button {
+  flex: 1;
+  background-color: #4d96ca; /* Green for save */
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.edit-modal-content button:hover {
+  background-color: #3677a5;
+}
+
+/* Close button styling */
+.edit-modal-content button.close {
+  background-color: #e74c3c;
+}
+
+.edit-modal-content button.close:hover {
+  background-color: #c0392b;
+}

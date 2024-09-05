@@ -159,6 +159,13 @@ const HomePage = ({ user }) => {
     setIsProductModalOpen(!isProductModalOpen);
   };
 
+  const editDelivery = (updatedDelivery) => {
+    const updatedOptions = deliveryOptions.map((delivery) =>
+      delivery.id === updatedDelivery.id ? updatedDelivery : delivery
+    );
+    setDeliveryOptions(updatedOptions);
+  };
+
   return (
     <div className="Homepage-container">
       <header className="homepage-header">
@@ -201,6 +208,7 @@ const HomePage = ({ user }) => {
           onClose={toggleProductModal}
           user={user}
           deleteDelivery={deleteDelivery} // Pass deleteDelivery function to modal
+          editDelivery={editDelivery}
         />
       )}
     </div>
