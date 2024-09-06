@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import DatePicker from 'react-datepicker';
+import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./Delivery.css";
 
 const Delivery = ({ onClose, addNewDelivery }) => {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [inputType, setInputType] = useState({
-    pickupTim: 'text',
-    deadline: 'text',
+    pickupTim: "text",
+    deadline: "text",
   });
   const [newDelivery, setNewDelivery] = useState({
     image: null,
@@ -24,18 +24,17 @@ const Delivery = ({ onClose, addNewDelivery }) => {
     deadline: "",
   });
 
-  const handleImageUpload = (event) => {
+  const handleImageUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setUploadedImage(reader.result);
-        setNewDelivery({ ...newDelivery, image: reader.result });
+        setUploadedImage(reader.result); // Save base64 to display immediately
+        setNewDelivery({ ...newDelivery, image: reader.result }); // You can change this to store just the image URL
       };
       reader.readAsDataURL(file);
     }
   };
-
   const handleImageDelete = () => {
     setUploadedImage(null);
     setNewDelivery({ ...newDelivery, image: null });
@@ -145,13 +144,22 @@ const Delivery = ({ onClose, addNewDelivery }) => {
                 name="pickupTim"
                 placeholder="Pickup Time"
                 value={newDelivery.pickupTim}
-                onFocus={() => setInputType({ ...inputType, pickupTim: 'datetime-local' })}
-                onBlur={() => newDelivery.pickupTim === '' && setInputType({ ...inputType, pickupTim: 'text' })}
+                onFocus={() =>
+                  setInputType({ ...inputType, pickupTim: "datetime-local" })
+                }
+                onBlur={() =>
+                  newDelivery.pickupTim === "" &&
+                  setInputType({ ...inputType, pickupTim: "text" })
+                }
                 onChange={handleInputChange}
               />
-               <DatePicker
+              <DatePicker
                 className="delivery-input"
-                selected={newDelivery.deadline ? new Date(`2024-${newDelivery.deadline}`) : null}
+                selected={
+                  newDelivery.deadline
+                    ? new Date(`2024-${newDelivery.deadline}`)
+                    : null
+                }
                 onChange={handleDateChange}
                 showTimeSelect
                 showMonthDropdown
@@ -193,10 +201,10 @@ const Delivery = ({ onClose, addNewDelivery }) => {
           </div>
         </div>
         <div className="Container-delivery-button">
-                <button className="delivery-button" onClick={handleAddDelivery}>
-                  Add
-                </button>
-              </div>
+          <button className="delivery-button" onClick={handleAddDelivery}>
+            Add
+          </button>
+        </div>
       </div>
     </div>
   );
