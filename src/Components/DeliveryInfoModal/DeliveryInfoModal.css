@@ -1,31 +1,115 @@
-/* .DeliveryInfoModal-overlay {
+/* Modal overlay */
+.DeliveryInfoModal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow-y: auto; /* Enable scrolling if content is too tall */
   z-index: 10000;
 }
 
+/* Modal content */
 .DeliveryInfoModal-content {
+  display: flex;
+  justify-content: center;
   background: white;
-  padding: 50px;
   border-radius: 8px;
-  text-align: center;
+  max-width: 800px; /* Maximum width of modal */
+  max-height: 95vh; /* Maximum height of modal (90% of viewport height) */
+  overflow-y: auto; /* Scroll content if it exceeds height */
   position: relative;
-  width: 500px;
 }
 
-.DeliveryInfoModal-content img {
-  width: 100px;
-  margin-bottom: 15px;
+.DeliveryInfoModal-content2 {
+  text-align: center; /* Ensure text content is centered */
+  overflow-y: auto;
+  padding: 20px;
 }
 
-.DeliveryInfoModal-content button {
+/* Close button */
+.info-modal-xbutton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border: none;
+  background: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Gallery container */
+.image-gallery {
+  display: flex;
+  flex-direction: column; /* Stack images vertically on smaller screens */
+  gap: 20px;
+  margin-bottom: 20px;
+
+  @media (min-width: 768px) {
+    flex-direction: row; /* Horizontal layout for larger screens */
+  }
+}
+
+/* Main image container */
+.main-image-container {
+  flex: 3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative; /* Make this relative for absolute positioning of buttons */
+}
+
+/* Main image */
+.main-image {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 400px; /* Limit max height of the main image */
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+/* Thumbnail images container */
+.thumbnail-images-container {
+  display: flex;
+  flex-direction: row; /* Display thumbnails in a row for small screens */
+  gap: 10px;
+  justify-content: center;
+
+  @media (min-width: 768px) {
+    flex-direction: column; /* Switch to column layout for larger screens */
+  }
+}
+
+/* Thumbnail image */
+.thumbnail-image {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: transform 0.2s;
+}
+
+.thumbnail-image:hover {
+  transform: scale(1.05);
+}
+
+.deliveryinfomdal-buttons-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Request and close button styles */
+.infomodal-request-button,
+.infomodal-close-button {
   margin-top: 10px;
   padding: 10px 20px;
   background-color: #007bff;
@@ -33,170 +117,44 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
-} */
-
-
-.DeliveryInfoModal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10000;
-  opacity: 1; /* Ensure the overlay is visible */
-  transition: opacity 0.3s ease; /* Smooth fade-in */
 }
 
-.DeliveryInfoModal-content {
-  background: white;
-  padding: 30px;
-  border-radius: 12px;
-  text-align: right;
-  width: 450px;
-  max-width: 90%;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  opacity: 1; /* Ensure the content is visible */
-  transition: transform 0.3s ease, opacity 0.3s ease;
+.infomodal-close-button {
+  background-color: #f44336;
 }
 
-.DeliveryInfoModal-content2{
-  background: white;
-  text-align: center;
-  position: relative;
-  opacity: 1; /* Ensure the content is visible */
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-.DeliveryInfoModal-content h2 {
-  margin-bottom: 20px;
-  color: #333;
-  font-size: 24px;
-  font-weight: 600;
-}
-
-.DeliveryInfoModal-content img {
-  width: 300px;
-  margin-bottom: 15px;
-  border-radius: 8px;
-  border: 2px solid #ddd;
-}
-
-.DeliveryInfoModal-content p {
-  margin: 10px 0;
-  color: #555;
-  font-size: 16px;
-  line-height: 1.5;
-}
-
-/* .DeliveryInfoModal-content button {
-  margin-top: 20px;
-  padding: 12px 24px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.DeliveryInfoModal-content button:hover {
+.infomodal-request-button:hover,
+.infomodal-close-button:hover {
   background-color: #0056b3;
-  transform: scale(1.05);
 }
 
-.DeliveryInfoModal-content button:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
+.infomodal-close-button:hover {
+  background-color: #d32f2f;
 }
 
-.DeliveryInfoModal-content button:active {
-  transform: scale(0.95);
-} */
-
-/* .requestclose-buttons-container{
-gap:10;
-} */
-
-.infomodal-request-button{
-  margin-top: 20px;
-  margin-right: 10px;
-  padding: 12px 24px;
-  background-color: #e44736;
-  color: white;
+.nav-button {
+  background-color: rgba(0, 0, 0, 0.5);
   border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.infomodal-request-button:hover{
-  background-color: #b31e00;
-  transform: scale(1.05);
-}
-
-.infomodal-request-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 13, 0, 0.5);
-}
-
-.infomodal-request-button:active {
-  transform: scale(0.95);
-}
-
-.infomodal-close-button{
-  margin-top: 20px;
-  padding: 12px 24px;
-  background-color: #007bff;
   color: white;
-  border: none;
-  border-radius: 5px;
+  font-size: 2rem;
+  padding: 10px;
   cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease, transform 0.3s ease;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
 }
 
-.infomodal-close-button:hover{
-  background-color: #0056b3;
-  transform: scale(1.05);
+.nav-button:hover {
+  opacity: 1;
 }
 
-.infomodal-close-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
+.nav-button.left {
+  left: 10px; /* Adjust positioning from the left */
 }
 
-.infomodal-close-button:active {
-  transform: scale(0.95);
-}
-
-
-.info-modal-xbutton{
-  background-color: #bbbfc3;
-  padding: 5px 13px;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.info-modal-xbutton:hover{
-  background-color: #9ba0a4;
-  transform: scale(1.05);
-}
-
-.info-modal-xbutton:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(137, 154, 172, 0.5);
-}
-
-.info-modal-xbutton:active {
-  transform: scale(0.95);
+.nav-button.right {
+  right: 10px; /* Adjust positioning from the right */
 }

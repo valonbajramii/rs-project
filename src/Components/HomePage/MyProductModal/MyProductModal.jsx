@@ -150,7 +150,11 @@ const MyProductModal = ({ onClose, user, deleteDelivery, editDelivery }) => {
               <div className="delivery-option2">
                 <img
                   className="car-icon"
-                  src={delivery.image}
+                  src={
+                    Array.isArray(delivery.images) && delivery.images.length > 0
+                      ? delivery.images[0]
+                      : "default-image-path.jpg"
+                  }
                   alt="Delivery Icon"
                 />
                 <div className="delivery-options-info">

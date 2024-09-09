@@ -98,7 +98,12 @@ const DeliveryOptions = ({ deliveryOptions, user }) => {
             <div className="delivery-option2">
               <img
                 className="car-icon"
-                src={option.image}
+                // Access the first image from the option's images array
+                src={
+                  Array.isArray(option.images) && option.images.length > 0
+                    ? option.images[0]
+                    : "default-image-path.jpg"
+                }
                 alt="Delivery Icon"
                 onClick={() => handleIconClick(option)}
               />

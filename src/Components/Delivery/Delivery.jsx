@@ -4,13 +4,13 @@ import "react-datepicker/dist/react-datepicker.css";
 import "./Delivery.css";
 
 const Delivery = ({ onClose, addNewDelivery }) => {
-  const [uploadedImage, setUploadedImage] = useState(null);
+  const [uploadedImages, setUploadedImages] = useState([]);
   const [inputType, setInputType] = useState({
     pickupTim: "text",
     deadline: "text",
   });
   const [newDelivery, setNewDelivery] = useState({
-    image: null,
+    images: [],
     name: "",
     location: "",
     destination: "",
@@ -25,19 +25,34 @@ const Delivery = ({ onClose, addNewDelivery }) => {
   });
 
   const handleImageUpload = async (event) => {
-    const file = event.target.files[0];
-    if (file) {
+    const files = event.target.files;
+    const imageArray = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
       const reader = new FileReader();
       reader.onloadend = () => {
-        setUploadedImage(reader.result); // Save base64 to display immediately
-        setNewDelivery({ ...newDelivery, image: reader.result }); // You can change this to store just the image URL
+        imageArray.push(reader.result);
+        if (i === files.length - 1) {
+          setUploadedImages((prevImages) =>
+            [...prevImages, ...imageArray].slice(0, 5)
+          ); // Limit to 5 images
+          setNewDelivery((prevDelivery) => ({
+            ...prevDelivery,
+            images: [...prevDelivery.images, ...imageArray].slice(0, 5),
+          }));
+        }
       };
       reader.readAsDataURL(file);
     }
   };
-  const handleImageDelete = () => {
-    setUploadedImage(null);
-    setNewDelivery({ ...newDelivery, image: null });
+  const handleImageDelete = (index) => {
+    const updatedImages = uploadedImages.filter((_, i) => i !== index);
+    setUploadedImages(updatedImages);
+    setNewDelivery((prevDelivery) => ({
+      ...prevDelivery,
+      images: updatedImages,
+    }));
   };
 
   const handleInputChange = (event) => {
@@ -170,11 +185,12 @@ const Delivery = ({ onClose, addNewDelivery }) => {
             </div>
           </div>
           <div className="delivery-img-container">
-            {!uploadedImage && (
+            {uploadedImages.length < 5 && (
               <>
                 <input
                   type="file"
                   id="file-input"
+                  multiple
                   onChange={handleImageUpload}
                   style={{ display: "none" }}
                 />
@@ -182,22 +198,27 @@ const Delivery = ({ onClose, addNewDelivery }) => {
                   htmlFor="file-input"
                   className="deliver-custom-file-upload"
                 >
-                  Upload image
+                  Upload up to {5 - uploadedImages.length} images
                 </label>
               </>
             )}
-            {uploadedImage && (
-              <div className="uploaded-image-container">
-                <img
-                  className="deliveri-image"
-                  src={uploadedImage}
-                  alt="Uploaded"
-                />
-                <button className="delete-button" onClick={handleImageDelete}>
-                  x
-                </button>
-              </div>
-            )}
+            <div className="uploaded-images-container">
+              {uploadedImages.map((image, index) => (
+                <div key={index} className="uploaded-image-container">
+                  <img
+                    className="deliveri-image"
+                    src={image}
+                    alt={`Uploaded ${index}`}
+                  />
+                  <button
+                    className="delete-button"
+                    onClick={() => handleImageDelete(index)}
+                  >
+                    x
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
         <div className="Container-delivery-button">
