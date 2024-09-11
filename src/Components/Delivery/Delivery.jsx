@@ -22,6 +22,7 @@ const Delivery = ({ onClose, addNewDelivery }) => {
     width: "",
     pickupTim: "",
     deadline: "",
+    requests: [],
   });
 
   const handleImageUpload = async (event) => {

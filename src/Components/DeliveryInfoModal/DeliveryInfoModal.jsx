@@ -99,6 +99,22 @@ const DeliveryInfoModal = ({ show, onClose, deliveryDetails, user }) => {
     );
   };
 
+  const handleRequestDelivery = () => {
+    const deliveries = JSON.parse(localStorage.getItem("deliveries"));
+    const updatedDeliveries = deliveries.map((delivery) => {
+      if (delivery.id === deliveryDetails.id) {
+        const newRequest = {
+          requester: user.email,
+          status: "pending",
+        };
+        return { ...delivery, requests: [...delivery.requests, newRequest] };
+      }
+      return delivery;
+    });
+    localStorage.setItem("deliveries", JSON.stringify(updatedDeliveries));
+    alert("Delivery request sent!");
+  };
+
   const currentImage = deliveryDetails.images[currentImageIndex];
   return (
     <div className="DeliveryInfoModal-overlay" onClick={onClose}>
@@ -155,7 +171,12 @@ const DeliveryInfoModal = ({ show, onClose, deliveryDetails, user }) => {
 
           <div className="deliveryinfomdal-buttons-container">
             {deliveryDetails.createdBy !== user.email && (
-              <button className="infomodal-request-button">Request</button>
+              <button
+                onClick={() => handleRequestDelivery()}
+                className="infomodal-request-button"
+              >
+                Request
+              </button>
             )}
 
             <button className="infomodal-close-button" onClick={onClose}>

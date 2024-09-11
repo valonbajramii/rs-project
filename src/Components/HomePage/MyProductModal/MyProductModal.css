@@ -51,6 +51,7 @@
 .myproductmodal-buttons {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
 .myproductmodal-delete-button {
@@ -61,7 +62,6 @@
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  margin-top: 10px; /* Space between price and button */
 }
 
 .myproductmodal-delete-button:hover {
@@ -81,7 +81,6 @@ hr {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  margin-top: 10px; /* Space between price and button */
 }
 
 .myproductmodal-edit-button:hover {
@@ -91,4 +90,12 @@ hr {
 hr {
   border: none;
   border-top: 2px solid #9f9e9e;
+}
+
+.myproductmodal-requests-button {
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid #000;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }

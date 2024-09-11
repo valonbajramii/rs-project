@@ -12,20 +12,20 @@ import { useNavigate } from "react-router-dom";
 
 const Profile = ({ user, setUser }) => {
   const [isModalVisible, setModalVisible] = useState(false);
-  const [isRequestsModalVisible, setRequestsModalVisible] = useState(false);
+  // const [isRequestsModalVisible, setRequestsModalVisible] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
-  const [requests, setRequests] = useState([]);
+  // const [requests, setRequests] = useState([]);
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Load requests from localStorage on component mount
-    const storedRequests = JSON.parse(localStorage.getItem("requests")) || [];
-    const userRequests = storedRequests.filter(
-      (request) => request.deliveryOwnerEmail === user.email
-    );
-    setRequests(userRequests);
-  }, [user.email]);
+  // useEffect(() => {
+  //   // Load requests from localStorage on component mount
+  //   const storedRequests = JSON.parse(localStorage.getItem("requests")) || [];
+  //   const userRequests = storedRequests.filter(
+  //     (request) => request.deliveryOwnerEmail === user.email
+  //   );
+  //   setRequests(userRequests);
+  // }, [user.email]);
 
   const handleHomePageClick = () => {
     navigate("/homepage");
@@ -39,13 +39,13 @@ const Profile = ({ user, setUser }) => {
     setModalVisible(false);
   };
 
-  const openRequestsModal = () => {
-    setRequestsModalVisible(true);
-  };
+  // const openRequestsModal = () => {
+  //   setRequestsModalVisible(true);
+  // };
 
-  const closeRequestsModal = () => {
-    setRequestsModalVisible(false);
-  };
+  // const closeRequestsModal = () => {
+  //   setRequestsModalVisible(false);
+  // };
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -68,17 +68,19 @@ const Profile = ({ user, setUser }) => {
     navigate("/login");
   };
 
-  const handleApproveRequest = (index) => {
-    const updatedRequests = [...requests];
-    updatedRequests[index].isApproved = true;
-    setRequests(updatedRequests);
-    localStorage.setItem("requests", JSON.stringify(updatedRequests));
-  };
+  // const handleApproveRequest = (index) => {
+  //   const updatedRequests = [...requests];
+  //   updatedRequests[index].isApproved = true;
+  //   setRequests(updatedRequests);
+  //   localStorage.setItem("requests", JSON.stringify(updatedRequests));
+  // };
 
   return (
     <div className="container11">
       <div className="profile-backbutton-container">
-        <button onClick={handleHomePageClick} className="back-button">Back</button>
+        <button onClick={handleHomePageClick} className="back-button">
+          Back
+        </button>
       </div>
       <div className="container2">
         <div className="content-container11">
@@ -98,7 +100,11 @@ const Profile = ({ user, setUser }) => {
             )}
             {uploadedImage && (
               <div className="uploaded-image-container">
-                <img className="profile-photo" src={uploadedImage} alt="Uploaded" />
+                <img
+                  className="profile-photo"
+                  src={uploadedImage}
+                  alt="Uploaded"
+                />
                 <button className="delete-button" onClick={handleImageDelete}>
                   x
                 </button>
@@ -118,9 +124,9 @@ const Profile = ({ user, setUser }) => {
               />
               Personal Information
             </button>
-            <button className="input11" onClick={openRequestsModal}>
+            {/* <button className="input11" onClick={openRequestsModal}>
               Manage Requests
-            </button>
+            </button> */}
             <button className="input11">
               <img
                 className="shield-fill"
@@ -138,15 +144,6 @@ const Profile = ({ user, setUser }) => {
               Settings
             </button>
           </div>
-
-          {/* Requests Modal */}
-          <RequestsModal
-            isVisible={isRequestsModalVisible}
-            onClose={closeRequestsModal}
-            requests={requests}
-            onApprove={handleApproveRequest}
-          />
-
           <div className="button-container11">
             <button className="button11" onClick={handleLogout}>
               <img className="logout-icon" src={LogoutIcon} alt="Log out" />

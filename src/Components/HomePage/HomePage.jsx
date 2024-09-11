@@ -24,7 +24,7 @@ const HomePage = ({ user }) => {
       ? JSON.parse(storedDeliveries)
       : [
           {
-            id: uuidv4(), // Add a unique id
+            id: uuidv4(),
             name: "Car",
             image: audiImage,
             price: "100",
@@ -38,28 +38,14 @@ const HomePage = ({ user }) => {
             pickupTim: "2024-08-28T17:00",
             deadline: "08-09 T12:55",
             createdBy: user.email,
+            requests: [], // Ensure requests is an array
           },
-          {
-            id: uuidv4(), // Add a unique id
-            name: "Car",
-            image: mercedesImage,
-            price: "200",
-            location: "Kamenic",
-            destination: "Prishtin",
-            description: "Description",
-            weightinKg: "20",
-            length: "50cm",
-            height: "50cm",
-            width: "50cm",
-            pickupTim: "2024-08-28T17:00",
-            deadline: "08-09 T05:55",
-            createdBy: user.email,
-          },
+          // Other deliveries...
         ];
 
     deliveries = deliveries.map((delivery) => {
       if (!delivery.createdBy) {
-        return { ...delivery, createdBy: user.email, id: uuidv4() }; // Ensure each delivery has an id
+        return { ...delivery, createdBy: user.email, id: uuidv4() };
       }
       return delivery;
     });
@@ -76,6 +62,17 @@ const HomePage = ({ user }) => {
   useEffect(() => {
     localStorage.setItem("deliveries", JSON.stringify(deliveryOptions));
   }, [deliveryOptions]);
+
+  useEffect(() => {
+    const storedDeliveries = localStorage.getItem("deliveries");
+    if (storedDeliveries) {
+      const deliveries = JSON.parse(storedDeliveries).map((delivery) => ({
+        ...delivery,
+        requests: Array.isArray(delivery.requests) ? delivery.requests : [], // Validate requests
+      }));
+      setDeliveryOptions(deliveries);
+    }
+  }, []);
 
   // Handler to add a new delivery
   const addNewDelivery = (newDelivery) => {

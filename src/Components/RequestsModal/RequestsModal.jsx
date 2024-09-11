@@ -35,36 +35,49 @@
 
 // export default RequestsModal;
 
-
 import React from "react";
 import "./RequestsModal.css";
 
-const RequestsModal = ({ isVisible, onClose, requests, onApprove }) => {
-  if (!isVisible) {
-    return null; // Do not render if not visible
+const RequestsModal = ({ delivery, onClose, handleRequestAction }) => {
+  if (!delivery) {
+    return null;
   }
+
+  const handleApprove = (requestId) => {
+    handleRequestAction(delivery.id, requestId, "approve");
+  };
+
+  const handleDecline = (requestId) => {
+    handleRequestAction(delivery.id, requestId, "decline");
+  };
 
   return (
     <div className="requests-modal-overlay" onClick={onClose}>
       <div
         className="requests-modal-content"
-        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+        onClick={(e) => e.stopPropagation()}
       >
-        <button className="modal-close-button" onClick={onClose}>
-          Close
+        <button className="requests-modal-close-button" onClick={onClose}>
+          x
         </button>
-        <h2>Delivery Requests</h2>
-        {requests.length > 0 ? (
-          requests.map((request, index) => (
+        <h2>Requests for {delivery.name}</h2>
+        <hr />
+        {delivery.requests && delivery.requests.length > 0 ? (
+          delivery.requests.map((request, index) => (
             <div key={index} className="request-item">
-              <p>Requester: {request.requesterName}</p>
-              <p>Delivery: {request.deliveryName}</p>
+              <p>Requested by: {request.requester}</p>
+              <p>Status: {request.status}</p>
               <button
-                onClick={() => onApprove(index)}
-                className="approve-button"
-                disabled={request.isApproved}
+                onClick={() => handleApprove(request.id)}
+                className="requests-modal-approve-button"
               >
-                {request.isApproved ? "Approved" : "Approve"}
+                Approve
+              </button>
+              <button
+                onClick={() => handleDecline(request.id)}
+                className="requests-modal-decline-button"
+              >
+                Decline
               </button>
             </div>
           ))
