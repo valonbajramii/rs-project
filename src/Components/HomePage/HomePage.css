@@ -8,11 +8,13 @@
 
 .homepage-header {
   display: flex;
+  align-items: center;
   padding: 10px;
   justify-content: space-between;
   padding-left: 20px;
   padding-right: 20px;
   background-color: rgb(191, 195, 196);
+  position: relative;
 }
 
 .Components-container {
@@ -25,7 +27,7 @@
 .profile-icon {
   width: 50px;
 }
-.add-buttons-container{
+.add-buttons-container {
   display: flex;
   flex-direction: row;
   gap: 10px;
@@ -39,4 +41,80 @@
 
 .add-delivery-icon {
   width: 30px;
+}
+
+.dropdown-toggle {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin-right: 50px;
+}
+
+.dropdown-toggle img {
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.dropdown-toggle .dropdown-text {
+  font-size: 20px;
+
+  color: #333;
+}
+
+.dropdown-toggle:hover,
+.dropdown-toggle:focus {
+  background-color: transparent;
+  outline: none;
+}
+
+/* Dropdown menu styling */
+.dropdown-menu {
+  position: absolute; /* Position dropdown menu absolutely */
+  top: 100%; /* Position dropdown menu below the button */
+  left: 1; /* Align dropdown menu with the left edge of the button */
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 200px;
+  background-color: #fff;
+  z-index: 10000; /* Ensure it appears above other content */
+  display: none; /* Hide dropdown initially */
+}
+
+.dropdown-menu.show {
+  display: block; /* Show dropdown when it should be visible */
+}
+
+.dropdown-item {
+  display: flex;
+  padding: 10px 15px;
+  font-size: 14px;
+  color: #333;
+  transition: background-color 0.3s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #f4f4f4;
+  color: #000;
+}
+
+.dropdown-divider {
+  height: 1px;
+  margin: 10px 0;
+  background-color: #ddd;
+}
+
+.chevron-down {
+  width: 20px;
+  height: 50px;
+  margin-left: 8px;
+}
+
+.profile-icon {
+  width: 25px;
+  height: 50px;
 }

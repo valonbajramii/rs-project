@@ -25,34 +25,40 @@ const Delivery = ({ onClose, addNewDelivery }) => {
     requests: [],
   });
 
-  const handleImageUpload = async (event) => {
-    const files = event.target.files;
-    const imageArray = [];
+  const handleImageUpload = (event, index) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        imageArray.push(reader.result);
-        if (i === files.length - 1) {
-          setUploadedImages((prevImages) =>
-            [...prevImages, ...imageArray].slice(0, 5)
-          ); // Limit to 5 images
-          setNewDelivery((prevDelivery) => ({
-            ...prevDelivery,
-            images: [...prevDelivery.images, ...imageArray].slice(0, 5),
-          }));
-        }
-      };
+    reader.onloadend = () => {
+      setUploadedImages((prevImages) => {
+        const newImages = [...prevImages];
+        newImages[index] = reader.result;
+
+        // Set newDelivery's images based on updated uploadedImages
+        setNewDelivery((prevDelivery) => ({
+          ...prevDelivery,
+          images: newImages, // Correctly update newDelivery's images
+        }));
+
+        return newImages;
+      });
+    };
+
+    if (file) {
       reader.readAsDataURL(file);
     }
   };
+
   const handleImageDelete = (index) => {
-    const updatedImages = uploadedImages.filter((_, i) => i !== index);
-    setUploadedImages(updatedImages);
+    setUploadedImages((prevImages) => {
+      const newImages = [...prevImages];
+      newImages[index] = null; // Remove the image only at the specific index
+      return newImages;
+    });
+
     setNewDelivery((prevDelivery) => ({
       ...prevDelivery,
-      images: updatedImages,
+      images: [...uploadedImages],
     }));
   };
 
@@ -186,37 +192,69 @@ const Delivery = ({ onClose, addNewDelivery }) => {
             </div>
           </div>
           <div className="delivery-img-container">
-            {uploadedImages.length < 5 && (
-              <>
+            <div className="image-grid-container">
+              {/* Main central large box */}
+              <div className="image-box large-box">
+                {uploadedImages[0] ? (
+                  <div className="uploaded-image-container">
+                    <img
+                      className="delivery-image"
+                      src={uploadedImages[0]}
+                      alt="Main"
+                    />
+                    <button
+                      className="delivery-delete-button"
+                      onClick={() => handleImageDelete(0)} // Delete specific image in this box
+                    >
+                      x
+                    </button>
+                  </div>
+                ) : (
+                  <label htmlFor={`file-input-0`} className="upload-label">
+                    <span className="plus-icon">+</span>
+                  </label>
+                )}
+                {/* Hidden input for file upload for the large box */}
                 <input
                   type="file"
-                  id="file-input"
-                  multiple
-                  onChange={handleImageUpload}
+                  id={`file-input-0`}
+                  onChange={(event) => handleImageUpload(event, 0)} // Upload image for the large box
                   style={{ display: "none" }}
                 />
-                <label
-                  htmlFor="file-input"
-                  className="deliver-custom-file-upload"
-                >
-                  Upload up to {5 - uploadedImages.length} images
-                </label>
-              </>
-            )}
-            <div className="uploaded-images-container">
-              {uploadedImages.map((image, index) => (
-                <div key={index} className="uploaded-image-container">
-                  <img
-                    className="deliveri-image"
-                    src={image}
-                    alt={`Uploaded ${index}`}
+              </div>
+
+              {/* Smaller boxes surrounding the large one */}
+              {[1, 2, 3, 4].map((box, index) => (
+                <div key={index} className="image-box small-box">
+                  {uploadedImages[box] ? (
+                    <div className="uploaded-image-container">
+                      <img
+                        className="delivery-image"
+                        src={uploadedImages[box]}
+                        alt={`Uploaded ${box}`}
+                      />
+                      <button
+                        className="delivery-delete-button"
+                        onClick={() => handleImageDelete(box)} // Delete specific image in this box
+                      >
+                        x
+                      </button>
+                    </div>
+                  ) : (
+                    <label
+                      htmlFor={`file-input-${box}`}
+                      className="upload-label"
+                    >
+                      <span className="plus-icon">+</span>
+                    </label>
+                  )}
+                  {/* Hidden input for file upload for each smaller box */}
+                  <input
+                    type="file"
+                    id={`file-input-${box}`}
+                    onChange={(event) => handleImageUpload(event, box)} // Upload image for the specific smaller box
+                    style={{ display: "none" }}
                   />
-                  <button
-                    className="delete-button"
-                    onClick={() => handleImageDelete(index)}
-                  >
-                    x
-                  </button>
                 </div>
               ))}
             </div>

@@ -1,26 +1,22 @@
 import React, { useState } from "react";
 import "./DeliveryEditModal.css"; // Add your own styles
+import EditImagesModal from "../EditImagesModal/EditImagesModal";
 
 const DeliveryEditModal = ({ delivery, onSave, onClose }) => {
   const [updatedDelivery, setUpdatedDelivery] = useState({ ...delivery });
-  const [newImage, setNewImage] = useState(null);
+  const [isEditingImages, setIsEditingImages] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setUpdatedDelivery((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    setNewImage(file);
+  const handleSave = () => {
+    onSave(updatedDelivery);
   };
 
-  const handleSave = () => {
-    const updated = {
-      ...updatedDelivery,
-      image: newImage ? URL.createObjectURL(newImage) : updatedDelivery.image,
-    };
-    onSave(updated);
+  const handleImageUpdate = (newImages) => {
+    setUpdatedDelivery((prev) => ({ ...prev, images: newImages }));
   };
 
   return (
@@ -72,7 +68,7 @@ const DeliveryEditModal = ({ delivery, onSave, onClose }) => {
         />
         <input
           type="number"
-          name="hight"
+          name="height"
           value={updatedDelivery.height}
           onChange={handleChange}
           placeholder="Height (cm)"
@@ -96,9 +92,17 @@ const DeliveryEditModal = ({ delivery, onSave, onClose }) => {
           value={updatedDelivery.deadline}
           onChange={handleChange}
         />
-        <input type="file" onChange={handleImageChange} accept="image/*" />
+        <button onClick={() => setIsEditingImages(true)}>Edit Images</button>
         <button onClick={handleSave}>Save Changes</button>
       </div>
+      {/* Show the EditImagesModal when the button is clicked */}
+      {isEditingImages && (
+        <EditImagesModal
+          images={updatedDelivery.images}
+          onClose={() => setIsEditingImages(false)}
+          onSave={handleImageUpdate}
+        />
+      )}
     </div>
   );
 };

@@ -101,19 +101,19 @@
 
 //   const handleRegisterStep2 = (addressData) => {
 //     const completeData = { ...registrationData, ...addressData };
-  
+
 //     // Retrieve existing users from localStorage
 //     const existingUsers = JSON.parse(localStorage.getItem("users")) || [];
-  
+
 //     // Add the new user to the array
 //     existingUsers.push(completeData);
-  
+
 //     // Save updated users list back to localStorage
 //     localStorage.setItem("users", JSON.stringify(existingUsers));
-  
+
 //     // Set the current user
 //     setUser(completeData);
-    
+
 //     setStep(1);
 //   };
 
@@ -193,19 +193,19 @@ function App() {
 
   const handleRegisterStep2 = (addressData) => {
     const completeData = { ...registrationData, ...addressData };
-  
+
     // Retrieve existing users from localStorage
     const existingUsers = JSON.parse(localStorage.getItem("users")) || [];
-  
+
     // Add the new user to the array
     existingUsers.push(completeData);
-  
+
     // Save updated users list back to localStorage
     localStorage.setItem("users", JSON.stringify(existingUsers));
-  
+
     // Set the current user
     setUser(completeData);
-    
+
     setStep(1);
   };
 
@@ -245,7 +245,10 @@ function App() {
               )
             }
           />
-          <Route path="/homepage" element={<HomePage user={user} />} />
+          <Route
+            path="/homepage"
+            element={<HomePage user={user} setUser={setUser} />}
+          />
           <Route path="/delivery" element={<Delivery />} />
         </Routes>
       </BrowserRouter>

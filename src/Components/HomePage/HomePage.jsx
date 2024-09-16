@@ -1,21 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "./HomePage.css";
 import DeliveryForm from "./DeliveryForm/DeliveryForm";
 import DeliveryOptions from "./DeliveryOptions/DeliveryOptions";
 import DeliveryMap from "./DeliveryMap/DeliveryMap";
 import Delivery from "../Delivery/Delivery";
-import profileImg from "../../icons/person-circle.svg";
+import profileImg from "../../icons/person-fill.svg";
+import chevronDown from "../../icons/chevron-down.svg";
 import addDeliveryIcon from "../../icons/plus-circle-dotted.svg";
 import { useNavigate } from "react-router-dom";
 import audiImage from "../../images/2025_audi_q7_4dr-suv_prestige_fq_oem_1_1600.avif";
 import mercedesImage from "../../images/2023-mercedes-amg-c63-s-e-performance-114-65d79698b0e26.avif";
 import MyProductModal from "./MyProductModal/MyProductModal";
 import { v4 as uuidv4 } from "uuid";
+import { Dropdown } from "react-bootstrap";
 
-const HomePage = ({ user }) => {
+const HomePage = ({ user, setUser }) => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null); // Ref for the dropdown
 
   // Function to initialize deliveries with 'createdBy' if missing
   const initializeDeliveries = () => {
@@ -144,10 +148,12 @@ const HomePage = ({ user }) => {
     applyFilters();
   }, [filterCriteria, deliveryOptions]);
 
+  // Handler for profile click
   const handleProfileClick = () => {
     navigate("/profile");
   };
 
+  // Toggle modal functions
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
@@ -156,11 +162,39 @@ const HomePage = ({ user }) => {
     setIsProductModalOpen(!isProductModalOpen);
   };
 
+  // Edit delivery handler
   const editDelivery = (updatedDelivery) => {
     const updatedOptions = deliveryOptions.map((delivery) =>
       delivery.id === updatedDelivery.id ? updatedDelivery : delivery
     );
     setDeliveryOptions(updatedOptions);
+  };
+
+  // Click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen((prev) => !prev);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem("user");
+    navigate("/login");
   };
 
   return (
@@ -173,7 +207,44 @@ const HomePage = ({ user }) => {
           onClick={handleProfileClick}
           style={{ cursor: "pointer" }}
         />
-        <div className="add-buttons-container">
+        <div className="dropdown-container" ref={dropdownRef}>
+          <button
+            onClick={toggleDropdown}
+            className="dropdown-toggle"
+            aria-expanded={isDropdownOpen}
+          >
+            <img
+              className="profile-icon"
+              src={profileImg}
+              alt="Profile"
+              style={{ cursor: "pointer" }}
+            />
+            <span className="dropdown-text">Mein Tutti.ch</span>
+            <img
+              className="chevron-down"
+              src={chevronDown}
+              alt="Chevron"
+              style={{ cursor: "pointer" }}
+            />
+          </button>
+
+          <div className={`dropdown-menu ${isDropdownOpen ? "show" : ""}`}>
+            <div className="dropdown-item" onClick={toggleProductModal}>
+              My Products
+            </div>
+            <div className="dropdown-item" onClick={toggleModal}>
+              Add Delivery
+            </div>
+            <div className="dropdown-item" onClick={() => navigate("/profile")}>
+              Profile
+            </div>
+            <hr className="dropdown-divider" />
+            <div className="dropdown-item" onClick={handleLogout}>
+              Logout
+            </div>
+          </div>
+        </div>
+        {/* <div className="add-buttons-container">
           <div className="add-delivery-container">
             <img
               className="add-delivery-icon"
@@ -187,7 +258,7 @@ const HomePage = ({ user }) => {
             <img className="add-delivery-icon" src={addDeliveryIcon} alt="" />
             Add Delivery
           </div>
-        </div>
+        </div> */}
       </header>
       <div className="Components-container">
         <DeliveryForm updateFilterCriteria={updateFilterCriteria} />
@@ -204,7 +275,7 @@ const HomePage = ({ user }) => {
         <MyProductModal
           onClose={toggleProductModal}
           user={user}
-          deleteDelivery={deleteDelivery} // Pass deleteDelivery function to modal
+          deleteDelivery={deleteDelivery}
           editDelivery={editDelivery}
         />
       )}

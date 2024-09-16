@@ -7,6 +7,9 @@ const Address = ({ onRegister }) => {
     address: "",
     state: "",
     zip: "",
+    mobileNumber: "",
+    idCard: "",
+    document: null, // Added field for the uploaded document
   });
   const navigate = useNavigate();
 
@@ -18,10 +21,30 @@ const Address = ({ onRegister }) => {
     }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setAddressData((prevAddressData) => ({
+      ...prevAddressData,
+      document: file,
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Call the onRegister function passed as a prop
-    onRegister(addressData);
+
+    // Create FormData to handle file upload
+    const formData = new FormData();
+    formData.append("address", addressData.address);
+    formData.append("state", addressData.state);
+    formData.append("zip", addressData.zip);
+    formData.append("mobileNumber", addressData.mobileNumber);
+    formData.append("idCard", addressData.idCard);
+    if (addressData.document) {
+      formData.append("document", addressData.document); // Add the uploaded document
+    }
+
+    // Call the onRegister function passed as a prop with FormData
+    onRegister(formData);
     navigate("/homepage");
   };
 
@@ -53,6 +76,29 @@ const Address = ({ onRegister }) => {
               onChange={handleChange}
             />
           </div>
+          <input
+            className="input"
+            placeholder="Mobile number"
+            name="mobileNumber"
+            value={addressData.mobileNumber}
+            onChange={handleChange}
+          />
+          <input
+            className="input"
+            placeholder="ID card"
+            name="idCard"
+            value={addressData.idCard}
+            onChange={handleChange}
+          />
+
+          {/* File input for document upload */}
+          <input
+            className="file-input"
+            type="file"
+            accept=".pdf, .jpg, .jpeg, .png"
+            onChange={handleFileChange}
+          />
+
           <div className="button-container">
             <button className="button" type="submit">
               Register

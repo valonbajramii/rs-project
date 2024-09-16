@@ -8,7 +8,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Ensure it's above other content */
+  z-index: 10000; /* Ensure it's above other content */
   padding: 10px; /* Add padding to prevent modal content from touching the edges on smaller screens */
 }
 
@@ -80,58 +80,75 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  /* margin-top: 20px; */
   background-color: rgb(255, 255, 255);
   border-radius: 10px;
-  width: 100%;
-  padding: 20px;
-  box-sizing: border-box; /* Include padding and border in the element's width */
-  overflow: hidden;
 }
 
-.uploaded-image-container {
+.image-grid-container {
+  display: grid;
+  grid-template-areas:
+    "small1 large small2"
+    "small3 large small4";
+  gap: 10px;
+}
+
+.large-box {
+  grid-area: large;
+  width: 200px;
+  height: 200px;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: relative;
-  display: inline-block;
 }
 
-.deliveri-image {
-  max-width: 100%;
-  max-height: 150px; /* Adjusted max height for better responsiveness */
-  object-fit: contain;
+.small-box {
+  width: 100px;
+  height: 100px;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
 }
 
-.deliver-custom-file-upload {
-  display: inline-block;
-  text-align: center;
-  padding: 12px 24px;
+.upload-label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
-  background-color: #257fdf;
-  color: rgb(255, 255, 255);
-  border: none;
-  border-radius: 15px;
-  font-size: 16px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  width: 80%;
-  max-width: 250px; /* Set a max width for better responsiveness */
+  font-size: 30px;
+  color: #ccc;
+  width: 100%;
+  height: 100%;
+  background-color: #eee;
 }
 
-.deliver-custom-file-upload:hover {
-  background-color: #1877ec;
+.plus-icon {
+  font-size: 40px;
+  color: #aaa;
 }
 
-.delete-button {
+.delivery-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.delivery-delete-button {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 6px 12px;
-  background-color: transparent;
+  top: 5px;
+  right: 5px;
+  background-color: rgb(146, 138, 138);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
   cursor: pointer;
-  font-size: 14px;
 }
-
 .Container-delivery-button {
   width: 100%;
   text-align: center;
@@ -187,7 +204,3 @@
     padding: 10px 20px;
   }
 }
-/* 
-.delete-button:hover {
-  background-color: darkred;
-} */
