@@ -70,24 +70,37 @@ import React, { useState } from "react";
 import "./DeliveryOptions.css";
 import DeliveryInfoModal from "../../DeliveryInfoModal/DeliveryInfoModal";
 
-const DeliveryOptions = ({ deliveryOptions, user }) => {
+const DeliveryOptions = ({
+  deliveryOptions,
+  user,
+  toggleFavorite,
+  favorites = [],
+}) => {
   const [showModal, setShowModal] = useState(false);
   const [selectedDelivery, setSelectedDelivery] = useState(null);
 
+  // Handle opening the modal when a delivery is clicked
   const handleIconClick = (option) => {
-    setSelectedDelivery(option);
-    setShowModal(true);
+    setSelectedDelivery(option); // Set the clicked delivery as selected
+    setShowModal(true); // Show the modal
   };
 
+  // Handle closing the modal
   const closeModal = () => {
     setShowModal(false);
-    setSelectedDelivery(null);
+    setSelectedDelivery(null); // Clear the selected delivery
+  };
+
+  // Check if a delivery is in the favorites list
+  const isFavorite = (deliveryId) => {
+    return favorites.includes(deliveryId);
   };
 
   return (
     <div className="delivery-option-container">
       <h2 className="deliver-option-h2">Choose Delivery</h2>
       <hr />
+
       <div>
         {deliveryOptions.map((option, index) => (
           <div
@@ -98,7 +111,6 @@ const DeliveryOptions = ({ deliveryOptions, user }) => {
             <div className="delivery-option2">
               <img
                 className="car-icon"
-                // Access the first image from the option's images array
                 src={
                   Array.isArray(option.images) && option.images.length > 0
                     ? option.images[0]
@@ -110,14 +122,35 @@ const DeliveryOptions = ({ deliveryOptions, user }) => {
               <div className="delivery-options-info">
                 <p>{option.name}</p>
                 <p>{option.destination}</p>
-                <p>Dead Line: {option.deadline}</p>
+                <p>Deadline: {option.deadline}</p>
               </div>
-              <p className="deliver-price">{option.price}.- CHF</p>
+              <div>
+                <p className="deliver-price">{option.price}.- CHF</p>
+              </div>
+              <div
+                className="star-icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFavorite(option.id);
+                }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="20"
+                  fill={isFavorite(option.id) ? "gold" : "gray"}
+                  className="bi bi-star-fill"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M3.612 15.443c-.396.198-.824-.149-.746-.592l.83-4.73-3.522-3.356c-.33-.31-.158-.888.283-.95l4.898-.696 2.058-4.27c.197-.408.73-.408.927 0l2.058 4.27 4.898.696c.441.062.613.64.283.95l-3.522 3.356.83 4.73c.078.443-.35.79-.746.592L8 13.187l-4.389 2.256z" />
+                </svg>
+              </div>
             </div>
             <hr />
           </div>
         ))}
       </div>
+
       {showModal && selectedDelivery && (
         <DeliveryInfoModal
           show={showModal}

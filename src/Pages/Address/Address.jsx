@@ -76,13 +76,13 @@ const Address = ({ onRegister }) => {
               onChange={handleChange}
             />
           </div>
-          <input
+          {/* <input
             className="input"
             placeholder="Mobile number"
             name="mobileNumber"
             value={addressData.mobileNumber}
             onChange={handleChange}
-          />
+          /> */}
           <input
             className="input"
             placeholder="ID card"

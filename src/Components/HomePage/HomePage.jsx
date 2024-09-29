@@ -13,12 +13,15 @@ import mercedesImage from "../../images/2023-mercedes-amg-c63-s-e-performance-11
 import MyProductModal from "./MyProductModal/MyProductModal";
 import { v4 as uuidv4 } from "uuid";
 import { Dropdown } from "react-bootstrap";
+import FavoritedeliveryModal from "../FavoritedeliveryModal/FavoritedeliveryModal";
 
 const HomePage = ({ user, setUser }) => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isFavoritedeliveryModal, setIsFavoritedeliveryModal] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [favorites, setFavorites] = useState([]);
   const dropdownRef = useRef(null); // Ref for the dropdown
 
   // Function to initialize deliveries with 'createdBy' if missing
@@ -162,6 +165,10 @@ const HomePage = ({ user, setUser }) => {
     setIsProductModalOpen(!isProductModalOpen);
   };
 
+  const toggleFavoritedeliveryModal = () => {
+    setIsFavoritedeliveryModal(!isFavoritedeliveryModal);
+  };
+
   // Edit delivery handler
   const editDelivery = (updatedDelivery) => {
     const updatedOptions = deliveryOptions.map((delivery) =>
@@ -197,16 +204,26 @@ const HomePage = ({ user, setUser }) => {
     navigate("/login");
   };
 
+  // Function to toggle favorite delivery
+  const toggleFavorite = (deliveryId) => {
+    setFavorites((prevFavorites) =>
+      prevFavorites.includes(deliveryId)
+        ? prevFavorites.filter((id) => id !== deliveryId)
+        : [...prevFavorites, deliveryId]
+    );
+  };
+
   return (
     <div className="Homepage-container">
       <header className="homepage-header">
-        <img
+        {/* <img
           className="profile-icon"
           src={profileImg}
           alt="Profile"
           onClick={handleProfileClick}
           style={{ cursor: "pointer" }}
-        />
+        /> */}
+        <h3>Logo</h3>
         <div className="dropdown-container" ref={dropdownRef}>
           <button
             onClick={toggleDropdown}
@@ -219,7 +236,7 @@ const HomePage = ({ user, setUser }) => {
               alt="Profile"
               style={{ cursor: "pointer" }}
             />
-            <span className="dropdown-text">Mein Tutti.ch</span>
+            <span className="dropdown-text">User Menu</span>
             <img
               className="chevron-down"
               src={chevronDown}
@@ -229,6 +246,12 @@ const HomePage = ({ user, setUser }) => {
           </button>
 
           <div className={`dropdown-menu ${isDropdownOpen ? "show" : ""}`}>
+            <div
+              className="dropdown-item"
+              onClick={toggleFavoritedeliveryModal}
+            >
+              Favorites
+            </div>
             <div className="dropdown-item" onClick={toggleProductModal}>
               My Products
             </div>
@@ -262,7 +285,11 @@ const HomePage = ({ user, setUser }) => {
       </header>
       <div className="Components-container">
         <DeliveryForm updateFilterCriteria={updateFilterCriteria} />
-        <DeliveryOptions deliveryOptions={filteredOptions} user={user} />
+        <DeliveryOptions
+          deliveryOptions={filteredOptions}
+          user={user}
+          toggleFavorite={toggleFavorite}
+        />
         <DeliveryMap />
       </div>
       {isModalOpen && (
@@ -277,6 +304,14 @@ const HomePage = ({ user, setUser }) => {
           user={user}
           deleteDelivery={deleteDelivery}
           editDelivery={editDelivery}
+        />
+      )}
+      {isFavoritedeliveryModal && (
+        <FavoritedeliveryModal
+          favorites={favorites}
+          deliveryOptions={deliveryOptions}
+          show={isFavoritedeliveryModal}
+          onClose={toggleFavoritedeliveryModal}
         />
       )}
     </div>

@@ -24,13 +24,12 @@
 
 // export default Login;
 
-
 import React, { useState } from "react";
 import "./Login.css";
 import { Link, useNavigate } from "react-router-dom";
 
 const Login = ({ setUser }) => {
-  const [email, setEmail] = useState(""); 
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
@@ -57,12 +56,14 @@ const Login = ({ setUser }) => {
       <div className="content-container">
         <h1>SW Logo</h1>
         <div className="input-container">
+          {/* <label className="login-label">E-mail</label> */}
           <input
             className="input"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
+          {/* <label className="login-label">Password</label> */}
           <input
             className="input"
             type="password"
@@ -72,7 +73,9 @@ const Login = ({ setUser }) => {
           />
         </div>
         <div className="button-container">
-          <button className="button" onClick={handleLogin}>Login</button>
+          <button className="button" onClick={handleLogin}>
+            Login
+          </button>
           <Link style={{ textDecoration: "none" }} to="/register">
             <button className="button">Register</button>
           </Link>
