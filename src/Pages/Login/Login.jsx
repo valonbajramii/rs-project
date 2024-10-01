@@ -27,6 +27,7 @@
 import React, { useState } from "react";
 import "./Login.css";
 import { Link, useNavigate } from "react-router-dom";
+import samewayLogo from "../../logo/sameway_logo.png";
 
 const Login = ({ setUser }) => {
   const [email, setEmail] = useState("");
@@ -53,33 +54,54 @@ const Login = ({ setUser }) => {
 
   return (
     <div className="container">
+      <img className="login-sameway-logo" src={samewayLogo} />
+      <h2 className="login-h2">Login</h2>
       <div className="content-container">
-        <h1>SW Logo</h1>
         <div className="input-container">
-          {/* <label className="login-label">E-mail</label> */}
-          <input
-            className="input"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          {/* <label className="login-label">Password</label> */}
-          <input
-            className="input"
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div className="email-input-container">
+            <label className="login-label" htmlFor="email">
+              E-mail
+            </label>
+            <input
+              className="input"
+              id="email"
+              type="email"
+              // placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="password-input-container">
+            <label className="login-label" htmlFor="password">
+              Password
+            </label>
+            <input
+              className="input"
+              id="password"
+              type="password"
+              // placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
         </div>
         <div className="button-container">
           <button className="button" onClick={handleLogin}>
-            Login
+            LOGIN
           </button>
-          <Link style={{ textDecoration: "none" }} to="/register">
-            <button className="button">Register</button>
-          </Link>
         </div>
+      </div>
+      <h3
+        className="forgot-password"
+        onClick={() => navigate("/resetpassword")}
+      >
+        Forgot Password ?
+      </h3>
+      <div className="login-h3">
+        <h3 style={{ fontWeight: "400" }}>Don't you have an account?</h3>
+        <Link style={{ textDecoration: "none" }} to="/register">
+          <h3 style={{ color: "rgb(76, 136, 248)" }}> Sign Up</h3>
+        </Link>
       </div>
     </div>
   );

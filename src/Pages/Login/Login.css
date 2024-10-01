@@ -11,26 +11,35 @@
   min-height: 100vh;
 }
 
+.login-sameway-logo {
+  width: 350px;
+  margin-bottom: 80px;
+}
+
 .content-container {
   display: flex;
   flex-direction: column;
   background-color: #e9ecef;
-  align-items: center;
+
   justify-content: center;
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  width: 80%;
+  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); */
+  width: 100%;
   max-width: 400px;
-  margin-bottom: 20px;
+}
+
+.login-h2 {
+  display: flex;
+  width: 440px;
+  font-size: 20px;
 }
 
 .input-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  width: 80%;
+  width: 100%;
   gap: 10px;
   margin-bottom: 20px;
 }
@@ -39,21 +48,19 @@
   width: 100%;
   padding: 10px;
   margin-bottom: 5px;
-  background-color: #acaeb0;
+  background-color: #adadad;
   box-sizing: border-box;
   border: 1px solid #ccc;
-  border-radius: 10px;
-  height: 60px;
+  border-radius: 5px;
+  height: 55px;
+  color: white;
+  font-size: 15px;
 }
 
 .input:focus {
   border-color: rgb(0, 97, 252);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); */
   outline: none;
-}
-
-.input::placeholder {
-  color: white;
 }
 
 .login-label {
@@ -62,25 +69,48 @@
   justify-content: left;
 }
 
+.email-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.password-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .button-container {
   display: flex;
   flex-direction: column;
-  margin-top: 30px;
-  width: 80%;
+
+  width: 100%;
   gap: 10px;
-  margin-bottom: 30px;
 }
 
 .button {
   padding: 10px 20px;
   border: none;
-  margin: 5px 0;
-  border-radius: 10px;
+  border-radius: 15px;
   cursor: pointer;
   background-color: rgb(76, 115, 224);
   color: white;
-  height: 60px;
+  height: 55px;
   width: 100%;
+  font-weight: 600;
+}
+
+.forgot-password {
+  font-size: 15px;
+  color: rgb(76, 136, 248);
+}
+
+.login-h3 {
+  display: flex;
+  gap: 10px;
+  font-size: 13px;
+  margin-top: 100px;
 }
 
 /* button:hover {

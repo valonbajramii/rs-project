@@ -1,3 +1,88 @@
+.register-container {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  min-height: 100vh;
+}
+
+.register-sameway-logo {
+  width: 350px;
+  margin-bottom: 30px;
+}
+
+.register-h2 {
+  display: flex;
+  width: 440px;
+  font-size: 20px;
+}
+
+.register-content-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #e9ecef;
+
+  justify-content: center;
+  padding: 20px;
+  border-radius: 10px;
+  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); */
+  width: 100%;
+  max-width: 400px;
+}
+
+.register-label {
+  font-weight: 500;
+  text-align: left;
+  justify-content: left;
+}
+
+.register-input-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  gap: 10px;
+}
+
+.register-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 5px;
+  background-color: #adadad;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 55px;
+  color: white;
+  font-size: 15px;
+}
+
+.register-input:focus {
+  border-color: rgb(0, 97, 252);
+  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); */
+  outline: none;
+}
+
+.register-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  background-color: rgb(76, 115, 224);
+  color: white;
+  height: 55px;
+  width: 100%;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+/* /////////////////////// */
+
 .checkbox-container {
   display: flex;
   margin-top: 10px;
@@ -13,4 +98,10 @@
   font-size: 14px;
   color: #333;
   font-weight: 500;
+}
+
+.back-to-login {
+  color: rgb(76, 136, 248);
+  font-weight: 700;
+  margin-top: 20px;
 }

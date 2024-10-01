@@ -170,6 +170,8 @@ import Address from "./Pages/Address/Address";
 import Profile from "./Pages/Profile/Profile";
 import HomePage from "./Components/HomePage/HomePage";
 import Delivery from "./Components/Delivery/Delivery";
+import ResetPassword from "./Pages/ResetPassword/ResetPassword";
+import NewPassword from "./Pages/NewPassword/NewPassword";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
@@ -250,6 +252,8 @@ function App() {
             element={<HomePage user={user} setUser={setUser} />}
           />
           <Route path="/delivery" element={<Delivery />} />
+          <Route path="/resetpassword" element={<ResetPassword />} />
+          <Route path="/newpassword" element={<NewPassword />} />
         </Routes>
       </BrowserRouter>
     </div>
