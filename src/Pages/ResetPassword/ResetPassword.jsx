@@ -13,13 +13,13 @@ const ResetPassword = () => {
         Lost your password? Please enter your email address. You will receive a
         link to create a new passord via email.
       </hj3>
-      <div className="content-container">
-        <div className="email-input-container">
-          <label className="login-label" htmlFor="email">
+      <div className="resetpassword-content-container">
+        <div className="resetpassword-input-container">
+          <label className="resetpassword-label" htmlFor="email">
             E-mail
           </label>
           <input
-            className="input"
+            className="resetpassword-input"
             id="email"
             type="email"
             // placeholder="Email"

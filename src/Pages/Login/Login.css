@@ -24,7 +24,7 @@
   justify-content: center;
   padding: 20px;
   border-radius: 10px;
-  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   width: 100%;
   max-width: 400px;
 }
@@ -116,3 +116,63 @@
 /* button:hover {
   background-color: rgb(28, 92, 224);
 } */
+
+@media (max-width: 485px) {
+  .container {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  .login-sameway-logo {
+    width: 250px;
+    margin-bottom: 40px;
+  }
+
+  .content-container {
+    display: flex;
+    flex-direction: column;
+    background-color: #e9ecef;
+
+    justify-content: center;
+    border-radius: 10px;
+
+    width: 100%;
+    padding: 15px;
+    max-width: 310px;
+  }
+
+  .login-h2 {
+    font-size: 18px;
+    width: 325px;
+    text-align: left;
+  }
+
+  .input {
+    height: 45px;
+    font-size: 14px;
+  }
+
+  .button {
+    height: 45px;
+  }
+
+  .forgot-password {
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .login-h3 {
+    font-size: 12px;
+    /* flex-direction: column; */
+    align-items: center;
+    margin-top: 50px;
+  }
+}

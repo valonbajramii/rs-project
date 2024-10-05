@@ -8,7 +8,7 @@ const NewPassword = () => {
   return (
     <div className="newpassword-container">
       <img className="newpassword-sameway-logo" src={samewayLogo} />
-      <h2 className="login-h2">New Password</h2>
+      <h2 className="newpassword-h2">New Password</h2>
       <div className="newpassword-content-container">
         <div className="newpassword-input-container">
           <label className="newpassword-label" htmlFor="password">
