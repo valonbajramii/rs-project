@@ -32,7 +32,7 @@ const Register = ({ onRegister }) => {
     }
     // Call the onRegister function passed as a prop
     onRegister(formData);
-    navigate("/address");
+    navigate("/homepage");
   };
 
   return (
