@@ -44,6 +44,24 @@ const LocationMarker = ({ setUserLocation }) => {
 };
 
 const DeliveryMap = () => {
+  const [mapHeight, setMapHeight] = useState(
+    window.innerWidth <= 480 ? "40vh" : "100vh"
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setMapHeight(window.innerWidth <= 480 ? "40vh" : "100vh");
+    };
+
+    // Set up the event listener for window resize
+    window.addEventListener("resize", handleResize);
+
+    // Clean up the event listener on component unmount
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   const [userLocation, setUserLocation] = useState(null);
   const [destination, setDestination] = useState(null);
   const [route, setRoute] = useState([]);
@@ -72,12 +90,12 @@ const DeliveryMap = () => {
 
   return (
     <div className="map-container">
-    
       <MapContainer
         center={[51.505, -0.09]}
         zoom={13}
-        style={{ height: "500px", width: "100%" }}
+        // style={{ height: "100vh", width: "100%" }}
         onClick={handleMapClick}
+        className="map-container"
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

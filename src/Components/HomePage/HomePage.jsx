@@ -14,15 +14,24 @@ import MyProductModal from "./MyProductModal/MyProductModal";
 import { v4 as uuidv4 } from "uuid";
 import { Dropdown } from "react-bootstrap";
 import FavoritedeliveryModal from "../FavoritedeliveryModal/FavoritedeliveryModal";
+import carIcon from "../../icons/car-front-outlined.svg";
+import Vector from "../../icons/Vector2.svg";
+import samewayLogo from "../../logo/sameway_logo.png";
+import { useMediaQuery } from "react-responsive";
+import MobileFooter from "../MobileFooter/MobileFooter";
 
 const HomePage = ({ user, setUser }) => {
   const navigate = useNavigate();
+  const isMobile = useMediaQuery({ maxWidth: 480 });
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isFavoritedeliveryModal, setIsFavoritedeliveryModal] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const dropdownRef = useRef(null); // Ref for the dropdown
+  const [showForm, setShowForm] = useState(true); // State to toggle components
+  const [activeIcon, setActiveIcon] = useState("form"); // New state to track active icon
 
   // Function to initialize deliveries with 'createdBy' if missing
   const initializeDeliveries = () => {
@@ -213,61 +222,75 @@ const HomePage = ({ user, setUser }) => {
     );
   };
 
+  const showDeliveryForm = () => {
+    setShowForm(true);
+    setActiveIcon("form"); // Set 'form' as the active icon
+  };
+
+  const showDeliveryOptions = () => {
+    setShowForm(false);
+    setActiveIcon("options"); // Set 'options' as the active icon
+  };
+
   return (
     <div className="Homepage-container">
-      <header className="homepage-header">
-        {/* <img
+      {!isMobile && (
+        <header className="homepage-header">
+          {/* <img
           className="profile-icon"
           src={profileImg}
           alt="Profile"
           onClick={handleProfileClick}
           style={{ cursor: "pointer" }}
         /> */}
-        <h3>Logo</h3>
-        <div className="dropdown-container" ref={dropdownRef}>
-          <button
-            onClick={toggleDropdown}
-            className="dropdown-toggle"
-            aria-expanded={isDropdownOpen}
-          >
-            <img
-              className="profile-icon"
-              src={profileImg}
-              alt="Profile"
-              style={{ cursor: "pointer" }}
-            />
-            <span className="dropdown-text">User Menu</span>
-            <img
-              className="chevron-down"
-              src={chevronDown}
-              alt="Chevron"
-              style={{ cursor: "pointer" }}
-            />
-          </button>
-
-          <div className={`dropdown-menu ${isDropdownOpen ? "show" : ""}`}>
-            <div
-              className="dropdown-item"
-              onClick={toggleFavoritedeliveryModal}
+          <img className="homepage-sameway-logo" src={samewayLogo} />
+          <div className="dropdown-container" ref={dropdownRef}>
+            <button
+              onClick={toggleDropdown}
+              className="dropdown-toggle"
+              aria-expanded={isDropdownOpen}
             >
-              Favorites
-            </div>
-            <div className="dropdown-item" onClick={toggleProductModal}>
-              My Products
-            </div>
-            <div className="dropdown-item" onClick={toggleModal}>
-              Add Delivery
-            </div>
-            <div className="dropdown-item" onClick={() => navigate("/profile")}>
-              Profile
-            </div>
-            <hr className="dropdown-divider" />
-            <div className="dropdown-item" onClick={handleLogout}>
-              Logout
+              <img
+                className="profile-icon"
+                src={profileImg}
+                alt="Profile"
+                style={{ cursor: "pointer" }}
+              />
+              <span className="dropdown-text">User Menu</span>
+              <img
+                className="chevron-down"
+                src={chevronDown}
+                alt="Chevron"
+                style={{ cursor: "pointer" }}
+              />
+            </button>
+
+            <div className={`dropdown-menu ${isDropdownOpen ? "show" : ""}`}>
+              <div
+                className="dropdown-item"
+                onClick={toggleFavoritedeliveryModal}
+              >
+                Favorites
+              </div>
+              <div className="dropdown-item" onClick={toggleProductModal}>
+                My Products
+              </div>
+              <div className="dropdown-item" onClick={toggleModal}>
+                Add Delivery
+              </div>
+              <div
+                className="dropdown-item"
+                onClick={() => navigate("/profile")}
+              >
+                Profile
+              </div>
+              <hr className="dropdown-divider" />
+              <div className="dropdown-item" onClick={handleLogout}>
+                Logout
+              </div>
             </div>
           </div>
-        </div>
-        {/* <div className="add-buttons-container">
+          {/* <div className="add-buttons-container">
           <div className="add-delivery-container">
             <img
               className="add-delivery-icon"
@@ -282,16 +305,85 @@ const HomePage = ({ user, setUser }) => {
             Add Delivery
           </div>
         </div> */}
-      </header>
+        </header>
+      )}
       <div className="Components-container">
-        <DeliveryForm updateFilterCriteria={updateFilterCriteria} />
-        <DeliveryOptions
-          deliveryOptions={filteredOptions}
-          user={user}
-          toggleFavorite={toggleFavorite}
-        />
         <DeliveryMap />
+        <div className="Components-container1">
+          {!isMobile && (
+            <div>
+              <div className="Components-header">
+                <div
+                  className="homepage-car-icon-container"
+                  onClick={showDeliveryForm}
+                  style={{ cursor: "pointer" }}
+                >
+                  <img
+                    className={`homepage-car-icon ${
+                      activeIcon === "form" ? "active-icon" : ""
+                    }`}
+                    src={carIcon}
+                    alt="Car Icon"
+                  />
+                  <label
+                    className={`homepage-icons-label ${
+                      activeIcon === "form" ? "activelabel" : ""
+                    }`}
+                  >
+                    Direction
+                  </label>
+                  <hr
+                    className={`${
+                      activeIcon === "form" ? "Components-header-icons-hr" : ""
+                    }`}
+                  />
+                </div>
+                <div
+                  className="homepage-vector-icon-container"
+                  onClick={showDeliveryOptions}
+                  style={{ cursor: "pointer" }}
+                >
+                  <img
+                    className={`vector-icon ${
+                      activeIcon === "options" ? "active-icon" : ""
+                    }`}
+                    src={Vector}
+                    alt="Vector Icon"
+                  />
+                  <label
+                    className={`homepage-icons-label ${
+                      activeIcon === "options" ? "activelabel" : ""
+                    }`}
+                  >
+                    Packages
+                  </label>
+                  <hr
+                    className={`${
+                      activeIcon === "options"
+                        ? "Components-header-icons-hr"
+                        : ""
+                    }`}
+                  />
+                </div>
+              </div>
+              <hr className="header-hr" />
+            </div>
+          )}
+
+          <div className="Components-container2">
+            {showForm ? (
+              <DeliveryForm updateFilterCriteria={updateFilterCriteria} />
+            ) : (
+              <DeliveryOptions
+                deliveryOptions={filteredOptions}
+                user={user}
+                toggleFavorite={toggleFavorite}
+              />
+            )}
+          </div>
+        </div>
       </div>
+      {isMobile && <MobileFooter />}
       {isModalOpen && (
         <Delivery
           onClose={toggleModal}

@@ -1,0 +1,31 @@
+.mobile-footer-container {
+  display: flex;
+  z-index: 1;
+  background-color: white;
+  height: 100%;
+  min-height: 70px;
+  box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.2);
+  justify-content: space-around;
+  align-items: center;
+}
+
+.footer-icon1 {
+  width: 30px;
+}
+
+.footer-icon2 {
+  width: 29px;
+}
+
+.footer-icon3 {
+  width: 32px;
+}
+
+.footer-icon4 {
+  width: 33px;
+}
+
+.footer-active-icon {
+  filter: brightness(0) saturate(100%) invert(29%) sepia(83%) saturate(2142%)
+    hue-rotate(190deg) brightness(97%) contrast(96%);
+}

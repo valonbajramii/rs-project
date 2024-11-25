@@ -98,7 +98,7 @@ const DeliveryOptions = ({
 
   return (
     <div className="delivery-option-container">
-      <h2 className="deliver-option-h2">Choose Delivery</h2>
+      <h2 className="deliver-option-h2">Welcome User</h2>
       <hr />
 
       <div>

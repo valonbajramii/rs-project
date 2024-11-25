@@ -1,19 +1,54 @@
 .form-container {
-  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  /* gap: 20px; */
   background-color: white;
   border-radius: 10px;
   height: 100%;
-  width: 400px;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 3ch;
-  padding-bottom: 60px;
+  width: 100%;
+  /* padding-left: 30px;
+  padding-right: 30px; */
+  padding-bottom: 15px;
   margin-top: 10px;
-  margin-left: 15px;
+  z-index: 1;
 }
 
 .form-h2 {
-  margin-left: 20px;
+  font-weight: 500;
+  margin: 0;
+  margin-bottom: 20px;
+  margin-left: 32px;
+  margin-right: 30px;
+}
+
+.input-icons-container {
+  display: flex;
+  justify-content: left;
+  gap: 30px;
+  width: 100%;
+  margin-bottom: 20px;
+  margin-left: 32px;
+  margin-right: 30px;
+}
+
+.form-icons-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+}
+
+.my-location-icon {
+  width: 33px;
+}
+
+.three {
+  width: 2.8px;
+}
+
+.destination-icon {
+  width: 33px;
 }
 
 .form-inputs-container {
@@ -23,16 +58,272 @@
 }
 
 .form-input {
-  width: 100%;
+  width: 320px;
+  min-width: 50px;
   padding: 10px;
+  padding-left: 20px;
   margin: 5px 0;
   box-sizing: border-box;
   border: 1px solid #ccc;
-  border-radius: 10px;
-  height: 50px;
-  border-color: rgb(0, 97, 252);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border-radius: 30px;
+  height: 47px;
+  /* border-color: rgb(0, 97, 252); */
+  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); */
   outline: none;
   text-align: left;
   font-size: 18px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.form-buttons-container {
+  display: flex;
+  justify-content: center;
+  /* justify-content: space-around; */
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.form-button {
+  background-color: #e0e2e5;
+  color: white;
+  width: 120px;
+  height: 45px;
+  border: none;
+  border-radius: 20px;
+}
+
+.form-button.active {
+  background-color: #3673e4;
+}
+
+.form-hr {
+  height: 0.5px; /* Sets the line to be very thin */
+  background-color: #d3cece; /* Sets the color of the line */
+  border: none; /* Removes default border */
+  display: block; /* Ensure the height is applied */
+  width: 100%;
+}
+
+.last-location-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  background-color: rgb(247, 247, 247);
+  border: 1px solid rgb(230, 230, 230);
+  height: 80px;
+}
+
+.clock {
+  width: 27px;
+}
+
+.form-text-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-h3 {
+  font-weight: 500;
+  margin: 0;
+}
+
+.form-p {
+  margin: 0;
+  font-size: 13px;
+  color: #4e4a4a;
+}
+
+.form-p2 {
+  display: flex;
+  justify-content: right;
+  margin: 0;
+  margin-right: 20px;
+  font-size: 14px;
+}
+
+.form-confirm-button {
+  background-color: #3673e4;
+  color: white;
+  border: none;
+  height: 50px;
+  margin-right: 20px;
+  margin-left: 20px;
+  margin-top: 40px;
+  border-radius: 10px;
+}
+
+@media (max-width: 480px) {
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    /* gap: 20px; */
+    /* background: linear-gradient(to bottom, #ffffff, #f1f1f1); */
+    background-color: white;
+    border-radius: 10px;
+    height: 100%;
+    width: 100%;
+    /* padding-left: 30px;
+    padding-right: 30px; */
+    padding-bottom: 15px;
+    margin-top: 10px;
+    z-index: 1;
+  }
+
+  .form-h2 {
+    font-weight: 500;
+    margin: 0;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    margin-right: 30px;
+    order: 2;
+    font-size: 20px;
+  }
+
+  .input-icons-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    width: 100%;
+    margin-bottom: 20px;
+    margin-left: 0px;
+    margin-right: 0px;
+    order: 3;
+    padding: 0px 10px 0px 0px;
+  }
+
+  .form-icons-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .my-location-icon {
+    width: 33px;
+  }
+
+  .three {
+    width: 2.8px;
+  }
+
+  .destination-icon {
+    width: 33px;
+  }
+
+  .form-inputs-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .form-input {
+    width: 60vw; /* Limit the width to a maximum of 300px */
+    min-width: 100px; /* Ensure the input doesn't shrink below 100px */
+    padding: 10px;
+    padding-left: 20px;
+    margin: 5px 0;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    height: 47px;
+    outline: none;
+    text-align: left;
+    font-size: 18px;
+    font-weight: 400;
+  }
+
+  .mobile-only-icon {
+    align-self: center; /* Center the icon */
+    width: 40px; /* Adjust icon size */
+    height: 40px; /* Maintain square aspect ratio */
+  }
+
+  .form-buttons-container {
+    display: flex;
+    justify-content: center;
+    /* justify-content: space-around; */
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 20px;
+    order: 4;
+  }
+
+  .form-button {
+    background-color: #e0e2e5;
+    color: white;
+    width: 120px;
+    height: 45px;
+    border: none;
+    border-radius: 20px;
+  }
+
+  .form-button.active {
+    background-color: #3673e4;
+  }
+
+  .form-hr {
+    height: 0.5px; /* Sets the line to be very thin */
+    background-color: #d3cece; /* Sets the color of the line */
+    border: none; /* Removes default border */
+    display: block; /* Ensure the height is applied */
+    width: 100%;
+  }
+
+  .last-location-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    background-color: rgb(247, 247, 247);
+    border: 1px solid rgb(230, 230, 230);
+    height: 80px;
+    order: 5;
+  }
+
+  .clock {
+    width: 27px;
+  }
+
+  .form-text-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .form-h3 {
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .form-p {
+    margin: 0;
+    font-size: 13px;
+    color: #4e4a4a;
+  }
+
+  .form-p2 {
+    display: flex;
+    justify-content: right;
+    margin: 0;
+    margin-right: 20px;
+    font-size: 14px;
+    order: 1;
+  }
+
+  .form-confirm-button {
+    background-color: #3673e4;
+    color: white;
+    border: none;
+    height: 50px;
+    margin-right: 20px;
+    margin-left: 20px;
+    margin-top: 40px;
+    border-radius: 10px;
+    order: 6;
+  }
 }
