@@ -27,24 +27,24 @@
   text-align: left;
 }
 
-.delivery-option {
+.myproductmodal-delivery-option {
   margin-bottom: 20px;
 }
 
-.delivery-option2 {
+.myproductmodal-delivery-option2 {
   display: flex;
   flex-direction: row;
   gap: 30px;
   align-items: center;
 }
 
-.delivery-options-info {
+.myproductmodal-delivery-options-info {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-.car-icon {
+.myproductmodal-car-icon {
   width: 100px;
 }
 

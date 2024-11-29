@@ -99,16 +99,15 @@ const DeliveryOptions = ({
   return (
     <div className="delivery-option-container">
       <h2 className="deliver-option-h2">Welcome User</h2>
-      <hr />
-
-      <div>
+      <input className="delivery-option-input" placeholder="Search by City" />
+      <div className="dlivery-option-menu">
         {deliveryOptions.map((option, index) => (
           <div
             key={index}
-            className="delivery-option"
+            // className="delivery-option"
             onClick={() => handleIconClick(option)}
           >
-            <div className="delivery-option2">
+            <div className="delivery-option">
               <img
                 className="car-icon"
                 src={
@@ -119,31 +118,31 @@ const DeliveryOptions = ({
                 alt="Delivery Icon"
                 onClick={() => handleIconClick(option)}
               />
-              <div className="delivery-options-info">
+              <div className="delivery-option-info">
                 <p>{option.name}</p>
                 <p>{option.destination}</p>
                 <p>Deadline: {option.deadline}</p>
               </div>
               <div>
                 <p className="deliver-price">{option.price}.- CHF</p>
-              </div>
-              <div
-                className="star-icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleFavorite(option.id);
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="20"
-                  fill={isFavorite(option.id) ? "gold" : "gray"}
-                  className="bi bi-star-fill"
-                  viewBox="0 0 16 16"
+                <div
+                  className="star-icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleFavorite(option.id);
+                  }}
                 >
-                  <path d="M3.612 15.443c-.396.198-.824-.149-.746-.592l.83-4.73-3.522-3.356c-.33-.31-.158-.888.283-.95l4.898-.696 2.058-4.27c.197-.408.73-.408.927 0l2.058 4.27 4.898.696c.441.062.613.64.283.95l-3.522 3.356.83 4.73c.078.443-.35.79-.746.592L8 13.187l-4.389 2.256z" />
-                </svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="20"
+                    fill={isFavorite(option.id) ? "gold" : "gray"}
+                    className="bi bi-star-fill"
+                    viewBox="0 0 16 16"
+                  >
+                    <path d="M3.612 15.443c-.396.198-.824-.149-.746-.592l.83-4.73-3.522-3.356c-.33-.31-.158-.888.283-.95l4.898-.696 2.058-4.27c.197-.408.73-.408.927 0l2.058 4.27 4.898.696c.441.062.613.64.283.95l-3.522 3.356.83 4.73c.078.443-.35.79-.746.592L8 13.187l-4.389 2.256z" />
+                  </svg>
+                </div>
               </div>
             </div>
             <hr />

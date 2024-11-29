@@ -296,10 +296,10 @@ const MyProductModal = ({ onClose, user, deleteDelivery, editDelivery }) => {
           <p>No deliveries added by you.</p>
         ) : (
           userDeliveries.map((delivery, index) => (
-            <div key={index} className="delivery-option">
-              <div className="delivery-option2">
+            <div key={index} className="myproductmodal-delivery-option">
+              <div className="myproductmodal-delivery-option2">
                 <img
-                  className="car-icon"
+                  className="myproductmodal-car-icon"
                   src={
                     Array.isArray(delivery.images) && delivery.images.length > 0
                       ? delivery.images[0]
@@ -307,7 +307,7 @@ const MyProductModal = ({ onClose, user, deleteDelivery, editDelivery }) => {
                   }
                   alt="Delivery Icon"
                 />
-                <div className="delivery-options-info">
+                <div className="myproductmodal-delivery-options-info">
                   <p>{delivery.name}</p>
                   <p>{delivery.destination}</p>
                   <p>Price: {delivery.price}.- CHF</p>
