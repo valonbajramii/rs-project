@@ -69,6 +69,7 @@
 import React, { useState } from "react";
 import "./DeliveryOptions.css";
 import DeliveryInfoModal from "../../DeliveryInfoModal/DeliveryInfoModal";
+import HeartIcon from "../../../icons/Heart-icon.svg";
 
 const DeliveryOptions = ({
   deliveryOptions,
@@ -100,56 +101,51 @@ const DeliveryOptions = ({
     <div className="delivery-option-container">
       <h2 className="deliver-option-h2">Welcome User</h2>
       <input className="delivery-option-input" placeholder="Search by City" />
-      <div className="dlivery-option-menu">
-        {deliveryOptions.map((option, index) => (
-          <div
-            key={index}
-            // className="delivery-option"
-            onClick={() => handleIconClick(option)}
-          >
-            <div className="delivery-option">
-              <img
-                className="car-icon"
-                src={
-                  Array.isArray(option.images) && option.images.length > 0
-                    ? option.images[0]
-                    : "default-image-path.jpg"
-                }
-                alt="Delivery Icon"
-                onClick={() => handleIconClick(option)}
-              />
-              <div className="delivery-option-info">
-                <p>{option.name}</p>
-                <p>{option.destination}</p>
-                <p>Deadline: {option.deadline}</p>
-              </div>
-              <div>
-                <p className="deliver-price">{option.price}.- CHF</p>
-                <div
-                  className="star-icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavorite(option.id);
-                  }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="20"
-                    fill={isFavorite(option.id) ? "gold" : "gray"}
-                    className="bi bi-star-fill"
-                    viewBox="0 0 16 16"
+      <div className="scrollable-container">
+        <div className="dlivery-option-menu">
+          {deliveryOptions.map((option, index) => (
+            <div key={index} onClick={() => handleIconClick(option)}>
+              <div className="delivery-option">
+                <img
+                  className="car-icon"
+                  src={
+                    Array.isArray(option.images) && option.images.length > 0
+                      ? option.images[0]
+                      : "default-image-path.jpg"
+                  }
+                  alt="Delivery Icon"
+                  onClick={() => handleIconClick(option)}
+                />
+                <div className="delivery-option-info">
+                  <p className="delivery-option-name">{option.name}</p>
+                  <p className="delivery-option-destination">
+                    {option.destination}
+                  </p>
+                  <p className="delivery-option-deadline">
+                    Deadline: {option.deadline}
+                  </p>
+                </div>
+                <div className="delivery-price-container">
+                  <p className="delivery-price">CHF-{option.price}</p>
+                  <div
+                    className="star-icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(option.id);
+                    }}
                   >
-                    <path d="M3.612 15.443c-.396.198-.824-.149-.746-.592l.83-4.73-3.522-3.356c-.33-.31-.158-.888.283-.95l4.898-.696 2.058-4.27c.197-.408.73-.408.927 0l2.058 4.27 4.898.696c.441.062.613.64.283.95l-3.522 3.356.83 4.73c.078.443-.35.79-.746.592L8 13.187l-4.389 2.256z" />
-                  </svg>
+                    <img src={HeartIcon} />
+                  </div>
                 </div>
               </div>
+              <hr className="deliveri-options-hr" />
             </div>
-            <hr />
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
+      <button className="add-new-package-btn">Add New Package</button>
 
+      {/* Delivery Info Modal */}
       {showModal && selectedDelivery && (
         <DeliveryInfoModal
           show={showModal}
