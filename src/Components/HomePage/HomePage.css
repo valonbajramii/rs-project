@@ -237,4 +237,15 @@
     border-bottom-right-radius: 0; /* No rounding on bottom right corner */
     z-index: 1;
   }
+
+  .Components-container2 {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    height: 500px;
+    background-color: white;
+    box-sizing: border-box; /* Include padding and borders in element's total width and height */
+    overflow: hidden; /* Prevent content from spilling outside the container */
+    z-index: 1;
+  }
 }
