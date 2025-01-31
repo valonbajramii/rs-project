@@ -404,7 +404,7 @@ const DeliveryOptions = ({
                     </p>
                   </div>
                   <div className="delivery-price-container">
-                    <p className="delivery-price">CHF-{option.price}</p>
+                    <p className="delivery-price">CHF {option.price}</p>
                     <div
                       className="star-icon"
                       onClick={(e) => {

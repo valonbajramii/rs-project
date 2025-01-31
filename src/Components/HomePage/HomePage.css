@@ -205,20 +205,32 @@
 @media (max-width: 480px) {
   .Homepage-container {
     display: flex;
-    background-color: rgb(222, 224, 225);
+    background-color: rgb(254, 255, 255);
     width: 100%;
-    min-height: 100%;
+    height: 100vh; /* Full screen height */
+    /* min-height: 100%; */
     flex-direction: column;
   }
 
   .Components-container {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: none;
     gap: 0px;
-    margin-top: 350px;
+    margin-top: 0px;
     margin-left: 0px;
-    /* margin-left: -20px; */
+    height: 92.5vh; /* Full screen height */
+    margin: 0; /* Remove extra margin */
+  }
+
+  .form-view .Components-container {
+    margin-top: 350px;
+    height: 60vh; /* Full screen height */
+  }
+
+  /* No margin-top when delivery options are active on mobile */
+  .delivery-view .Components-container {
+    margin-top: 0;
   }
 
   .Components-container1 {
@@ -231,6 +243,7 @@
     overflow: hidden; /* Prevent content from spilling outside the container */
     margin-left: 0px;
     max-width: 500px;
+    flex: 1;
     border-top-left-radius: 20px; /* Rounded top left corner */
     border-top-right-radius: 20px; /* Rounded top right corner */
     border-bottom-left-radius: 0; /* No rounding on bottom left corner */
@@ -242,10 +255,20 @@
     display: flex;
     justify-content: space-around;
     width: 100%;
-    height: 500px;
+    height: 100%;
+    flex: 1;
     background-color: white;
     box-sizing: border-box; /* Include padding and borders in element's total width and height */
     overflow: hidden; /* Prevent content from spilling outside the container */
     z-index: 1;
+  }
+
+  .MobileFooter {
+    background-color: lightgray;
+    padding: 10px;
+    text-align: center;
+    flex-shrink: 0; /* Keep footer fixed at the bottom */
+    position: relative;
+    z-index: 10;
   }
 }

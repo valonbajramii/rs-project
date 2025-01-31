@@ -149,3 +149,18 @@
 .add-new-package-btn:hover {
   background-color: #285ab9;
 } */
+
+@media (max-width: 480px) {
+  .delivery-option-container {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 100%; /* Prevent overflow */
+    height: 100%;
+    overflow: hidden; /* Prevent overall scrolling */
+    padding-bottom: 15px;
+    position: relative;
+  }
+}

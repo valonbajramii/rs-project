@@ -232,6 +232,16 @@ const HomePage = ({ user, setUser }) => {
     setActiveIcon("options"); // Set 'options' as the active icon
   };
 
+  const handleFooterClick = (view) => {
+    if (view === "form") {
+      setShowForm(true); // Show form and map
+    } else if (view === "options") {
+      setShowForm(false); // Show delivery options
+    } else if (view === "profile") {
+      navigate("/profile"); // Navigate to the profile page when icon4 is clicked
+    }
+  };
+
   return (
     <div className="Homepage-container">
       {!isMobile && (
@@ -307,83 +317,94 @@ const HomePage = ({ user, setUser }) => {
         </div> */}
         </header>
       )}
-      <div className="Components-container">
-        <DeliveryMap />
-        <div className="Components-container1">
-          {!isMobile && (
-            <div>
-              <div className="Components-header">
-                <div
-                  className="homepage-car-icon-container"
-                  onClick={showDeliveryForm}
-                  style={{ cursor: "pointer" }}
-                >
-                  <img
-                    className={`homepage-car-icon ${
-                      activeIcon === "form" ? "active-icon" : ""
-                    }`}
-                    src={carIcon}
-                    alt="Car Icon"
-                  />
-                  <label
-                    className={`homepage-icons-label ${
-                      activeIcon === "form" ? "activelabel" : ""
-                    }`}
+      <div className={`${showForm ? "form-view" : "delivery-view"}`}>
+        <div className="Components-container">
+          {!isMobile && <DeliveryMap />} {/* Always show map on desktop */}
+          {isMobile && showForm && <DeliveryMap />}{" "}
+          {/* Show map only in mobile when form is active */}
+          <div className="Components-container1">
+            {!isMobile && (
+              <div>
+                <div className="Components-header">
+                  <div
+                    className="homepage-car-icon-container"
+                    onClick={showDeliveryForm}
+                    style={{ cursor: "pointer" }}
                   >
-                    Direction
-                  </label>
-                  <hr
-                    className={`${
-                      activeIcon === "form" ? "Components-header-icons-hr" : ""
-                    }`}
-                  />
-                </div>
-                <div
-                  className="homepage-vector-icon-container"
-                  onClick={showDeliveryOptions}
-                  style={{ cursor: "pointer" }}
-                >
-                  <img
-                    className={`vector-icon ${
-                      activeIcon === "options" ? "active-icon" : ""
-                    }`}
-                    src={Vector}
-                    alt="Vector Icon"
-                  />
-                  <label
-                    className={`homepage-icons-label ${
-                      activeIcon === "options" ? "activelabel" : ""
-                    }`}
+                    <img
+                      className={`homepage-car-icon ${
+                        activeIcon === "form" ? "active-icon" : ""
+                      }`}
+                      src={carIcon}
+                      alt="Car Icon"
+                    />
+                    <label
+                      className={`homepage-icons-label ${
+                        activeIcon === "form" ? "activelabel" : ""
+                      }`}
+                    >
+                      Direction
+                    </label>
+                    <hr
+                      className={`${
+                        activeIcon === "form"
+                          ? "Components-header-icons-hr"
+                          : ""
+                      }`}
+                    />
+                  </div>
+                  <div
+                    className="homepage-vector-icon-container"
+                    onClick={showDeliveryOptions}
+                    style={{ cursor: "pointer" }}
                   >
-                    Packages
-                  </label>
-                  <hr
-                    className={`${
-                      activeIcon === "options"
-                        ? "Components-header-icons-hr"
-                        : ""
-                    }`}
-                  />
+                    <img
+                      className={`vector-icon ${
+                        activeIcon === "options" ? "active-icon" : ""
+                      }`}
+                      src={Vector}
+                      alt="Vector Icon"
+                    />
+                    <label
+                      className={`homepage-icons-label ${
+                        activeIcon === "options" ? "activelabel" : ""
+                      }`}
+                    >
+                      Packages
+                    </label>
+                    <hr
+                      className={`${
+                        activeIcon === "options"
+                          ? "Components-header-icons-hr"
+                          : ""
+                      }`}
+                    />
+                  </div>
                 </div>
+                <hr className="header-hr" />
               </div>
-              <hr className="header-hr" />
-            </div>
-          )}
-
-          <div className="Components-container2">
-            {showForm ? (
-              <DeliveryForm updateFilterCriteria={updateFilterCriteria} />
-            ) : (
-              <DeliveryOptions
-                deliveryOptions={filteredOptions}
-                user={user}
-                toggleFavorite={toggleFavorite}
-              />
             )}
+
+            <div className="Components-container2">
+              {showForm ? (
+                <DeliveryForm updateFilterCriteria={updateFilterCriteria} />
+              ) : (
+                <DeliveryOptions
+                  deliveryOptions={filteredOptions}
+                  user={user}
+                  toggleFavorite={toggleFavorite}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>
-      {isMobile && <MobileFooter />}
+      {isMobile && (
+        <MobileFooter
+          className="MobileFooter"
+          onFooterClick={handleFooterClick}
+        />
+      )}
       {isModalOpen && (
         <Delivery
           onClose={toggleModal}
