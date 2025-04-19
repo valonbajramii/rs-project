@@ -291,7 +291,7 @@ const MyProductModal = ({ onClose, user, deleteDelivery, editDelivery }) => {
       <div className="myproductmodal-content">
         <button onClick={onClose}>x</button>
         <h2 className="modal-h2">My Deliveries</h2>
-        <hr />
+        <hr className="myproductmodal-hr" />
         {userDeliveries.length === 0 ? (
           <p>No deliveries added by you.</p>
         ) : (
@@ -333,7 +333,7 @@ const MyProductModal = ({ onClose, user, deleteDelivery, editDelivery }) => {
                   </button>
                 </div>
               </div>
-              <hr />
+              <hr className="myproductmodal-hr" />
             </div>
           ))
         )}

@@ -445,3 +445,224 @@ const DeliveryOptions = ({
 };
 
 export default DeliveryOptions;
+
+/////////////////////////////////////component above
+
+// import React, { useState, useEffect } from "react";
+// import "./DeliveryOptions.css";
+// import DeliveryInfoModal from "../../DeliveryInfoModal/DeliveryInfoModal";
+// import HeartIcon from "../../../icons/Heart-icon.svg";
+// import Delivery from "../../Delivery/Delivery";
+// import { v4 as uuidv4 } from "uuid";
+// import audiImage from "../../../images/2025_audi_q7_4dr-suv_prestige_fq_oem_1_1600.avif";
+
+// const DeliveryOptions = ({
+//   deliveryOptions,
+//   user,
+//   toggleFavorite,
+//   favorites = [],
+//   setDeliveryOptions: setParentDeliveryOptions, // Add this prop to update parent state
+// }) => {
+//   const initializeDeliveries = () => {
+//     const storedDeliveries = localStorage.getItem("deliveries");
+//     let deliveries = storedDeliveries
+//       ? JSON.parse(storedDeliveries)
+//       : [
+//           {
+//             id: uuidv4(),
+//             name: "Car",
+//             image: audiImage,
+//             price: "100",
+//             location: "Kamenic",
+//             destination: "Prishtin",
+//             description: "Description",
+//             weightinKg: "20",
+//             length: "50cm",
+//             height: "50cm",
+//             width: "50cm",
+//             pickupTim: "2024-08-28T17:00",
+//             deadline: "08-09 T12:55",
+//             createdBy: user.email,
+//             requests: [],
+//           },
+//         ];
+
+//     deliveries = deliveries.map((delivery) => {
+//       if (!delivery.createdBy) {
+//         return { ...delivery, createdBy: user.email, id: uuidv4() };
+//       }
+//       return delivery;
+//     });
+
+//     localStorage.setItem("deliveries", JSON.stringify(deliveries));
+//     return deliveries;
+//   };
+
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [showModal, setShowModal] = useState(false);
+//   const [selectedDelivery, setSelectedDelivery] = useState(null);
+//   const [deliveryOptionss, setDeliveryOptionss] =
+//     useState(initializeDeliveries);
+
+//   useEffect(() => {
+//     localStorage.setItem("deliveries", JSON.stringify(deliveryOptionss));
+//     // Update parent state if prop is available
+//     if (setParentDeliveryOptions) {
+//       setParentDeliveryOptions(deliveryOptionss);
+//     }
+//   }, [deliveryOptionss, setParentDeliveryOptions]);
+
+//   useEffect(() => {
+//     const storedDeliveries = localStorage.getItem("deliveries");
+//     if (storedDeliveries) {
+//       const deliveries = JSON.parse(storedDeliveries).map((delivery) => ({
+//         ...delivery,
+//         requests: Array.isArray(delivery.requests) ? delivery.requests : [],
+//       }));
+//       setDeliveryOptionss(deliveries);
+//     }
+//   }, []);
+
+//   const handleIconClick = (option) => {
+//     setSelectedDelivery(option);
+//     setShowModal(true);
+//   };
+
+//   const closeModal = () => {
+//     setShowModal(false);
+//     setSelectedDelivery(null);
+//   };
+
+//   const toggleModal = () => {
+//     setIsModalOpen(!isModalOpen);
+//   };
+
+//   const addNewDelivery = (newDelivery) => {
+//     const deliveryWithUser = {
+//       ...newDelivery,
+//       createdBy: user.email,
+//       id: uuidv4(),
+//     };
+//     const updatedDeliveryOptions = [...deliveryOptionss, deliveryWithUser];
+//     setDeliveryOptionss(updatedDeliveryOptions);
+//     localStorage.setItem("deliveries", JSON.stringify(updatedDeliveryOptions));
+//   };
+
+//   const isFavorite = (deliveryId) => {
+//     return favorites.includes(deliveryId);
+//   };
+
+//   const handleRequestDelivery = (delivery) => {
+//     // Check if user already made a request for this delivery
+//     const hasRequested = delivery.requests?.some(
+//       (req) => req.requester === user.email
+//     );
+
+//     if (hasRequested) {
+//       alert("You've already requested this delivery");
+//       return;
+//     }
+
+//     const updatedDeliveries = deliveryOptionss.map((d) => {
+//       if (d.id === delivery.id) {
+//         const newRequest = {
+//           id: uuidv4(),
+//           requester: user.email,
+//           requesterName: user.name || "Unknown", // Fallback if name doesn't exist
+//           status: "Pending",
+//           timestamp: new Date().toISOString(),
+//         };
+
+//         return {
+//           ...d,
+//           requests: [...(d.requests || []), newRequest],
+//         };
+//       }
+//       return d;
+//     });
+
+//     setDeliveryOptionss(updatedDeliveries);
+//     localStorage.setItem("deliveries", JSON.stringify(updatedDeliveries));
+//     alert("Your request has been sent to the delivery owner!");
+//     closeModal(); // Close the modal after sending request
+//   };
+
+//   return (
+//     <div className="delivery-option-container">
+//       <h2 className="deliver-option-h2">Welcome {user.name || "User"}</h2>
+//       <input className="delivery-option-input" placeholder="Search by City" />
+//       <div className="scrollable-container">
+//         <div className="dlivery-option-menu">
+//           {deliveryOptionss.map((option, index) => (
+//             <div key={index} onClick={() => handleIconClick(option)}>
+//               <div className="delivery-option">
+//                 <img
+//                   className="car-icon"
+//                   src={
+//                     Array.isArray(option.images) && option.images.length > 0
+//                       ? option.images[0]
+//                       : option.image || "default-image-path.jpg" // Fallback to image if images array doesn't exist
+//                   }
+//                   alt="Delivery Icon"
+//                 />
+//                 <div className="delivery-option-info">
+//                   <p className="delivery-option-name">{option.name}</p>
+//                   <p className="delivery-option-destination">
+//                     {option.destination}
+//                   </p>
+//                   <p className="delivery-option-deadline">
+//                     Deadline: {option.deadline}
+//                   </p>
+//                 </div>
+//                 <div className="delivery-price-container">
+//                   <p className="delivery-price">CHF {option.price}</p>
+//                   <div
+//                     className="star-icon"
+//                     onClick={(e) => {
+//                       e.stopPropagation();
+//                       toggleFavorite(option.id);
+//                     }}
+//                   >
+//                     <img
+//                       src={HeartIcon}
+//                       style={{
+//                         filter: isFavorite(option.id)
+//                           ? "brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%)"
+//                           : "none",
+//                       }}
+//                       alt={
+//                         isFavorite(option.id) ? "Favorited" : "Not favorited"
+//                       }
+//                     />
+//                   </div>
+//                 </div>
+//               </div>
+//               <hr className="deliveri-options-hr" />
+//             </div>
+//           ))}
+//         </div>
+//       </div>
+//       <button className="add-new-package-btn" onClick={toggleModal}>
+//         Add New Package
+//       </button>
+
+//       {showModal && selectedDelivery && (
+//         <DeliveryInfoModal
+//           show={showModal}
+//           onClose={closeModal}
+//           deliveryDetails={selectedDelivery}
+//           user={user}
+//           onRequestDelivery={handleRequestDelivery}
+//         />
+//       )}
+//       {isModalOpen && (
+//         <Delivery
+//           onClose={toggleModal}
+//           addNewDelivery={(delivery) => addNewDelivery({ ...delivery })}
+//         />
+//       )}
+//     </div>
+//   );
+// };
+
+// export default DeliveryOptions;

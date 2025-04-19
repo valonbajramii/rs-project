@@ -1,0 +1,24 @@
+.user-avatar {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e7e7e7;
+  color: #333;
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.avatar-image {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-letter {
+  font-size: 16px;
+  text-transform: uppercase;
+}

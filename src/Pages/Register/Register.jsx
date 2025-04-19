@@ -181,7 +181,22 @@ const Register = ({ onRegister }) => {
       return;
     }
     // Call the onRegister function passed as a prop
-    onRegister(formData);
+    const userData = {
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+      dateOfBirth: formData.dateOfBirth,
+      // Initialize empty profile fields
+      mobileNumber: "",
+      address: "",
+      city: "",
+      state: "",
+      zip: "",
+      idDocument: null,
+      drivingLicense: null,
+      profileImage: null,
+    };
+    onRegister(userData);
     navigate("/homepage");
   };
 
@@ -201,6 +216,7 @@ const Register = ({ onRegister }) => {
               name="name"
               value={formData.name}
               onChange={handleChange}
+              required
             />
           </div>
 
@@ -212,8 +228,10 @@ const Register = ({ onRegister }) => {
               className="register-input"
               id="email"
               name="email"
+              type="email"
               value={formData.email}
               onChange={handleChange}
+              required
             />
           </div>
 
@@ -238,8 +256,10 @@ const Register = ({ onRegister }) => {
               className="register-input"
               id="dateOfBirth"
               name="dateOfBirth"
+              type="date"
               value={formData.dateOfBirth}
               onChange={handleChange}
+              required
             />
           </div>
 
@@ -254,6 +274,7 @@ const Register = ({ onRegister }) => {
               name="password"
               value={formData.password}
               onChange={handleChange}
+              required
             />
           </div>
 
@@ -268,6 +289,7 @@ const Register = ({ onRegister }) => {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
+              required
             />
           </div>
           {/* <div className="checkbox-container">

@@ -56,9 +56,22 @@ const DeliveryForm = ({ updateFilterCriteria }) => {
       <h2 className="form-h2">Where are you going today?</h2>
       <div className="input-icons-container">
         <div className="form-icons-container">
-          <img className="my-location-icon" src={MyLocationIcon} />
-          <img className="three" src={Three} />
-          <img className="destination-icon" src={destinationIcon} />
+          <img
+            className={`my-location-icon ${
+              formValues.location ? "active" : ""
+            }`}
+            src={MyLocationIcon}
+          />
+          <img
+            className={`three ${formValues.destination ? "active" : ""}`}
+            src={Three}
+          />
+          <img
+            className={`destination-icon ${
+              formValues.destination ? "active" : ""
+            }`}
+            src={destinationIcon}
+          />
         </div>
         <div className="form-inputs-container">
           <input

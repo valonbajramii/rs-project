@@ -1,9 +1,12 @@
 .mobile-footer-container {
   display: flex;
-  z-index: 1;
+  position: fixed; /* Change to fixed positioning */
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
   background-color: white;
-  max-height: 70px;
-  min-height: 70px;
+  height: 70px; /* Fixed height */
   box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.2);
   justify-content: space-around;
   align-items: center;

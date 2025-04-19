@@ -39,16 +39,27 @@
   gap: 7px;
 }
 
-.my-location-icon {
-  width: 33px;
-}
-
-.three {
-  width: 2.8px;
-}
-
+/* Default styles for icons */
+.my-location-icon,
+.three,
 .destination-icon {
-  width: 33px;
+  filter: grayscale(100%); /* Default state, icons appear in grayscale */
+  transition: filter 0.3s ease;
+}
+
+/* When input fields are filled, make the icons blue */
+.my-location-icon.active,
+.three.active,
+.destination-icon.active {
+  filter: none; /* Remove grayscale, so it can use original or customized color */
+}
+
+/* Optionally, you can add a blue tint */
+.my-location-icon.active,
+.three.active,
+.destination-icon.active {
+  filter: brightness(0) saturate(100%) invert(50%) sepia(70%) saturate(500%)
+    hue-rotate(175deg) brightness(90%) contrast(100%);
 }
 
 .form-inputs-container {

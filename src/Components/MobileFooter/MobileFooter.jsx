@@ -5,8 +5,8 @@ import messageSquare from "../../icons/message-square.svg";
 import Vector from "../../icons/Vector2.svg";
 import profileIcon from "../../icons/person-fill.svg";
 
-const MobileFooter = ({ onFooterClick }) => {
-  const [activeIcon, setActiveIcon] = useState("icon1");
+const MobileFooter = ({ onFooterClick, activeIcon }) => {
+  // const [activeIcon, setActiveIcon] = useState("icon1");
 
   // const showIcon1 = () => {
   //   setActiveIcon("icon1"); // Set 'form' as the active icon
@@ -25,7 +25,6 @@ const MobileFooter = ({ onFooterClick }) => {
   // };
 
   const handleIconClick = (icon) => {
-    setActiveIcon(icon);
     if (icon === "icon1") {
       onFooterClick("form"); // Show the form
     } else if (icon === "icon2") {
@@ -42,6 +41,7 @@ const MobileFooter = ({ onFooterClick }) => {
           activeIcon === "icon1" ? "footer-active-icon" : ""
         }`}
         src={houseicon}
+        alt="Home"
       />
       <img
         onClick={() => handleIconClick("icon2")}
@@ -49,6 +49,7 @@ const MobileFooter = ({ onFooterClick }) => {
           activeIcon === "icon2" ? "footer-active-icon" : ""
         }`}
         src={Vector}
+        alt="Packages"
       />
       <img
         onClick={() => handleIconClick("icon3")}
@@ -56,6 +57,7 @@ const MobileFooter = ({ onFooterClick }) => {
           activeIcon === "icon3" ? "footer-active-icon" : ""
         }`}
         src={messageSquare}
+        alt="Messages"
       />
       <img
         onClick={() => handleIconClick("icon4")}
@@ -63,6 +65,7 @@ const MobileFooter = ({ onFooterClick }) => {
           activeIcon === "icon4" ? "footer-active-icon" : ""
         }`}
         src={profileIcon}
+        alt="Profile"
       />
     </div>
   );

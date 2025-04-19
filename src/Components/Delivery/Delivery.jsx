@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./Delivery.css";
+import chevronLeft from "../../images/chevron-left.svg";
 
 const Delivery = ({ onClose, addNewDelivery }) => {
   const [uploadedImages, setUploadedImages] = useState([]);
@@ -34,10 +35,9 @@ const Delivery = ({ onClose, addNewDelivery }) => {
         const newImages = [...prevImages];
         newImages[index] = reader.result;
 
-        // Set newDelivery's images based on updated uploadedImages
         setNewDelivery((prevDelivery) => ({
           ...prevDelivery,
-          images: newImages, // Correctly update newDelivery's images
+          images: newImages,
         }));
 
         return newImages;
@@ -52,7 +52,7 @@ const Delivery = ({ onClose, addNewDelivery }) => {
   const handleImageDelete = (index) => {
     setUploadedImages((prevImages) => {
       const newImages = [...prevImages];
-      newImages[index] = null; // Remove the image only at the specific index
+      newImages[index] = null;
       return newImages;
     });
 
@@ -68,132 +68,152 @@ const Delivery = ({ onClose, addNewDelivery }) => {
   };
 
   const handleDateChange = (date) => {
-    // Custom formatting can be applied here if needed.
-    const formattedDate = date.toISOString().slice(5, 16); // Remove the year from the formatted date string
+    const formattedDate = date.toISOString().slice(5, 16);
     setNewDelivery({ ...newDelivery, deadline: formattedDate });
   };
 
   const handleAddDelivery = () => {
     addNewDelivery(newDelivery);
-    onClose(); // Close the modal after adding
+    onClose();
   };
 
   return (
     <div className="delivery-modal-overlay">
       <div className="delivery-modal-content">
         <div className="delivery-container">
-          <button className="delivery-close-modal" onClick={onClose}>
-            x
-          </button>
           <div className="delivery-content">
-            <h2 className="delivery-h2">Add Delivery</h2>
+            <div className="back-button-and-text">
+              <img src={chevronLeft} className="chevron-left" alt="Back" />
+              <h2 className="delivery-h2">Add new package</h2>
+            </div>
+
             <div className="delivery-inputs-container">
-              <input
-                className="delivery-input"
-                type="text"
-                name="name"
-                placeholder="Delivery Name"
-                value={newDelivery.name}
-                onChange={handleInputChange}
-              />
-              <input
-                className="delivery-input"
-                type="text"
-                name="location"
-                placeholder="Location"
-                value={newDelivery.location}
-                onChange={handleInputChange}
-              />
-              <input
-                className="delivery-input"
-                type="text"
-                name="destination"
-                placeholder="Destination"
-                value={newDelivery.destination}
-                onChange={handleInputChange}
-              />
-              <input
-                className="delivery-input"
-                type="text"
-                name="description"
-                placeholder="Description"
-                value={newDelivery.description}
-                onChange={handleInputChange}
-              />
-              <input
-                className="delivery-input"
-                type="number"
-                name="price"
-                placeholder="Price in CHF"
-                value={newDelivery.price}
-                onChange={handleInputChange}
-              />
-              <input
-                className="delivery-input"
-                type="number"
-                name="weightinKg"
-                placeholder="Weight in Kg"
-                value={newDelivery.weightinKg}
-                onChange={handleInputChange}
-              />
-              <input
-                className="delivery-input"
-                type="number"
-                name="length"
-                placeholder="Length"
-                value={newDelivery.length}
-                onChange={handleInputChange}
-              />
-              <input
-                className="delivery-input"
-                type="number"
-                name="height"
-                placeholder="Height"
-                value={newDelivery.height}
-                onChange={handleInputChange}
-              />
-              <input
-                className="delivery-input"
-                type="number"
-                name="width"
-                placeholder="Width"
-                value={newDelivery.width}
-                onChange={handleInputChange}
-              />
-              <input
-                className="delivery-input"
-                type={inputType.pickupTim}
-                name="pickupTim"
-                placeholder="Pickup Time"
-                value={newDelivery.pickupTim}
-                onFocus={() =>
-                  setInputType({ ...inputType, pickupTim: "datetime-local" })
-                }
-                onBlur={() =>
-                  newDelivery.pickupTim === "" &&
-                  setInputType({ ...inputType, pickupTim: "text" })
-                }
-                onChange={handleInputChange}
-              />
-              <DatePicker
-                className="delivery-input"
-                selected={
-                  newDelivery.deadline
-                    ? new Date(`2024-${newDelivery.deadline}`)
-                    : null
-                }
-                onChange={handleDateChange}
-                showTimeSelect
-                showMonthDropdown
-                showDayDropdown
-                dateFormat="MMMM d, h:mm aa"
-                placeholderText="Deadline"
-              />
+              <div className="form-section">
+                <h3 className="section-title">Package Name</h3>
+                <input
+                  className="delivery-input"
+                  type="text"
+                  name="name"
+                  placeholder="Aspirator"
+                  value={newDelivery.name}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="form-section">
+                <h3 className="section-title">Location and Destination</h3>
+                <div className="input-group">
+                  <input
+                    className="delivery-input"
+                    type="text"
+                    name="location"
+                    placeholder="Location"
+                    value={newDelivery.location}
+                    onChange={handleInputChange}
+                  />
+                  <input
+                    className="delivery-input"
+                    type="text"
+                    name="destination"
+                    placeholder="Destination"
+                    value={newDelivery.destination}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+
+              <div className="form-section">
+                <h3 className="section-title">Description</h3>
+                <textarea
+                  className="delivery-textarea"
+                  name="description"
+                  placeholder=""
+                  value={newDelivery.description}
+                  onChange={handleInputChange}
+                  rows="4"
+                />
+              </div>
             </div>
           </div>
+          <hr className="vertical" />
           <div className="delivery-img-container">
+            <div className="form-section">
+              <h3 className="h3-section-title">
+                {window.innerWidth <= 485 ? "Dimensions" : "Additional Info"}
+              </h3>
+              <div className="additional-info-grid">
+                <div className="delivery-info-group">
+                  <label className="dimension-label">Weight</label>
+                  <div className="input-with-unit">
+                    <input
+                      className="delivery-input"
+                      type="number"
+                      name="weightinKg"
+                      placeholder={
+                        window.innerWidth <= 485 ? "Weight in kg" : ""
+                      }
+                      value={newDelivery.weightinKg}
+                      onChange={handleInputChange}
+                    />
+                    <span className="unit">Kg</span>
+                  </div>
+                </div>
+
+                <div className="delivery-info-group">
+                  <label className="dimension-label">Length</label>
+                  <div className="input-with-unit">
+                    <input
+                      className="delivery-input"
+                      type="number"
+                      name="length"
+                      placeholder={
+                        window.innerWidth <= 485 ? "Length in cm" : ""
+                      }
+                      value={newDelivery.length}
+                      onChange={handleInputChange}
+                    />
+                    <span className="unit">cm</span>
+                  </div>
+                </div>
+
+                <div className="delivery-info-group">
+                  <label className="dimension-label">Height</label>
+                  <div className="input-with-unit">
+                    <input
+                      className="delivery-input"
+                      type="number"
+                      name="height"
+                      placeholder={
+                        window.innerWidth <= 485 ? "Height in cm" : ""
+                      }
+                      value={newDelivery.height}
+                      onChange={handleInputChange}
+                    />
+                    <span className="unit">cm</span>
+                  </div>
+                </div>
+
+                <div className="delivery-info-group">
+                  <label className="dimension-label">Width</label>
+                  <div className="input-with-unit">
+                    <input
+                      className="delivery-input"
+                      type="number"
+                      name="width"
+                      placeholder={
+                        window.innerWidth <= 485 ? "Width in cm" : ""
+                      }
+                      value={newDelivery.width}
+                      onChange={handleInputChange}
+                    />
+                    <span className="unit">cm</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <h3 className="section-title">Images</h3>
             <div className="image-grid-container">
-              {/* Main central large box */}
               <div className="image-box large-box">
                 {uploadedImages[0] ? (
                   <div className="uploaded-image-container">
@@ -204,26 +224,27 @@ const Delivery = ({ onClose, addNewDelivery }) => {
                     />
                     <button
                       className="delivery-delete-button"
-                      onClick={() => handleImageDelete(0)} // Delete specific image in this box
+                      onClick={() => handleImageDelete(0)}
                     >
                       x
                     </button>
                   </div>
                 ) : (
-                  <label htmlFor={`file-input-0`} className="upload-label">
+                  <label
+                    htmlFor={`file-input-0`}
+                    className="delivery-upload-label"
+                  >
                     <span className="plus-icon">+</span>
                   </label>
                 )}
-                {/* Hidden input for file upload for the large box */}
                 <input
                   type="file"
                   id={`file-input-0`}
-                  onChange={(event) => handleImageUpload(event, 0)} // Upload image for the large box
+                  onChange={(event) => handleImageUpload(event, 0)}
                   style={{ display: "none" }}
                 />
               </div>
 
-              {/* Smaller boxes surrounding the large one */}
               {[1, 2, 3, 4].map((box, index) => (
                 <div key={index} className="image-box small-box">
                   {uploadedImages[box] ? (
@@ -235,7 +256,7 @@ const Delivery = ({ onClose, addNewDelivery }) => {
                       />
                       <button
                         className="delivery-delete-button"
-                        onClick={() => handleImageDelete(box)} // Delete specific image in this box
+                        onClick={() => handleImageDelete(box)}
                       >
                         x
                       </button>
@@ -243,27 +264,40 @@ const Delivery = ({ onClose, addNewDelivery }) => {
                   ) : (
                     <label
                       htmlFor={`file-input-${box}`}
-                      className="upload-label"
+                      className="delivery-upload-label"
                     >
                       <span className="plus-icon">+</span>
                     </label>
                   )}
-                  {/* Hidden input for file upload for each smaller box */}
                   <input
                     type="file"
                     id={`file-input-${box}`}
-                    onChange={(event) => handleImageUpload(event, box)} // Upload image for the specific smaller box
+                    onChange={(event) => handleImageUpload(event, box)}
                     style={{ display: "none" }}
                   />
                 </div>
               ))}
             </div>
+            <div className="form-section">
+              <h3 className="section-title">Price</h3>
+              <div className="input-with-unit-price">
+                <input
+                  className="delivery-input"
+                  type="number"
+                  name="price"
+                  placeholder={window.innerWidth <= 485 ? "in CHF" : ""}
+                  value={newDelivery.price}
+                  onChange={handleInputChange}
+                />
+                <span className="unit">CHF</span>
+              </div>
+            </div>
+            <div className="Container-delivery-button">
+              <button className="delivery-button" onClick={handleAddDelivery}>
+                Add New Package
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="Container-delivery-button">
-          <button className="delivery-button" onClick={handleAddDelivery}>
-            Add
-          </button>
         </div>
       </div>
     </div>
