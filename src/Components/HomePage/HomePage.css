@@ -46,7 +46,8 @@
   box-sizing: border-box; /* Include padding and borders in element's total width and height */
   overflow: hidden; /* Prevent content from spilling outside the container */
   margin-left: 20px;
-  max-width: 500px;
+  /* max-width: 500px; */
+  max-height: 605px;
   border-radius: 20px;
   z-index: 1;
 }
@@ -471,7 +472,7 @@ homepage-request-item:hover {
     display: flex;
     flex-direction: column;
     margin-top: 10px;
-    background-color: white;
+    background-color: rgb(255, 255, 255);
     /* padding: 20px;  */
     box-sizing: border-box; /* Include padding and borders in element's total width and height */
     overflow: hidden; /* Prevent content from spilling outside the container */
@@ -483,6 +484,7 @@ homepage-request-item:hover {
     border-bottom-left-radius: 0; /* No rounding on bottom left corner */
     border-bottom-right-radius: 0; /* No rounding on bottom right corner */
     z-index: 1;
+    max-height: none;
   }
 
   .Components-container2 {
@@ -491,7 +493,7 @@ homepage-request-item:hover {
     width: 100%;
     height: 100%;
     flex: 1;
-    background-color: white;
+    background-color: rgb(255, 255, 255);
     box-sizing: border-box; /* Include padding and borders in element's total width and height */
     overflow: hidden; /* Prevent content from spilling outside the container */
     z-index: 1;

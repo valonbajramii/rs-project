@@ -78,12 +78,17 @@ const Delivery = ({ onClose, addNewDelivery }) => {
   };
 
   return (
-    <div className="delivery-modal-overlay">
+    <div className="delivery-form-container">
       <div className="delivery-modal-content">
         <div className="delivery-container">
           <div className="delivery-content">
             <div className="back-button-and-text">
-              <img src={chevronLeft} className="chevron-left" alt="Back" />
+              <img
+                src={chevronLeft}
+                className="chevron-left"
+                alt="Back"
+                onClick={onClose}
+              />
               <h2 className="delivery-h2">Add new package</h2>
             </div>
 

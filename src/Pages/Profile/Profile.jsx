@@ -391,7 +391,7 @@ import paperReplice from "../../icons/paperclip.svg";
 import { useMediaQuery } from "react-responsive";
 import MobileFooter from "../../Components/MobileFooter/MobileFooter";
 
-const Profile = ({ user, setUser }) => {
+const Profile = ({ user, setUser, setShowProfile }) => {
   const isMobile = useMediaQuery({ maxWidth: 480 });
   const [activeIcon, setActiveIcon] = useState("icon4"); // Default to profile icon
   const [isModalVisible, setModalVisible] = useState(false);
@@ -412,6 +412,7 @@ const Profile = ({ user, setUser }) => {
 
   const handleHomePageClick = () => {
     navigate("/homepage");
+    setShowProfile(false);
   };
 
   const handleFooterClick = (section) => {

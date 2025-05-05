@@ -1,4 +1,4 @@
-.delivery-modal-overlay {
+/* .delivery-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -10,12 +10,20 @@
   align-items: center;
   z-index: 10000;
   padding: 10px;
+} */
+
+.delivery-form-container {
+  width: 100%;
+  /* padding: 20px; */
+  background-color: white;
+  border-radius: 10px;
+  margin-top: 20px; /* Add some spacing */
 }
 
 .delivery-modal-content {
   background-color: rgb(255, 255, 255);
   border-radius: 10px;
-  padding: 20px;
+  /* padding: 20px; */
   width: 100%;
   max-width: 900px;
   position: relative;
@@ -299,7 +307,7 @@
 
 /* Update your existing media query */
 @media (max-width: 485px) {
-  .delivery-modal-overlay {
+  .delivery-form-container {
     position: fixed;
     top: 0;
     left: 0;
@@ -365,5 +373,6 @@
     width: 100%;
     max-width: none;
     margin: 0;
+    margin-bottom: 5px;
   }
 }

@@ -277,7 +277,6 @@ import React, { useState, useEffect } from "react";
 import "./DeliveryOptions.css";
 import DeliveryInfoModal from "../../DeliveryInfoModal/DeliveryInfoModal";
 import HeartIcon from "../../../icons/Heart-icon.svg";
-import Delivery from "../../Delivery/Delivery";
 import { v4 as uuidv4 } from "uuid";
 import audiImage from "../../../images/2025_audi_q7_4dr-suv_prestige_fq_oem_1_1600.avif";
 
@@ -286,6 +285,9 @@ const DeliveryOptions = ({
   user,
   toggleFavorite,
   favorites = [],
+  setIsAddPackageView,
+  setShowForm,
+  setShowProfile,
 }) => {
   const initializeDeliveries = () => {
     const storedDeliveries = localStorage.getItem("deliveries");
@@ -322,7 +324,6 @@ const DeliveryOptions = ({
     return deliveries;
   };
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedDelivery, setSelectedDelivery] = useState(null);
   const [deliveryOptionss, setDeliveryOptionss] =
@@ -353,21 +354,6 @@ const DeliveryOptions = ({
     setSelectedDelivery(null);
   };
 
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
-  };
-
-  const addNewDelivery = (newDelivery) => {
-    const deliveryWithUser = {
-      ...newDelivery,
-      createdBy: user.email,
-      id: uuidv4(),
-    };
-    const updatedDeliveryOptions = [...deliveryOptionss, deliveryWithUser];
-    setDeliveryOptionss(updatedDeliveryOptions); // Update state
-    localStorage.setItem("deliveries", JSON.stringify(updatedDeliveryOptions)); // Sync with local storage
-  };
-
   const isFavorite = (deliveryId) => {
     return favorites.includes(deliveryId);
   };
@@ -378,51 +364,53 @@ const DeliveryOptions = ({
       <input className="delivery-option-input" placeholder="Search by City" />
       <div className="scrollable-container">
         <div className="dlivery-option-menu">
-          {deliveryOptionss.map(
-            (
-              option,
-              index // Use updated state
-            ) => (
-              <div key={index} onClick={() => handleIconClick(option)}>
-                <div className="delivery-option">
-                  <img
-                    className="car-icon"
-                    src={
-                      Array.isArray(option.images) && option.images.length > 0
-                        ? option.images[0]
-                        : "default-image-path.jpg"
-                    }
-                    alt="Delivery Icon"
-                  />
-                  <div className="delivery-option-info">
-                    <p className="delivery-option-name">{option.name}</p>
-                    <p className="delivery-option-destination">
-                      {option.destination}
-                    </p>
-                    <p className="delivery-option-deadline">
-                      Deadline: {option.deadline}
-                    </p>
-                  </div>
-                  <div className="delivery-price-container">
-                    <p className="delivery-price">CHF {option.price}</p>
-                    <div
-                      className="star-icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleFavorite(option.id);
-                      }}
-                    >
-                      <img src={HeartIcon} />
-                    </div>
+          {deliveryOptionss.map((option, index) => (
+            <div key={index} onClick={() => handleIconClick(option)}>
+              <div className="delivery-option">
+                <img
+                  className="car-icon"
+                  src={
+                    Array.isArray(option.images) && option.images.length > 0
+                      ? option.images[0]
+                      : "default-image-path.jpg"
+                  }
+                  alt="Delivery Icon"
+                />
+                <div className="delivery-option-info">
+                  <p className="delivery-option-name">{option.name}</p>
+                  <p className="delivery-option-destination">
+                    {option.destination}
+                  </p>
+                  <p className="delivery-option-deadline">
+                    Deadline: {option.deadline}
+                  </p>
+                </div>
+                <div className="delivery-price-container">
+                  <p className="delivery-price">CHF {option.price}</p>
+                  <div
+                    className="star-icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(option.id);
+                    }}
+                  >
+                    <img src={HeartIcon} />
                   </div>
                 </div>
-                <hr className="deliveri-options-hr" />
               </div>
-            )
-          )}
+              <hr className="deliveri-options-hr" />
+            </div>
+          ))}
         </div>
       </div>
-      <button className="add-new-package-btn" onClick={toggleModal}>
+      <button
+        className="add-new-package-btn"
+        onClick={() => {
+          setIsAddPackageView(true);
+          setShowForm(false);
+          setShowProfile(false);
+        }}
+      >
         Add New Package
       </button>
 
@@ -432,12 +420,6 @@ const DeliveryOptions = ({
           onClose={closeModal}
           deliveryDetails={selectedDelivery}
           user={user}
-        />
-      )}
-      {isModalOpen && (
-        <Delivery
-          onClose={toggleModal}
-          addNewDelivery={(delivery) => addNewDelivery({ ...delivery })}
         />
       )}
     </div>
