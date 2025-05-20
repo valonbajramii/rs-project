@@ -29,6 +29,8 @@ const MobileFooter = ({ onFooterClick, activeIcon }) => {
       onFooterClick("form"); // Show the form
     } else if (icon === "icon2") {
       onFooterClick("options"); // Show delivery options
+    } else if (icon === "icon3") {
+      onFooterClick("notifications"); // Add this case
     } else if (icon === "icon4") {
       onFooterClick("profile"); // Navigate to profile
     }

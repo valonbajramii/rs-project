@@ -275,7 +275,6 @@
 
 import React, { useState, useEffect } from "react";
 import "./DeliveryOptions.css";
-import DeliveryInfoModal from "../../DeliveryInfoModal/DeliveryInfoModal";
 import HeartIcon from "../../../icons/Heart-icon.svg";
 import { v4 as uuidv4 } from "uuid";
 import audiImage from "../../../images/2025_audi_q7_4dr-suv_prestige_fq_oem_1_1600.avif";
@@ -288,6 +287,7 @@ const DeliveryOptions = ({
   setIsAddPackageView,
   setShowForm,
   setShowProfile,
+  setSelectedDelivery, // Add this new prop
 }) => {
   const initializeDeliveries = () => {
     const storedDeliveries = localStorage.getItem("deliveries");
@@ -324,34 +324,33 @@ const DeliveryOptions = ({
     return deliveries;
   };
 
-  const [showModal, setShowModal] = useState(false);
-  const [selectedDelivery, setSelectedDelivery] = useState(null);
-  const [deliveryOptionss, setDeliveryOptionss] =
-    useState(initializeDeliveries);
+  // // Remove modal-related states (showModal and selectedDelivery)
+  // const [deliveryOptionss, setDeliveryOptionss] =
+  //   useState(initializeDeliveries);
 
-  useEffect(() => {
-    localStorage.setItem("deliveries", JSON.stringify(deliveryOptionss));
-  }, [deliveryOptionss]);
+  // useEffect(() => {
+  //   localStorage.setItem("deliveries", JSON.stringify(deliveryOptionss));
+  // }, [deliveryOptionss]);
 
-  useEffect(() => {
-    const storedDeliveries = localStorage.getItem("deliveries");
-    if (storedDeliveries) {
-      const deliveries = JSON.parse(storedDeliveries).map((delivery) => ({
-        ...delivery,
-        requests: Array.isArray(delivery.requests) ? delivery.requests : [],
-      }));
-      setDeliveryOptionss(deliveries);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const storedDeliveries = localStorage.getItem("deliveries");
+  //   if (storedDeliveries) {
+  //     const deliveries = JSON.parse(storedDeliveries).map((delivery) => ({
+  //       ...delivery,
+  //       requests: Array.isArray(delivery.requests) ? delivery.requests : [],
+  //     }));
+  //     setDeliveryOptionss(deliveries);
+  //   }
+  // }, []);
 
+  // Simplified handler - just sets the selected delivery
   const handleIconClick = (option) => {
-    setSelectedDelivery(option);
-    setShowModal(true);
-  };
-
-  const closeModal = () => {
-    setShowModal(false);
-    setSelectedDelivery(null);
+    if (typeof setSelectedDelivery === "function") {
+      // Add this check
+      setSelectedDelivery(option);
+    } else {
+      console.error("setSelectedDelivery is not a function");
+    }
   };
 
   const isFavorite = (deliveryId) => {
@@ -364,7 +363,7 @@ const DeliveryOptions = ({
       <input className="delivery-option-input" placeholder="Search by City" />
       <div className="scrollable-container">
         <div className="dlivery-option-menu">
-          {deliveryOptionss.map((option, index) => (
+          {deliveryOptions.map((option, index) => (
             <div key={index} onClick={() => handleIconClick(option)}>
               <div className="delivery-option">
                 <img
@@ -414,14 +413,7 @@ const DeliveryOptions = ({
         Add New Package
       </button>
 
-      {showModal && selectedDelivery && (
-        <DeliveryInfoModal
-          show={showModal}
-          onClose={closeModal}
-          deliveryDetails={selectedDelivery}
-          user={user}
-        />
-      )}
+      {/* REMOVED the DeliveryInfoModal rendering here */}
     </div>
   );
 };

@@ -1,0 +1,48 @@
+.mobile-notifications-container {
+  padding: 20px;
+  background: white;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.mobile-notifications-header {
+  margin-bottom: 20px;
+}
+
+.mobile-notifications-header h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.mobile-notifications-header p {
+  margin: 5px 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.mobile-notification-item {
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.notification-header {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.notification-details {
+  flex: 1;
+}
+
+.notification-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.no-notifications {
+  text-align: center;
+  padding: 40px 0;
+  color: #666;
+}

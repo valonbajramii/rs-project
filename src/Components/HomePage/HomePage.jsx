@@ -26,6 +26,10 @@ import manageAcc from "../../icons/manageAccIcon.svg";
 import keyIcon from "../../icons/Key-icon.svg";
 import logOutIcon from "../../icons/logoutIcon.svg";
 import bellIcon from "../../icons/bell-fill.svg";
+import DeliveryInfoPanel from "../DeliveryInfoPanel/DeliveryInfoPanel";
+import MobileNotifications from "../MobileNotifications/MobileNotifications";
+import editIcon from "../../icons/edit.svg";
+import Chat from "../Chat/Chat";
 
 const HomePage = ({ user, setUser }) => {
   const navigate = useNavigate();
@@ -34,9 +38,21 @@ const HomePage = ({ user, setUser }) => {
 
   //request dropdown state
   const [isRequestsDropdownOpen, setIsRequestsDropdownOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [pendingRequests, setPendingRequests] = useState([]);
 
+  const [selectedDelivery, setSelectedDelivery] = useState(null);
+
   const [isAddPackageView, setIsAddPackageView] = useState(false);
+
+  //
+  // Add these state variables at the top of your HomePage component
+  // const [showChat, setShowChat] = useState(false);
+  // const [selectedChatContact, setSelectedChatContact] = useState(null);
+  // const [showChatView, setShowChatView] = useState(false);
+
+  const [selectedChatContact, setSelectedChatContact] = useState(null);
+  const [showChatView, setShowChatView] = useState(false);
 
   const [showProfile, setShowProfile] = useState(false);
   const [activeRequestId, setActiveRequestId] = useState(null);
@@ -279,6 +295,11 @@ const HomePage = ({ user, setUser }) => {
       if (delivery.id === deliveryId) {
         const updatedRequests = delivery.requests.map((request) => {
           if (request.id === requestId) {
+            // Add requester to chat contacts if accepting
+            if (action === "approve") {
+              const requesterUser = getRequesterInfo(request.requester);
+              addChatContact(requesterUser);
+            }
             return {
               ...request,
               status: action === "approve" ? "Approved" : "Declined",
@@ -293,7 +314,7 @@ const HomePage = ({ user, setUser }) => {
 
     setDeliveryOptions(updatedDeliveries);
     localStorage.setItem("deliveries", JSON.stringify(updatedDeliveries));
-    refreshRequests(); // Refresh the list
+    refreshRequests();
   };
 
   // Handler for profile click
@@ -376,6 +397,28 @@ const HomePage = ({ user, setUser }) => {
     setActiveIcon("options"); // Set 'options' as the active icon
   };
 
+  // Add this function to manage chat contacts
+  const addChatContact = (contact) => {
+    const storedContacts =
+      JSON.parse(localStorage.getItem("chatContacts")) || [];
+    const contactExists = storedContacts.some((c) => c.email === contact.email);
+
+    if (!contactExists) {
+      const updatedContacts = [...storedContacts, contact];
+      localStorage.setItem("chatContacts", JSON.stringify(updatedContacts));
+    }
+  };
+
+  // Update the messaging container click handler
+  const handleMessagingClick = () => {
+    setShowChatView(true);
+    setShowForm(false);
+    setIsAddPackageView(false);
+    setShowProfile(false);
+    setShowNotifications(false);
+    setActiveIcon("icon5");
+  };
+
   // const handleFooterClick = (view) => {
   //   if (view === "form") {
   //     setShowForm(true);
@@ -394,22 +437,44 @@ const HomePage = ({ user, setUser }) => {
       setShowForm(true);
       setIsAddPackageView(false);
       setShowProfile(false);
+      setShowNotifications(false);
+      setShowChatView(false);
       setActiveIcon("icon1");
     } else if (view === "options") {
       setShowForm(false);
       setIsAddPackageView(false);
       setShowProfile(false);
+      setShowNotifications(false);
+      setShowChatView(false);
       setActiveIcon("icon2");
     } else if (view === "add") {
       setShowForm(false);
       setIsAddPackageView(true);
       setShowProfile(false);
+      setShowNotifications(false);
+      setShowChatView(false);
       setActiveIcon("icon3");
     } else if (view === "profile") {
       setShowForm(false);
       setIsAddPackageView(false);
       setShowProfile(true);
+      setShowNotifications(false);
+      setShowChatView(false);
       setActiveIcon("icon4");
+    } else if (view === "notifications") {
+      setShowForm(false);
+      setIsAddPackageView(false);
+      setShowProfile(false);
+      setShowNotifications(true);
+      setShowChatView(false);
+      setActiveIcon("icon3");
+    } else if (view === "chat") {
+      setShowForm(false);
+      setIsAddPackageView(false);
+      setShowProfile(false);
+      setShowNotifications(false);
+      setShowChatView(true);
+      setActiveIcon("icon5");
     }
   };
 
@@ -509,7 +574,7 @@ const HomePage = ({ user, setUser }) => {
                               setActiveRequestId(request.requestId)
                             }
                           >
-                            <div className="request-header">
+                            <div className="request-content">
                               <div
                                 className="highlight-bar"
                                 style={{
@@ -534,34 +599,40 @@ const HomePage = ({ user, setUser }) => {
                                 </p>
                               </div>
                             </div>
-                            {/* <div className="request-actions">
-                              <button
-                                onClick={() => {
-                                  handleRequestAction(
-                                    request.deliveryId,
-                                    request.requestId,
-                                    "approve"
-                                  );
-                                  setIsRequestsDropdownOpen(false);
-                                }}
-                                className="approve-btn"
-                              >
-                                Approve
-                              </button>
-                              <button
-                                onClick={() => {
-                                  handleRequestAction(
-                                    request.deliveryId,
-                                    request.requestId,
-                                    "decline"
-                                  );
-                                  setIsRequestsDropdownOpen(false);
-                                }}
-                                className="decline-btn"
-                              >
-                                Decline
-                              </button>
-                            </div> */}
+
+                            {/* Only show buttons for the active request */}
+                            {activeRequestId === request.requestId && (
+                              <div className="request-actions">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRequestAction(
+                                      request.deliveryId,
+                                      request.requestId,
+                                      "approve"
+                                    );
+                                    setIsRequestsDropdownOpen(false);
+                                  }}
+                                  className="approve-btn"
+                                >
+                                  Accept
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRequestAction(
+                                      request.deliveryId,
+                                      request.requestId,
+                                      "decline"
+                                    );
+                                    setIsRequestsDropdownOpen(false);
+                                  }}
+                                  className="decline-btn"
+                                >
+                                  Decline
+                                </button>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -613,12 +684,12 @@ const HomePage = ({ user, setUser }) => {
                   <img src={keyIcon} />
                   Change Passwrod
                 </div>
-                <div className="dropdown-item" onClick={toggleProductModal}>
+                {/* <div className="dropdown-item" onClick={toggleProductModal}>
                   My Products
                 </div>
                 <div className="dropdown-item" onClick={toggleModal}>
                   Add Delivery
-                </div>
+                </div> */}
                 <div
                   className="dropdown-item"
                   // onClick={() => navigate("/profile")}
@@ -661,105 +732,154 @@ const HomePage = ({ user, setUser }) => {
           {!isMobile && <DeliveryMap />} {/* Always show map on desktop */}
           {isMobile && showForm && <DeliveryMap />}{" "}
           {/* Show map only in mobile when form is active */}
-          <div className="Components-container1">
-            {showProfile ? (
-              <Profile
-                user={user}
-                setUser={setUser}
-                isEmbedded={true}
-                setShowProfile={setShowProfile}
-              />
-            ) : isAddPackageView ? (
-              <Delivery
-                onClose={() => setIsAddPackageView(false)}
-                addNewDelivery={(delivery) => {
-                  addNewDelivery({ ...delivery });
-                  setIsAddPackageView(false);
-                  setShowForm(false); // Add this to ensure correct view state
-                }}
-              />
-            ) : (
-              <>
-                {!isMobile && (
-                  <div>
-                    <div className="Components-header">
-                      <div
-                        className="homepage-car-icon-container"
-                        onClick={showDeliveryForm}
-                        style={{ cursor: "pointer" }}
-                      >
-                        <img
-                          className={`homepage-car-icon ${
-                            activeIcon === "form" ? "active-icon" : ""
-                          }`}
-                          src={carIcon}
-                          alt="Car Icon"
-                        />
-                        <label
-                          className={`homepage-icons-label ${
-                            activeIcon === "form" ? "activelabel" : ""
-                          }`}
-                        >
-                          Direction
-                        </label>
-                        <hr
-                          className={`${
-                            activeIcon === "form"
-                              ? "Components-header-icons-hr"
-                              : ""
-                          }`}
-                        />
+          <div className="main-content-container">
+            <div className="Components-container1">
+              {
+                /* {showNotifications ? (
+                <MobileNotifications
+                  pendingRequests={pendingRequests}
+                  handleRequestAction={handleRequestAction}
+                  getRequesterInfo={getRequesterInfo}
+                  formatRelativeTime={formatRelativeTime}
+                />
+              ) :*/ showProfile ? (
+                  <Profile
+                    user={user}
+                    setUser={setUser}
+                    isEmbedded={true}
+                    setShowProfile={setShowProfile}
+                  />
+                ) : isAddPackageView ? (
+                  <Delivery
+                    onClose={() => setIsAddPackageView(false)}
+                    addNewDelivery={(delivery) => {
+                      addNewDelivery({ ...delivery });
+                      setIsAddPackageView(false);
+                      setShowForm(false);
+                    }}
+                  />
+                ) : showChatView ? (
+                  <Chat
+                    user={user}
+                    selectedContact={selectedChatContact}
+                    onClose={() => setShowChatView(false)}
+                  />
+                ) : (
+                  <>
+                    {!isMobile && (
+                      <div>
+                        <div className="Components-header">
+                          <div
+                            className="homepage-car-icon-container"
+                            onClick={showDeliveryForm}
+                            style={{ cursor: "pointer" }}
+                          >
+                            <img
+                              className={`homepage-car-icon ${
+                                activeIcon === "form" ? "active-icon" : ""
+                              }`}
+                              src={carIcon}
+                              alt="Car Icon"
+                            />
+                            <label
+                              className={`homepage-icons-label ${
+                                activeIcon === "form" ? "activelabel" : ""
+                              }`}
+                            >
+                              Direction
+                            </label>
+                            <hr
+                              className={`${
+                                activeIcon === "form"
+                                  ? "Components-header-icons-hr"
+                                  : ""
+                              }`}
+                            />
+                          </div>
+                          <div
+                            className="homepage-vector-icon-container"
+                            onClick={showDeliveryOptions}
+                            style={{ cursor: "pointer" }}
+                          >
+                            <img
+                              className={`vector-icon ${
+                                activeIcon === "options" ? "active-icon" : ""
+                              }`}
+                              src={Vector}
+                              alt="Vector Icon"
+                            />
+                            <label
+                              className={`homepage-icons-label ${
+                                activeIcon === "options" ? "activelabel" : ""
+                              }`}
+                            >
+                              Packages
+                            </label>
+                            <hr
+                              className={`${
+                                activeIcon === "options"
+                                  ? "Components-header-icons-hr"
+                                  : ""
+                              }`}
+                            />
+                          </div>
+                        </div>
+                        <hr className="header-hr" />
                       </div>
-                      <div
-                        className="homepage-vector-icon-container"
-                        onClick={showDeliveryOptions}
-                        style={{ cursor: "pointer" }}
-                      >
-                        <img
-                          className={`vector-icon ${
-                            activeIcon === "options" ? "active-icon" : ""
-                          }`}
-                          src={Vector}
-                          alt="Vector Icon"
-                        />
-                        <label
-                          className={`homepage-icons-label ${
-                            activeIcon === "options" ? "activelabel" : ""
-                          }`}
-                        >
-                          Packages
-                        </label>
-                        <hr
-                          className={`${
-                            activeIcon === "options"
-                              ? "Components-header-icons-hr"
-                              : ""
-                          }`}
-                        />
-                      </div>
-                    </div>
-                    <hr className="header-hr" />
-                  </div>
-                )}
+                    )}
 
-                <div className="Components-container2">
-                  {showForm ? (
-                    <DeliveryForm updateFilterCriteria={updateFilterCriteria} />
-                  ) : (
-                    <DeliveryOptions
-                      deliveryOptions={filteredOptions}
-                      user={user}
-                      toggleFavorite={toggleFavorite}
-                      favorites={favorites}
-                      setIsAddPackageView={setIsAddPackageView}
-                      setShowForm={setShowForm}
-                      setShowProfile={setShowProfile}
-                    />
-                  )}
-                </div>
-              </>
+                    <div className="Components-container2">
+                      {showForm ? (
+                        <DeliveryForm
+                          updateFilterCriteria={updateFilterCriteria}
+                        />
+                      ) : (
+                        <DeliveryOptions
+                          deliveryOptions={filteredOptions}
+                          user={user}
+                          toggleFavorite={toggleFavorite}
+                          favorites={favorites}
+                          setIsAddPackageView={setIsAddPackageView}
+                          setShowForm={setShowForm}
+                          setShowProfile={setShowProfile}
+                          setSelectedDelivery={setSelectedDelivery}
+                        />
+                      )}
+                    </div>
+                  </>
+                )
+              }
+            </div>
+            {/* Add the DeliveryInfoPanel */}
+            {selectedDelivery && (
+              <div
+                className={`delivery-info-panel ${
+                  selectedDelivery ? "open" : ""
+                }`}
+              >
+                <DeliveryInfoPanel
+                  deliveryDetails={selectedDelivery}
+                  user={user}
+                  onClose={() => setSelectedDelivery(null)}
+                />
+              </div>
             )}
           </div>
+        </div>
+        {/* {showChat && (
+          <Chat
+            user={user}
+            selectedContact={selectedChatContact}
+            onClose={() => setShowChat(false)}
+          />
+        )} */}
+        // Update the messaging container to include the onClick handler
+        <div className="messaging-container" onClick={handleMessagingClick}>
+          <div className="avatar-message-container">
+            <UserAvatar user={user} />
+            <p2>Messaging</p2>
+          </div>
+          <img src={editIcon} />
         </div>
       </div>
       {isMobile && (

@@ -37,6 +37,28 @@
   margin-left: 30px;
 }
 
+.main-content-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.delivery-info-panel {
+  width: 0;
+  overflow: hidden;
+  transition: width 0.3s ease;
+  background: white;
+  border-left: 1px solid #eee;
+  position: relative;
+}
+
+.delivery-info-panel.open {
+  width: 400px;
+  min-width: 400px;
+  overflow-y: auto;
+}
+
 .Components-container1 {
   display: flex;
   flex-direction: column;
@@ -282,11 +304,10 @@
 
 /* Request items */
 .homepage-request-item {
-  padding: 12px 12px 0px 0px;
+  padding: 12px 12px 12px 0px;
   border-bottom: 1px solid #f0f0f0;
-  display: flex;
   cursor: pointer;
-  position: relative; /* For absolute positioning of highlight bar */
+  position: relative;
   transition: background-color 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
@@ -319,28 +340,41 @@ homepage-request-item:hover {
   transition: background-color 0.2s ease;
 }
 
+.request-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
 .request-actions {
   display: flex;
   gap: 8px;
+  margin-left: 44px; /* Adjust this to align with the text */
+  padding-top: 8px;
 }
 
 .approve-btn,
 .decline-btn {
-  padding: 4px 8px;
+  padding: 8px 8px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 12px;
+  /* height: 30px; */
+  width: 100px;
 }
 
 .approve-btn {
-  background-color: #4caf50;
+  background-color: #3673e4;
   color: white;
 }
 
 .decline-btn {
-  background-color: #f44336;
-  color: white;
+  background-color: transparent;
+  color: #3673e4;
+  border: 1px solid;
+  border-color: #3673e4;
 }
 
 .request-dropdown-footer {
@@ -418,24 +452,38 @@ homepage-request-item:hover {
   margin-top: 8px;
 }
 
-.approve-btn,
-.decline-btn {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  font-size: 13px;
+.messaging-container {
+  position: relative;
+  /* bottom: 50px;
+  top: 650px; */
+  /* right: 20px; */
+  gap: 10px;
+  width: 335px;
+  height: 75px;
+  margin-top: 100px;
+  margin-left: 50px;
+  background-color: #ffffff;
+  border-radius: 10px 10px 0px 0px;
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
   cursor: pointer;
 }
 
-.approve-btn {
-  background-color: #4caf50;
-  color: white;
+.avatar-message-container {
+  display: flex;
+  align-items: center;
+  margin-left: 15px;
+  margin-right: 110px;
 }
 
-.decline-btn {
-  background-color: #f44336;
-  color: white;
-}
+/* Add a chat icon inside */
+/* .messaging-container::after {
+  content: "💬";
+  font-size: 24px;
+} */
 
 @media (max-width: 480px) {
   .Homepage-container {
@@ -466,6 +514,22 @@ homepage-request-item:hover {
   /* No margin-top when delivery options are active on mobile */
   .delivery-view .Components-container {
     margin-top: 0;
+  }
+
+  .delivery-info-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+
+  .delivery-info-panel.open {
+    transform: translateX(0);
+    width: 100%;
   }
 
   .Components-container1 {
