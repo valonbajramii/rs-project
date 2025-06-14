@@ -143,12 +143,21 @@ import React, { useState, useEffect } from "react";
 import "./Chat.css";
 import UserAvatar from "../UserAvatar/UserAvatar";
 import chevronLeft from "../../images/chevron-left.svg";
+import { useMediaQuery } from "react-responsive";
 
-const Chat = ({ user, selectedContact, onClose }) => {
+const Chat = ({
+  user,
+  selectedContact,
+  onClose,
+  setShowFooter = () => {},
+  setIsInMessageView = () => {},
+}) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [contacts, setContacts] = useState([]);
   const [activeContact, setActiveContact] = useState(null);
+  const [showMessageView, setShowMessageView] = useState(false);
+  const isMobile = useMediaQuery({ maxWidth: 480 });
 
   // Load contacts and messages from localStorage
   useEffect(() => {
@@ -163,8 +172,11 @@ const Chat = ({ user, selectedContact, onClose }) => {
           localStorage.getItem(`chatMessages_${selectedContact.email}`)
         ) || [];
       setMessages(storedMessages);
+      if (isMobile) {
+        setShowMessageView(true);
+      }
     }
-  }, [selectedContact]);
+  }, [selectedContact, isMobile, setShowFooter]);
 
   const handleSendMessage = () => {
     if (!newMessage.trim() || !activeContact) return;
@@ -185,29 +197,99 @@ const Chat = ({ user, selectedContact, onClose }) => {
     setNewMessage("");
   };
 
+  const handleContactClick = (contact) => {
+    setActiveContact(contact);
+    const storedMessages =
+      JSON.parse(localStorage.getItem(`chatMessages_${contact.email}`)) || [];
+    setMessages(storedMessages);
+    if (isMobile) {
+      setShowMessageView(true);
+      setIsInMessageView(true); // This will hide the footer
+    }
+  };
+
+  const handleBackToContacts = () => {
+    setShowMessageView(false);
+    setIsInMessageView(false); // This will show the footer again
+  };
+
+  // And in the onClose handler for the back button in the header:
+  const handleCloseChat = () => {
+    onClose();
+    setIsInMessageView(false); // Ensure footer shows when closing chat
+  };
+
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
+  // Mobile message view (full screen)
+  if (isMobile && showMessageView && activeContact) {
+    return (
+      <div className="mobile-message-view">
+        <div className="message-view-header">
+          <button onClick={handleBackToContacts} className="back-button">
+            <img src={chevronLeft} className="chevron-left" alt="Back" />
+          </button>
+          <div className="contact-info-header">
+            <UserAvatar user={activeContact} />
+            <span className="contact-name">{activeContact.name}</span>
+          </div>
+        </div>
+
+        <div className="mobile-messages-container">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`message ${
+                message.sender === user.email ? "sent" : "received"
+              }`}
+            >
+              <div className="message-content">
+                <p>{message.text}</p>
+                <span className="message-time">
+                  {formatTime(message.timestamp)}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mobile-message-input-container">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="Type your message..."
+            className="message-input"
+            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+          />
+          <button onClick={handleSendMessage} className="send-button">
+            Send
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Default view (contacts list + messages side by side, or mobile contacts list)
   return (
-    <div className="chat-form-container">
+    <div className={`chat-form-container ${isMobile ? "mobile-chat" : ""}`}>
       <div className="chat-modal-content">
         <div className="chat-container">
           <div className="chat-content">
-            <div className="back-button-and-text">
-              {/* <button className="back-button" onClick={onClose}>
-                ←
-              </button>
-              Chat */}
-              <img
-                src={chevronLeft}
-                className="chevron-left"
-                alt="Back"
-                onClick={onClose}
-              />
-              <h2 className="chat-h2">Chat</h2>
-            </div>
+            {!isMobile && (
+              <div className="back-button-and-text">
+                <img
+                  src={chevronLeft}
+                  className="chevron-left"
+                  alt="Back"
+                  onClick={onClose}
+                />
+                <h2 className="chat-h2">Chat</h2>
+              </div>
+            )}
 
             <div className="chat-contacts-container">
               <div className="search-section">
@@ -225,14 +307,7 @@ const Chat = ({ user, selectedContact, onClose }) => {
                     className={`contact-item ${
                       activeContact?.email === contact.email ? "active" : ""
                     }`}
-                    onClick={() => {
-                      setActiveContact(contact);
-                      const storedMessages =
-                        JSON.parse(
-                          localStorage.getItem(`chatMessages_${contact.email}`)
-                        ) || [];
-                      setMessages(storedMessages);
-                    }}
+                    onClick={() => handleContactClick(contact)}
                   >
                     <UserAvatar user={contact} />
                     <div className="contact-info">
@@ -247,57 +322,61 @@ const Chat = ({ user, selectedContact, onClose }) => {
             </div>
           </div>
 
-          <div className="vertical-divider"></div>
+          {!isMobile && <div className="vertical-divider"></div>}
 
-          <div className="chat-messages-container">
-            {activeContact ? (
-              <>
-                <div className="message-header">
-                  <UserAvatar user={activeContact} />
-                  <div className="contact-details">
-                    <span className="contact-name">{activeContact.name}</span>
-                    <span className="contact-status">Online</span>
-                  </div>
-                </div>
-
-                <div className="messages-container">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`message ${
-                        message.sender === user.email ? "sent" : "received"
-                      }`}
-                    >
-                      <div className="message-content">
-                        <p>{message.text}</p>
-                        <span className="message-time">
-                          {formatTime(message.timestamp)}
-                        </span>
-                      </div>
+          {!isMobile && (
+            <div className="chat-messages-container">
+              {activeContact ? (
+                <>
+                  <div className="message-header">
+                    <UserAvatar user={activeContact} />
+                    <div className="contact-details">
+                      <span className="contact-name">{activeContact.name}</span>
+                      <span className="contact-status">Online</span>
                     </div>
-                  ))}
-                </div>
+                  </div>
 
-                <div className="message-input-container">
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type your message..."
-                    className="message-input"
-                    onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                  />
-                  <button onClick={handleSendMessage} className="send-button">
-                    Send
-                  </button>
+                  <div className="messages-container">
+                    {messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`message ${
+                          message.sender === user.email ? "sent" : "received"
+                        }`}
+                      >
+                        <div className="message-content">
+                          <p>{message.text}</p>
+                          <span className="message-time">
+                            {formatTime(message.timestamp)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="message-input-container">
+                    <input
+                      type="text"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="Type your message..."
+                      className="message-input"
+                      onKeyPress={(e) =>
+                        e.key === "Enter" && handleSendMessage()
+                      }
+                    />
+                    <button onClick={handleSendMessage} className="send-button">
+                      Send
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="no-contact-selected">
+                  <p>Select a contact to start chatting</p>
                 </div>
-              </>
-            ) : (
-              <div className="no-contact-selected">
-                <p>Select a contact to start chatting</p>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

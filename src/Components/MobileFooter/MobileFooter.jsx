@@ -30,7 +30,7 @@ const MobileFooter = ({ onFooterClick, activeIcon }) => {
     } else if (icon === "icon2") {
       onFooterClick("options"); // Show delivery options
     } else if (icon === "icon3") {
-      onFooterClick("notifications"); // Add this case
+      onFooterClick("messages"); // Add this case
     } else if (icon === "icon4") {
       onFooterClick("profile"); // Navigate to profile
     }

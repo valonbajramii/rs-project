@@ -51,8 +51,13 @@ const HomePage = ({ user, setUser }) => {
   // const [selectedChatContact, setSelectedChatContact] = useState(null);
   // const [showChatView, setShowChatView] = useState(false);
 
+  const [activeMessagesTab, setActiveMessagesTab] = useState("notifications"); // 'notifications' or 'chat'
+
   const [selectedChatContact, setSelectedChatContact] = useState(null);
   const [showChatView, setShowChatView] = useState(false);
+
+  const [showFooter, setShowFooter] = useState(true);
+  const [isInMessageView, setIsInMessageView] = useState(false); // Add this new state
 
   const [showProfile, setShowProfile] = useState(false);
   const [activeRequestId, setActiveRequestId] = useState(null);
@@ -439,6 +444,7 @@ const HomePage = ({ user, setUser }) => {
       setShowProfile(false);
       setShowNotifications(false);
       setShowChatView(false);
+      setIsInMessageView(false); // Add this
       setActiveIcon("icon1");
     } else if (view === "options") {
       setShowForm(false);
@@ -446,6 +452,7 @@ const HomePage = ({ user, setUser }) => {
       setShowProfile(false);
       setShowNotifications(false);
       setShowChatView(false);
+      setIsInMessageView(false); // Add this
       setActiveIcon("icon2");
     } else if (view === "add") {
       setShowForm(false);
@@ -453,6 +460,7 @@ const HomePage = ({ user, setUser }) => {
       setShowProfile(false);
       setShowNotifications(false);
       setShowChatView(false);
+      setIsInMessageView(false); // Add this
       setActiveIcon("icon3");
     } else if (view === "profile") {
       setShowForm(false);
@@ -460,20 +468,23 @@ const HomePage = ({ user, setUser }) => {
       setShowProfile(true);
       setShowNotifications(false);
       setShowChatView(false);
+      setIsInMessageView(false); // Add this
       setActiveIcon("icon4");
-    } else if (view === "notifications") {
+    } else if (view === "messages") {
       setShowForm(false);
       setIsAddPackageView(false);
       setShowProfile(false);
       setShowNotifications(true);
-      setShowChatView(false);
-      setActiveIcon("icon3");
+      setShowChatView(true);
+      setIsInMessageView(false); // Add this
+      setActiveIcon("icon5");
     } else if (view === "chat") {
       setShowForm(false);
       setIsAddPackageView(false);
       setShowProfile(false);
       setShowNotifications(false);
       setShowChatView(true);
+      setIsInMessageView(false); // Add this
       setActiveIcon("icon5");
     }
   };
@@ -727,6 +738,60 @@ const HomePage = ({ user, setUser }) => {
           </div>
         </header>
       )}
+      {isMobile && showNotifications && (
+        <div className="mobile-messages-view">
+          <div className="mobile-messages-tabs">
+            <button
+              className={`mobile-tab ${
+                activeMessagesTab === "notifications" ? "active-tab" : ""
+              }`}
+              onClick={() => setActiveMessagesTab("notifications")}
+            >
+              Notifications
+              {pendingRequests.length > 0 && (
+                <span className="notification-badge">
+                  {pendingRequests.length}
+                </span>
+              )}
+            </button>
+            <button
+              className={`mobile-tab ${
+                activeMessagesTab === "chat" ? "active-tab" : ""
+              }`}
+              onClick={() => setActiveMessagesTab("chat")}
+            >
+              Chat
+            </button>
+          </div>
+
+          <div className="mobile-messages-content">
+            {activeMessagesTab === "notifications" ? (
+              <MobileNotifications
+                pendingRequests={pendingRequests}
+                handleRequestAction={handleRequestAction}
+                getRequesterInfo={getRequesterInfo}
+                formatRelativeTime={formatRelativeTime}
+                deliveryOptions={deliveryOptions}
+              />
+            ) : (
+              <Chat
+                user={user}
+                selectedContact={selectedChatContact}
+                onClose={() => setShowChatView(false)}
+                setShowFooter={setShowFooter}
+              />
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* {isMobile && (
+        <MobileFooter
+          className="MobileFooter"
+          onFooterClick={handleFooterClick}
+          activeIcon={activeIcon}
+        />
+      )} */}
       <div className={`${showForm ? "form-view" : "delivery-view"}`}>
         <div className="Components-container">
           {!isMobile && <DeliveryMap />} {/* Always show map on desktop */}
@@ -762,7 +827,13 @@ const HomePage = ({ user, setUser }) => {
                   <Chat
                     user={user}
                     selectedContact={selectedChatContact}
-                    onClose={() => setShowChatView(false)}
+                    onClose={() => {
+                      setShowChatView(false);
+                      setIsInMessageView(false);
+                      setShowFooter(true);
+                    }}
+                    setShowFooter={setShowFooter}
+                    setIsInMessageView={setIsInMessageView} // Pass this down
                   />
                 ) : (
                   <>
@@ -873,18 +944,22 @@ const HomePage = ({ user, setUser }) => {
             onClose={() => setShowChat(false)}
           />
         )} */}
-        // Update the messaging container to include the onClick handler
-        <div className="messaging-container" onClick={handleMessagingClick}>
-          <div className="avatar-message-container">
-            <UserAvatar user={user} />
-            <p2>Messaging</p2>
+
+        {!isMobile && (
+          <div className="messaging-container" onClick={handleMessagingClick}>
+            <div className="avatar-message-container">
+              <UserAvatar user={user} />
+              <p2>Messaging</p2>
+            </div>
+            <img src={editIcon} />
           </div>
-          <img src={editIcon} />
-        </div>
+        )}
       </div>
       {isMobile && (
         <MobileFooter
-          className="MobileFooter"
+          className={`mobile-footer-container ${
+            isInMessageView ? "hidden" : ""
+          }`}
           onFooterClick={handleFooterClick}
           activeIcon={activeIcon}
         />

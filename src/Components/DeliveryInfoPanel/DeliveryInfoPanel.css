@@ -17,7 +17,7 @@
   border: none;
   font-size: 20px;
   cursor: pointer;
-  z-index: 10;
+  /* z-index: 10; */
 }
 
 /* Image gallery styles */
@@ -81,7 +81,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 10;
+  /* z-index: 10; */
   opacity: 0.7;
   transition: opacity 0.3s ease;
   border-radius: 50%;

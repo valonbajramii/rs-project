@@ -485,6 +485,161 @@ homepage-request-item:hover {
   font-size: 24px;
 } */
 
+/* Mobile Messages View */
+.mobile-messages-view {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 80px; /* Adjust based on footer height */
+  background: white;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-messages-tabs {
+  display: flex;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+}
+
+.mobile-tab {
+  flex: 1;
+  padding: 15px;
+  text-align: center;
+  background: none;
+  border: none;
+  font-size: 14px;
+  position: relative;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.mobile-tab.active-tab {
+  color: #3673e4;
+  font-weight: 500;
+}
+
+.mobile-tab.active-tab::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #3673e4;
+}
+
+.notification-badge {
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.mobile-messages-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Mobile Notifications specific styles */
+.mobile-notifications-container {
+  padding: 15px;
+}
+
+.mobile-notifications-header {
+  margin-bottom: 15px;
+}
+
+.mobile-notifications-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.mobile-notifications-header p {
+  margin: 5px 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.mobile-notification-item {
+  padding: 15px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.notification-header {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.notification-details {
+  flex: 1;
+}
+
+.requester-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.requester-name {
+  font-weight: 500;
+  margin: 0;
+}
+
+.request-time {
+  color: #888;
+  margin: 0;
+}
+
+.delivery-name {
+  color: #666;
+  margin: 0;
+  font-size: 14px;
+}
+
+.notification-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.approve-btn,
+.decline-btn {
+  padding: 8px 15px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.approve-btn {
+  background-color: #3673e4;
+  color: white;
+  border: none;
+}
+
+.decline-btn {
+  background-color: white;
+  color: #3673e4;
+  border: 1px solid #3673e4;
+}
+
+.no-notifications {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
 @media (max-width: 480px) {
   .Homepage-container {
     display: flex;
