@@ -152,69 +152,70 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Register.css";
 import samewayLogo from "../../logo/sameway_logo.png";
+import { authApi } from "../../API/api";
 
 const Register = ({ onRegister }) => {
   const [formData, setFormData] = useState({
-    name: "",
+    fullName: "",
     email: "",
-    mobileNumber: "",
     dateOfBirth: "",
     password: "",
     confirmPassword: "",
-    acceptTerms: false,
   });
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Perform validation here
+
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match!");
       return;
     }
-    // Call the onRegister function passed as a prop
-    const userData = {
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-      dateOfBirth: formData.dateOfBirth,
-      // Initialize empty profile fields
-      mobileNumber: "",
-      address: "",
-      city: "",
-      state: "",
-      zip: "",
-      idDocument: null,
-      drivingLicense: null,
-      profileImage: null,
-    };
-    onRegister(userData);
-    navigate("/homepage");
+
+    try {
+      const response = await authApi.basicRegister({
+        fullName: formData.fullName,
+        email: formData.email,
+        dateOfBirth: formData.dateOfBirth,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+      });
+
+      // Store token and redirect to profile completion
+      localStorage.setItem("token", response.token);
+      navigate("/complete-profile"); // <-- This is correctly placed
+    } catch (error) {
+      console.error("Registration error:", error);
+      setError(error.message || "Registration failed. Please try again.");
+    }
   };
 
   return (
     <div className="register-container">
-      <img className="register-sameway-logo" src={samewayLogo} />
+      <img
+        className="register-sameway-logo"
+        src={samewayLogo}
+        alt="SameWay Logo"
+      />
       <h2 className="register-h2">Sign up</h2>
+      {error && <div className="error-message">{error}</div>}
       <div className="register-content-container">
         <form className="register-input-container" onSubmit={handleSubmit}>
           <div className="register-input-container">
-            <label className="register-label" htmlFor="name">
-              Name/Surname
+            <label className="register-label" htmlFor="fullName">
+              Full Name
             </label>
             <input
               className="register-input"
-              id="name"
-              name="name"
-              value={formData.name}
+              id="fullName"
+              name="fullName"
+              value={formData.fullName}
               onChange={handleChange}
               required
             />
@@ -234,19 +235,6 @@ const Register = ({ onRegister }) => {
               required
             />
           </div>
-
-          {/* <div className="input-container">
-            <label className="register-label" htmlFor="mobileNumber">
-              Mobile Number
-            </label>
-            <input
-              className="register-input"
-              id="mobileNumber"
-              name="mobileNumber"
-              value={formData.mobileNumber}
-              onChange={handleChange}
-            />
-          </div> */}
 
           <div className="register-input-container">
             <label className="register-label" htmlFor="dateOfBirth">
@@ -292,19 +280,7 @@ const Register = ({ onRegister }) => {
               required
             />
           </div>
-          {/* <div className="checkbox-container">
-            <input
-              type="checkbox"
-              id="accept-terms"
-              className="checkbox"
-              name="acceptTerms"
-              checked={formData.acceptTerms}
-              onChange={handleChange}
-            />
-            <label htmlFor="accept-terms" className="checkbox-label">
-              Accept AGB
-            </label>
-          </div> */}
+
           <div className="button-container">
             <button className="register-button" type="submit">
               Register Account

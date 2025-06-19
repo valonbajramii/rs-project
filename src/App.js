@@ -172,83 +172,96 @@ import HomePage from "./Components/HomePage/HomePage";
 import Delivery from "./Components/Delivery/Delivery";
 import ResetPassword from "./Pages/ResetPassword/ResetPassword";
 import NewPassword from "./Pages/NewPassword/NewPassword";
+import CompleteProfile from "./Pages/CompleteProfile/CompleteProfile";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { authApi } from "./API/api";
 
 function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    // Check for token and validate it
+    const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
+
+    if (token && storedUser) {
+      // You might want to add token validation here
       setUser(JSON.parse(storedUser));
     }
   }, []);
 
-  const handleRegister = (userData) => {
-    // Save user data to localStorage
-    const existingUsers = JSON.parse(localStorage.getItem("users")) || [];
-    existingUsers.push(userData);
-    localStorage.setItem("users", JSON.stringify(existingUsers));
-    setUser(userData);
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
   };
-
-  const requireAddress = !user?.address; // Check if the user has provided an address
 
   return (
     <div className="App">
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" />} />
-          <Route path="/login" element={<Login setUser={setUser} />} />
+          <Route
+            path="/"
+            element={<Navigate to={user ? "/homepage" : "/login"} />}
+          />
+          <Route
+            path="/login"
+            element={
+              user ? <Navigate to="/homepage" /> : <Login setUser={setUser} />
+            }
+          />
           <Route
             path="/register"
-            element={<Register onRegister={handleRegister} />}
+            element={user ? <Navigate to="/homepage" /> : <Register />}
           />
+
           <Route
             path="/profile"
             element={
               user ? (
-                <Profile user={user} setUser={setUser} />
+                <Profile user={user} onLogout={handleLogout} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+
+          <Route
+            path="/delivery"
+            element={user ? <Delivery user={user} /> : <Navigate to="/login" />}
+          />
+
+          <Route
+            path="/address"
+            element={user ? <Address user={user} /> : <Navigate to="/login" />}
+          />
+
+          <Route
+            path="/homepage"
+            element={
+              user ? (
+                <HomePage user={user} onLogout={handleLogout} />
               ) : (
                 <Navigate to="/login" />
               )
             }
           />
           <Route
-            path="/delivery"
+            path="/complete-profile"
             element={
               user ? (
-                requireAddress ? (
-                  <Navigate to="/address" />
+                user.IsProfileComplete ? (
+                  <Navigate to="/homepage" />
                 ) : (
-                  <Delivery />
+                  <CompleteProfile user={user} setUser={setUser} />
                 )
               ) : (
                 <Navigate to="/login" />
               )
             }
           />
-          <Route
-            path="/address"
-            element={
-              user ? (
-                <Address user={user} setUser={setUser} />
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
-          />
-          <Route
-            path="/homepage"
-            element={
-              user ? (
-                <HomePage user={user} setUser={setUser} />
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
-          />
+
           <Route path="/resetpassword" element={<ResetPassword />} />
           <Route path="/newpassword" element={<NewPassword />} />
         </Routes>

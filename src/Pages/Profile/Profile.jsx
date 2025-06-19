@@ -375,7 +375,7 @@
 
 // export default Profile;
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Profile.css";
 import PersonFill from "../../icons/person-fill.svg";
 import ShieldFill from "../../icons/shield-fill.svg";
@@ -393,10 +393,9 @@ import MobileFooter from "../../Components/MobileFooter/MobileFooter";
 
 const Profile = ({ user, setUser, setShowProfile }) => {
   const isMobile = useMediaQuery({ maxWidth: 480 });
-  const [activeIcon, setActiveIcon] = useState("icon4"); // Default to profile icon
+  const [activeIcon, setActiveIcon] = useState("icon4");
   const [isModalVisible, setModalVisible] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
-  const [isProfileComplete, setIsProfileComplete] = useState(false);
   const [profileData, setProfileData] = useState({
     mobileNumber: user.mobileNumber || "",
     address: user.address || "",
@@ -409,6 +408,13 @@ const Profile = ({ user, setUser, setShowProfile }) => {
   });
 
   const navigate = useNavigate();
+
+  // Redirect to complete-profile if profile isn't complete
+  useEffect(() => {
+    if (user && !user.IsProfileComplete) {
+      navigate("/complete-profile");
+    }
+  }, [user, navigate]);
 
   const handleHomePageClick = () => {
     navigate("/homepage");
@@ -424,7 +430,6 @@ const Profile = ({ user, setUser, setShowProfile }) => {
       navigate("/homepage", { state: { showForm: false } });
     } else if (section === "profile") {
       setActiveIcon("icon4");
-      // Already on profile page
     }
   };
 
@@ -455,6 +460,7 @@ const Profile = ({ user, setUser, setShowProfile }) => {
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
     navigate("/login");
   };
 
@@ -476,17 +482,34 @@ const Profile = ({ user, setUser, setShowProfile }) => {
     }
   };
 
-  const handleConfirm = () => {
-    const updatedUser = {
-      ...user,
-      ...profileData,
-      profileImage: uploadedImage || user.profileImage,
-    };
+  const handleSave = async () => {
+    try {
+      // Call your backend API to update the profile
+      const response = await fetch("/api/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          ...profileData,
+          profileImage: uploadedImage || user.profileImage,
+        }),
+      });
 
-    setUser(updatedUser);
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-    alert("Profile updated successfully!");
-    setIsProfileComplete(true);
+      if (!response.ok) throw new Error("Failed to update profile");
+
+      const updatedUser = await response.json();
+
+      // Update user state and local storage
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Profile update error:", error);
+      alert("Error updating profile. Please try again.");
+    }
   };
 
   return (
@@ -518,7 +541,7 @@ const Profile = ({ user, setUser, setShowProfile }) => {
                   <img className="camera-icon" src={cameraIcon} alt="Upload" />
                 </label>
                 <label htmlFor="file-input" className="profile-upload-label">
-                  Upload Cover Photo
+                  Upload Profile Photo
                 </label>
               </>
             ) : (
@@ -640,7 +663,7 @@ const Profile = ({ user, setUser, setShowProfile }) => {
                     className="paperclip-icon"
                   />
                   <span className="file-upload-placeholder">
-                    {profileData.idDocument ? "ID Uploaded" : "Upload ID"}
+                    {profileData.idDocument ? "ID Uploaded" : "Update ID"}
                   </span>
                 </label>
               </div>
@@ -662,48 +685,24 @@ const Profile = ({ user, setUser, setShowProfile }) => {
                   <span className="file-upload-placeholder">
                     {profileData.drivingLicense
                       ? "DL Uploaded"
-                      : "Driving License"}
+                      : "Update Driving License"}
                   </span>
                 </label>
               </div>
             </div>
 
-            {isProfileComplete ? (
+            <div className="profile-actions">
+              <button className="profile-save-button" onClick={handleSave}>
+                Save Changes
+              </button>
               <button className="profile-logout-button" onClick={handleLogout}>
-                {/* <img className="logout-icon" src={LogoutIcon} alt="Log out" /> */}
                 Log out
               </button>
-            ) : (
-              <button
-                className="profile-confirm-button"
-                onClick={handleConfirm}
-              >
-                Confirm
-              </button>
-            )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* {isModalVisible && (
-        <PersonalInfoModal isVisible={isModalVisible} onClose={closeModal}>
-          <h2 className="personal-info-h2">
-            <img className="person-icon-modal" src={PersonFill} alt="icon" />
-            Personal Information
-          </h2>
-          <p>Legal name: {user.name}</p>
-          <p>Birthday: {user.dateOfBirth}</p>
-          <p>Email: {user.email}</p>
-          <p>Mobile: {user.mobileNumber}</p>
-          <h2 className="address-info-h2">
-            <img className="geoalt-icon" src={GeoaltIcon} alt="icon" />
-            Address Information
-          </h2>
-          <p>Street & Nr: {user.address}</p>
-          <p>ZIP Code: {user.zip}</p>
-          <p> State: {user.state}</p>
-        </PersonalInfoModal>
-      )} */}
       {isMobile && (
         <MobileFooter
           onFooterClick={handleFooterClick}

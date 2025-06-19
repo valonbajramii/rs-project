@@ -361,6 +361,31 @@
   font-weight: bold;
 }
 
+/* Add these new styles to Profile.css */
+.profile-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.profile-save-button {
+  flex: 1;
+  padding: 12px;
+  background-color: #3673e4;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.profile-save-button:hover {
+  background-color: #2a62c7;
+}
+
 @media (max-width: 485px) {
   .profile-main-container {
     width: 100%; /* Full width on mobile */
@@ -437,5 +462,10 @@
     border-radius: 10px;
     font-size: 18px;
     font-weight: 600;
+  }
+
+  .profile-actions {
+    flex-direction: column;
+    gap: 15px;
   }
 }

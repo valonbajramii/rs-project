@@ -28,34 +28,46 @@ import React, { useState } from "react";
 import "./Login.css";
 import { Link, useNavigate } from "react-router-dom";
 import samewayLogo from "../../logo/sameway_logo.png";
+import { authApi } from "../../API/api";
 
 const Login = ({ setUser }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    // Retrieve stored users from localStorage
-    const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
+  const handleLogin = async () => {
+    try {
+      const response = await authApi.login({ email, password });
 
-    // Find user with matching email and password
-    const matchedUser = storedUsers.find(
-      (user) => user.email === email && user.password === password
-    );
+      // Store the token in localStorage
+      localStorage.setItem("token", response.token);
 
-    if (matchedUser) {
-      // If user is found, set the user in state and navigate to profile
-      setUser(matchedUser);
+      // Store user data
+      const userData = {
+        email,
+        token: response.token,
+      };
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      // Update user state
+      setUser(userData);
+
       navigate("/homepage");
-    } else {
-      alert("Invalid email or password!"); // Show error if no matching user is found
+    } catch (error) {
+      setError("Invalid email or password. Please try again.");
     }
   };
 
   return (
     <div className="container">
-      <img className="login-sameway-logo" src={samewayLogo} />
+      <img
+        className="login-sameway-logo"
+        src={samewayLogo}
+        alt="SameWay Logo"
+      />
       <h2 className="login-h2">Login</h2>
+      {error && <div className="error-message">{error}</div>}
       <div className="content-container">
         <div className="input-container">
           <div className="email-input-container">
@@ -66,7 +78,6 @@ const Login = ({ setUser }) => {
               className="input"
               id="email"
               type="email"
-              // placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -79,7 +90,6 @@ const Login = ({ setUser }) => {
               className="input"
               id="password"
               type="password"
-              // placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
