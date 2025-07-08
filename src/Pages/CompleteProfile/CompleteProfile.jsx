@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./CompleteProfile.css";
 import { useNavigate } from "react-router-dom";
 import paperReplice from "../../icons/paperclip.svg";
+import { authApi } from "../../API/api";
 
 const CompleteProfile = ({ user, setUser }) => {
   const navigate = useNavigate();
@@ -64,29 +65,24 @@ const CompleteProfile = ({ user, setUser }) => {
     setIsSubmitting(true);
 
     try {
-      // Call your backend API to complete the profile
-      const response = await fetch("/api/auth/complete-profile", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(profileData),
-      });
+      const formData = new FormData();
+      formData.append("StreetAddress", profileData.address);
+      formData.append("City", profileData.city);
+      formData.append("State", profileData.state);
+      formData.append("ZipCode", profileData.zip);
+      formData.append("MobileNumber", profileData.mobileNumber);
+      formData.append("IdDocument", profileData.idDocument);
+      formData.append("DrivingLicense", profileData.drivingLicense);
 
-      if (!response.ok) throw new Error("Failed to complete profile");
+      const response = await authApi.completeProfile(formData);
 
-      const updatedUser = await response.json();
+      setUser(response.user);
+      localStorage.setItem("user", JSON.stringify(response.user));
 
-      // Update user state and local storage
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-
-      // Redirect to homepage
       navigate("/homepage");
     } catch (error) {
       console.error("Profile completion error:", error);
-      alert("Error completing profile. Please try again.");
+      alert(error.message || "Error completing profile. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

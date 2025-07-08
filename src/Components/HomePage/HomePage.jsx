@@ -31,7 +31,7 @@ import MobileNotifications from "../MobileNotifications/MobileNotifications";
 import editIcon from "../../icons/edit.svg";
 import Chat from "../Chat/Chat";
 
-const HomePage = ({ user, setUser }) => {
+const HomePage = ({ user, setUser, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation(); // Get the location object from React Router
   const isMobile = useMediaQuery({ maxWidth: 480 });
@@ -378,7 +378,8 @@ const HomePage = ({ user, setUser }) => {
   };
 
   const handleLogout = () => {
-    setUser(null);
+    // setUser(null);
+    onLogout(null);
     localStorage.removeItem("user");
     navigate("/login");
   };

@@ -48,9 +48,14 @@ export const authApi = {
   },
 
   // Add this new method for complete profile
-  completeProfile: async (profileData) => {
+  completeProfile: async (formData) => {
     try {
-      const response = await api.post("/auth/complete-profile", profileData);
+      const response = await api.post("/auth/complete-profile", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
