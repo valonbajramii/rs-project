@@ -66,6 +66,30 @@
   position: relative;
 }
 
+.spinner-border {
+  vertical-align: middle;
+}
+
+.complete-profile-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* .complete-profile-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+} */
+
+.alert-danger {
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+}
+
 .hidden-file-input {
   display: none;
 }
@@ -77,6 +101,10 @@
   border: 1px dashed #ddd;
   border-radius: 5px;
   cursor: pointer;
+}
+
+.file-upload-label:hover {
+  opacity: 0.8;
 }
 
 .paperclip-icon {
@@ -95,11 +123,6 @@
   font-size: 16px;
   cursor: pointer;
   margin-top: 10px;
-}
-
-.complete-profile-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
 }
 
 .error {

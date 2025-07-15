@@ -275,24 +275,24 @@
   font-weight: 600;
   color: white;
 }
-
+/* ///////////////////////////////////////// */
 /* File Upload Styling */
-.file-upload-container {
+.profile-file-upload-container {
   display: flex;
   gap: 15px;
   width: 100%; /* Ensure container takes full width */
 }
 
-.file-upload-input {
+.profile-file-upload-input {
   position: relative;
   width: 100%; /* Full width for each upload container */
 }
 
-.hidden-file-input {
+.profile-hidden-file-input {
   display: none;
 }
 
-.file-upload-label {
+.profile-file-upload-label {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -306,22 +306,22 @@
   box-sizing: border-box; /* Include padding in width calculation */
 }
 
-.file-upload-label:hover {
+.profile-file-upload-label:hover {
   border-color: #888;
 }
 
-.paperclip-icon {
+.profile-paperclip-icon {
   width: 16px;
   height: 16px;
 }
 
-.file-upload-placeholder {
+.profile-file-upload-placeholder {
   color: #666;
   font-size: 14px;
   flex-grow: 1; /* Allow placeholder to take available space */
 }
 
-.address-form {
+.profile-address-form {
   display: flex;
   gap: 10px;
   width: 100%;

@@ -29,12 +29,34 @@ api.interceptors.request.use((config) => {
 // Auth API
 export const authApi = {
   basicRegister: async (userData) => {
-    // Add this method
     try {
-      const response = await api.post("/auth/basic-register", userData);
+      const response = await api.post(
+        "/auth/basic-register",
+        {
+          FullName: userData.FullName,
+          Email: userData.Email,
+          DateOfBirth: userData.DateOfBirth,
+          Password: userData.Password,
+          ConfirmPassword: userData.ConfirmPassword,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       return response.data;
     } catch (error) {
-      throw error.response?.data || error.message;
+      // Enhanced error parsing
+      if (error.response) {
+        const serverError = error.response.data;
+        throw {
+          message: serverError.title || "Registration failed",
+          errors: serverError.errors,
+          status: error.response.status,
+        };
+      }
+      throw error;
     }
   },
 

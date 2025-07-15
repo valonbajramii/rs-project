@@ -604,7 +604,7 @@ const Profile = ({ user, setUser, setShowProfile }) => {
               onChange={handleInputChange}
             />
 
-            <div className="address-form">
+            <div className="profile-address-form">
               <input
                 className="profile-input"
                 type="text"
@@ -647,42 +647,48 @@ const Profile = ({ user, setUser, setShowProfile }) => {
               />
             </div>
 
-            <div className="file-upload-container">
-              <div className="file-upload-input">
+            <div className="profile-file-upload-container">
+              <div className="profile-file-upload-input">
                 <input
                   type="file"
                   id="id-upload"
                   accept="image/*,.pdf"
                   onChange={(e) => handleFileUpload(e, "idDocument")}
-                  className="hidden-file-input"
+                  className="profile-hidden-file-input"
                 />
-                <label htmlFor="id-upload" className="file-upload-label">
+                <label
+                  htmlFor="id-upload"
+                  className="profile-file-upload-label"
+                >
                   <img
                     src={paperReplice}
                     alt="Upload"
-                    className="paperclip-icon"
+                    className="profile-paperclip-icon"
                   />
-                  <span className="file-upload-placeholder">
+                  <span className="profile-file-upload-placeholder">
                     {profileData.idDocument ? "ID Uploaded" : "Update ID"}
                   </span>
                 </label>
               </div>
 
-              <div className="file-upload-input">
+              <div className="profile-file-upload-input">
                 <input
                   type="file"
                   id="dl-upload"
                   accept="image/*,.pdf"
                   onChange={(e) => handleFileUpload(e, "drivingLicense")}
-                  className="hidden-file-input"
+                  className="profile-hidden-file-input"
                 />
-                <label htmlFor="dl-upload" className="file-upload-label">
+                <label
+                  htmlFor="dl-upload"
+                  className="profile-file-upload-label"
+                >
                   <img
                     src={paperReplice}
                     alt="Upload"
-                    className="paperclip-icon"
+                    className="profile-paperclip-icon"
                   />
-                  <span className="file-upload-placeholder">
+                  <span className="profile-file-upload-placeholder">
                     {profileData.drivingLicense
                       ? "DL Uploaded"
                       : "Update Driving License"}
@@ -692,9 +698,9 @@ const Profile = ({ user, setUser, setShowProfile }) => {
             </div>
 
             <div className="profile-actions">
-              <button className="profile-save-button" onClick={handleSave}>
+              {/* <button className="profile-save-button" onClick={handleSave}>
                 Save Changes
-              </button>
+              </button> */}
               <button className="profile-logout-button" onClick={handleLogout}>
                 Log out
               </button>

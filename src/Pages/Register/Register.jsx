@@ -173,26 +173,67 @@ const Register = ({ onRegister }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
+    const { password, confirmPassword } = formData;
+
+    // Password validation regex
+    const passwordRegex = {
+      length: /.{6,}/,
+      lowercase: /[a-z]/,
+      uppercase: /[A-Z]/,
+      digit: /[0-9]/,
+      specialChar: /[^A-Za-z0-9]/,
+    };
+
+    if (password !== confirmPassword) {
       setError("Passwords do not match!");
       return;
     }
 
-    try {
-      const response = await authApi.basicRegister({
-        fullName: formData.fullName,
-        email: formData.email,
-        dateOfBirth: formData.dateOfBirth,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword,
-      });
+    if (!passwordRegex.length.test(password)) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
 
-      // Store token and redirect to profile completion
+    if (!passwordRegex.lowercase.test(password)) {
+      setError("Password must contain at least one lowercase letter.");
+      return;
+    }
+
+    if (!passwordRegex.uppercase.test(password)) {
+      setError("Password must contain at least one uppercase letter.");
+      return;
+    }
+
+    if (!passwordRegex.digit.test(password)) {
+      setError("Password must contain at least one digit.");
+      return;
+    }
+
+    if (!passwordRegex.specialChar.test(password)) {
+      setError("Password must contain at least one special character.");
+      return;
+    }
+
+    try {
+      const registrationData = {
+        FullName: formData.fullName,
+        Email: formData.email,
+        DateOfBirth: new Date(formData.dateOfBirth).toISOString(),
+        Password: password,
+        ConfirmPassword: confirmPassword,
+      };
+
+      const response = await authApi.basicRegister(registrationData);
+
       localStorage.setItem("token", response.token);
-      navigate("/complete-profile"); // <-- This is correctly placed
+      navigate("/complete-profile");
     } catch (error) {
-      console.error("Registration error:", error);
-      setError(error.message || "Registration failed. Please try again.");
+      console.error("Full error details:", error);
+      setError(
+        error.response?.data?.title ||
+          error.message ||
+          "Registration failed. Please check your details."
+      );
     }
   };
 

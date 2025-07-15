@@ -47,6 +47,7 @@ const Login = ({ setUser }) => {
       const userData = {
         email,
         token: response.token,
+        IsProfileComplete: response.profileComplete,
       };
       localStorage.setItem("user", JSON.stringify(userData));
 
