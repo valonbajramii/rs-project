@@ -375,6 +375,8 @@
 
 // export default Profile;
 
+/////////////////////////////
+
 import React, { useState, useEffect } from "react";
 import "./Profile.css";
 import PersonFill from "../../icons/person-fill.svg";
@@ -397,21 +399,34 @@ const Profile = ({ user, setUser, setShowProfile }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [profileData, setProfileData] = useState({
-    mobileNumber: user.mobileNumber || "",
-    address: user.address || "",
-    city: user.city || "",
-    state: user.state || "",
-    zip: user.zip || "",
-    dateOfBirth: user.dateOfBirth || "",
-    idDocument: user.idDocument || null,
-    drivingLicense: user.drivingLicense || null,
+    mobileNumber: user?.MobileNumber || user?.mobileNumber || "",
+    address: user?.StreetAddress || user?.streetAddress || "",
+    city: user?.City || user?.city || "",
+    state: user?.State || user?.state || "",
+    zip: user?.ZipCode || user?.zipCode || "",
+    dateOfBirth: user?.DateOfBirth || user?.dateOfBirth || "",
+    idDocument: user?.IdDocumentPath || user?.idDocumentPath || null,
+    drivingLicense:
+      user?.DrivingLicensePath || user?.drivingLicensePath || null,
   });
 
   const navigate = useNavigate();
 
-  // Redirect to complete-profile if profile isn't complete
+  // // Redirect to complete-profile if profile isn't complete
+  // useEffect(() => {
+  //   if (user && !user.IsProfileComplete) {
+  //     navigate("/complete-profile");
+  //   }
+  // }, [user, navigate]);
+
   useEffect(() => {
-    if (user && !user.IsProfileComplete) {
+    const checkCompletion = () => {
+      const storedUser = localStorage.getItem("user");
+      const localUser = storedUser ? JSON.parse(storedUser) : null;
+      return user?.isProfileComplete || localUser?.isProfileComplete;
+    };
+
+    if (user && !checkCompletion()) {
       navigate("/complete-profile");
     }
   }, [user, navigate]);
@@ -576,7 +591,7 @@ const Profile = ({ user, setUser, setShowProfile }) => {
               type="text"
               name="name"
               placeholder="Full Name"
-              value={user.name}
+              value={user?.FullName || user?.fullName || ""}
               readOnly
             />
             <input
@@ -584,7 +599,7 @@ const Profile = ({ user, setUser, setShowProfile }) => {
               type="email"
               name="email"
               placeholder="Email"
-              value={user.email}
+              value={user?.Email || user?.email || ""}
               readOnly
             />
             <input
@@ -592,8 +607,12 @@ const Profile = ({ user, setUser, setShowProfile }) => {
               type="date"
               name="dateOfBirth"
               placeholder="Date of Birth"
-              value={profileData.dateOfBirth}
-              onChange={handleInputChange}
+              value={
+                user?.DateOfBirth
+                  ? new Date(user.DateOfBirth).toISOString().split("T")[0]
+                  : ""
+              }
+              readOnly
             />
             <input
               className="profile-input"
@@ -601,7 +620,7 @@ const Profile = ({ user, setUser, setShowProfile }) => {
               name="mobileNumber"
               placeholder="Phone Number"
               value={profileData.mobileNumber}
-              onChange={handleInputChange}
+              readOnly
             />
 
             <div className="profile-address-form">
@@ -611,9 +630,7 @@ const Profile = ({ user, setUser, setShowProfile }) => {
                 name="address"
                 placeholder="Street Address"
                 value={profileData.address}
-                onChange={(e) =>
-                  setProfileData({ ...profileData, address: e.target.value })
-                }
+                readOnly
               />
               <input
                 className="profile-input"
@@ -621,9 +638,7 @@ const Profile = ({ user, setUser, setShowProfile }) => {
                 name="city"
                 placeholder="City"
                 value={profileData.city}
-                onChange={(e) =>
-                  setProfileData({ ...profileData, city: e.target.value })
-                }
+                readOnly
               />
               <input
                 className="profile-input"
@@ -631,9 +646,7 @@ const Profile = ({ user, setUser, setShowProfile }) => {
                 name="state"
                 placeholder="State"
                 value={profileData.state}
-                onChange={(e) =>
-                  setProfileData({ ...profileData, state: e.target.value })
-                }
+                readOnly
               />
               <input
                 className="profile-input"
@@ -641,9 +654,7 @@ const Profile = ({ user, setUser, setShowProfile }) => {
                 name="zip"
                 placeholder="ZIP Code"
                 value={profileData.zip}
-                onChange={(e) =>
-                  setProfileData({ ...profileData, zip: e.target.value })
-                }
+                readOnly
               />
             </div>
 
@@ -720,3 +731,350 @@ const Profile = ({ user, setUser, setShowProfile }) => {
 };
 
 export default Profile;
+
+//
+// import React, { useState, useEffect } from "react";
+// import "./Profile.css";
+// import PersonFill from "../../icons/person-fill.svg";
+// import ShieldFill from "../../icons/shield-fill.svg";
+// import KeyFill from "../../icons/key-fill.svg";
+// import GearFill from "../../icons/gear-fill.svg";
+// import LogoutIcon from "../../icons/box-arrow-left.svg";
+// import GeoaltIcon from "../../icons/geo-alt.svg";
+// import PersonalInfoModal from "../../Components/PersonalInfoModal/PersonalInfoModal";
+// import { useNavigate } from "react-router-dom";
+// import chevronLeft from "../../images/chevron-left.svg";
+// import cameraIcon from "../../icons/camera-fill.svg";
+// import paperReplice from "../../icons/paperclip.svg";
+// import { useMediaQuery } from "react-responsive";
+// import MobileFooter from "../../Components/MobileFooter/MobileFooter";
+
+// const Profile = ({ user, setUser, setShowProfile }) => {
+//   const isMobile = useMediaQuery({ maxWidth: 480 });
+//   const [activeIcon, setActiveIcon] = useState("icon4");
+//   const [isModalVisible, setModalVisible] = useState(false);
+//   const [uploadedImage, setUploadedImage] = useState(null);
+//   const [profileData, setProfileData] = useState({
+//     mobileNumber: user.mobileNumber || "",
+//     address: user.address || "",
+//     city: user.city || "",
+//     state: user.state || "",
+//     zip: user.zip || "",
+//     dateOfBirth: user.dateOfBirth || "",
+//     idDocument: user.idDocument || null,
+//     drivingLicense: user.drivingLicense || null,
+//   });
+
+//   const navigate = useNavigate();
+
+//   // Redirect to complete-profile if profile isn't complete
+//   useEffect(() => {
+//     if (user && !user.IsProfileComplete) {
+//       navigate("/complete-profile");
+//     }
+//   }, [user, navigate]);
+
+//   const handleHomePageClick = () => {
+//     navigate("/homepage");
+//     setShowProfile(false);
+//   };
+
+//   const handleFooterClick = (section) => {
+//     if (section === "form") {
+//       setActiveIcon("icon1");
+//       navigate("/homepage", { state: { showForm: true } });
+//     } else if (section === "options") {
+//       setActiveIcon("icon2");
+//       navigate("/homepage", { state: { showForm: false } });
+//     } else if (section === "profile") {
+//       setActiveIcon("icon4");
+//     }
+//   };
+
+//   const openModal = () => {
+//     setModalVisible(true);
+//   };
+
+//   const closeModal = () => {
+//     setModalVisible(false);
+//   };
+
+//   const handleImageUpload = (event) => {
+//     const file = event.target.files[0];
+//     if (file) {
+//       const reader = new FileReader();
+//       reader.onloadend = () => {
+//         setUploadedImage(reader.result);
+//       };
+//       reader.readAsDataURL(file);
+//     }
+//   };
+
+//   const handleImageDelete = () => {
+//     setUploadedImage(null);
+//     setUser({ ...user, profileImage: null });
+//   };
+
+//   const handleLogout = () => {
+//     setUser(null);
+//     localStorage.removeItem("user");
+//     localStorage.removeItem("token");
+//     navigate("/login");
+//   };
+
+//   const handleInputChange = (e) => {
+//     const { name, value } = e.target;
+//     setProfileData((prev) => ({
+//       ...prev,
+//       [name]: value,
+//     }));
+//   };
+
+//   const handleFileUpload = (e, fieldName) => {
+//     const file = e.target.files[0];
+//     if (file) {
+//       setProfileData((prev) => ({
+//         ...prev,
+//         [fieldName]: file,
+//       }));
+//     }
+//   };
+
+//   const handleSave = async () => {
+//     try {
+//       // Call your backend API to update the profile
+//       const response = await fetch("/api/profile", {
+//         method: "PUT",
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: `Bearer ${localStorage.getItem("token")}`,
+//         },
+//         body: JSON.stringify({
+//           ...profileData,
+//           profileImage: uploadedImage || user.profileImage,
+//         }),
+//       });
+
+//       if (!response.ok) throw new Error("Failed to update profile");
+
+//       const updatedUser = await response.json();
+
+//       // Update user state and local storage
+//       setUser(updatedUser);
+//       localStorage.setItem("user", JSON.stringify(updatedUser));
+
+//       alert("Profile updated successfully!");
+//     } catch (error) {
+//       console.error("Profile update error:", error);
+//       alert("Error updating profile. Please try again.");
+//     }
+//   };
+
+//   return (
+//     <div className="profile-main-container">
+//       <div className="profile-container">
+//         {!isMobile && (
+//           <div className="profile-back-icon">
+//             <img
+//               src={chevronLeft}
+//               onClick={handleHomePageClick}
+//               className="profile-chevron-left"
+//               alt="Back"
+//             />
+//             <h2 className="profile-h2">Account</h2>
+//           </div>
+//         )}
+//         <div className="profile-content-container">
+//           <div className="profile-photo-container">
+//             {!uploadedImage && !user.profileImage ? (
+//               <>
+//                 <input
+//                   type="file"
+//                   id="file-input"
+//                   onChange={handleImageUpload}
+//                   style={{ display: "none" }}
+//                   accept="image/*"
+//                 />
+//                 <label htmlFor="file-input" className="profile-photo-empty">
+//                   <img className="camera-icon" src={cameraIcon} alt="Upload" />
+//                 </label>
+//                 <label htmlFor="file-input" className="profile-upload-label">
+//                   Upload Profile Photo
+//                 </label>
+//               </>
+//             ) : (
+//               <div className="uploaded-image-container">
+//                 <img
+//                   className="profile-photo"
+//                   src={uploadedImage || user.profileImage}
+//                   alt="Profile"
+//                 />
+//                 <button
+//                   className="profile-delete-button"
+//                   onClick={(e) => {
+//                     e.stopPropagation();
+//                     handleImageDelete();
+//                   }}
+//                 >
+//                   ×
+//                 </button>
+//               </div>
+//             )}
+//           </div>
+
+//           <div className="profile-welcome-label">
+//             {(uploadedImage || user.profileImage) && (
+//               <label className="welcome-label">Welcome, {user.name}!</label>
+//             )}
+//           </div>
+
+//           <div className="text-info">
+//             <input
+//               className="profile-input"
+//               type="text"
+//               name="name"
+//               placeholder="Full Name"
+//               value={user.name}
+//               readOnly
+//             />
+//             <input
+//               className="profile-input"
+//               type="email"
+//               name="email"
+//               placeholder="Email"
+//               value={user.email}
+//               readOnly
+//             />
+//             <input
+//               className="profile-input"
+//               type="date"
+//               name="dateOfBirth"
+//               placeholder="Date of Birth"
+//               value={profileData.dateOfBirth}
+//               onChange={handleInputChange}
+//             />
+//             <input
+//               className="profile-input"
+//               type="tel"
+//               name="mobileNumber"
+//               placeholder="Phone Number"
+//               value={profileData.mobileNumber}
+//               onChange={handleInputChange}
+//             />
+
+//             <div className="profile-address-form">
+//               <input
+//                 className="profile-input"
+//                 type="text"
+//                 name="address"
+//                 placeholder="Street Address"
+//                 value={profileData.address}
+//                 onChange={(e) =>
+//                   setProfileData({ ...profileData, address: e.target.value })
+//                 }
+//               />
+//               <input
+//                 className="profile-input"
+//                 type="text"
+//                 name="city"
+//                 placeholder="City"
+//                 value={profileData.city}
+//                 onChange={(e) =>
+//                   setProfileData({ ...profileData, city: e.target.value })
+//                 }
+//               />
+//               <input
+//                 className="profile-input"
+//                 type="text"
+//                 name="state"
+//                 placeholder="State"
+//                 value={profileData.state}
+//                 onChange={(e) =>
+//                   setProfileData({ ...profileData, state: e.target.value })
+//                 }
+//               />
+//               <input
+//                 className="profile-input"
+//                 type="text"
+//                 name="zip"
+//                 placeholder="ZIP Code"
+//                 value={profileData.zip}
+//                 onChange={(e) =>
+//                   setProfileData({ ...profileData, zip: e.target.value })
+//                 }
+//               />
+//             </div>
+
+//             <div className="profile-file-upload-container">
+//               <div className="profile-file-upload-input">
+//                 <input
+//                   type="file"
+//                   id="id-upload"
+//                   accept="image/*,.pdf"
+//                   onChange={(e) => handleFileUpload(e, "idDocument")}
+//                   className="profile-hidden-file-input"
+//                 />
+//                 <label
+//                   htmlFor="id-upload"
+//                   className="profile-file-upload-label"
+//                 >
+//                   <img
+//                     src={paperReplice}
+//                     alt="Upload"
+//                     className="profile-paperclip-icon"
+//                   />
+//                   <span className="profile-file-upload-placeholder">
+//                     {profileData.idDocument ? "ID Uploaded" : "Update ID"}
+//                   </span>
+//                 </label>
+//               </div>
+
+//               <div className="profile-file-upload-input">
+//                 <input
+//                   type="file"
+//                   id="dl-upload"
+//                   accept="image/*,.pdf"
+//                   onChange={(e) => handleFileUpload(e, "drivingLicense")}
+//                   className="profile-hidden-file-input"
+//                 />
+//                 <label
+//                   htmlFor="dl-upload"
+//                   className="profile-file-upload-label"
+//                 >
+//                   <img
+//                     src={paperReplice}
+//                     alt="Upload"
+//                     className="profile-paperclip-icon"
+//                   />
+//                   <span className="profile-file-upload-placeholder">
+//                     {profileData.drivingLicense
+//                       ? "DL Uploaded"
+//                       : "Update Driving License"}
+//                   </span>
+//                 </label>
+//               </div>
+//             </div>
+
+//             <div className="profile-actions">
+//               {/* <button className="profile-save-button" onClick={handleSave}>
+//                 Save Changes
+//               </button> */}
+//               <button className="profile-logout-button" onClick={handleLogout}>
+//                 Log out
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+
+//       {isMobile && (
+//         <MobileFooter
+//           onFooterClick={handleFooterClick}
+//           activeIcon={activeIcon}
+//         />
+//       )}
+//     </div>
+//   );
+// };
+
+// export default Profile;
