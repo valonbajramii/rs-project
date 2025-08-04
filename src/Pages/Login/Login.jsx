@@ -36,35 +36,17 @@ const Login = ({ setUser }) => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  // In Login.js
   const handleLogin = async () => {
     try {
-      const response = await authApi.login({ email, password });
+      const userData = await authApi.login({ email, password });
+      console.log("Login successful, user data:", userData);
 
-      // Store the token in localStorage
-      localStorage.setItem("token", response.token);
-
-      // // Store user data
-      // const userData = {
-      //   email,
-      //   token: response.token,
-      //   IsProfileComplete: response.profileComplete,
-      // };
-
-      // Store COMPLETE user data including profile information
-      const userData = {
-        ...response.user, // This contains all the profile data from backend
-        token: response.token,
-        IsProfileComplete: response.profileComplete,
-      };
-
-      localStorage.setItem("user", JSON.stringify(userData));
-
-      // Update user state
-      setUser(userData);
-
+      setUser(userData); // Use the already normalized data from authApi.login
       navigate("/homepage");
     } catch (error) {
-      setError("Invalid email or password. Please try again.");
+      console.error("Login failed:", error);
+      setError(error.message || "Login failed. Please try again.");
     }
   };
 

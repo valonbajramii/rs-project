@@ -422,8 +422,12 @@ const Profile = ({ user, setUser, setShowProfile }) => {
   useEffect(() => {
     const checkCompletion = () => {
       const storedUser = localStorage.getItem("user");
-      const localUser = storedUser ? JSON.parse(storedUser) : null;
-      return user?.isProfileComplete || localUser?.isProfileComplete;
+      if (!storedUser) return false;
+
+      const localUser = JSON.parse(storedUser);
+      return (
+        localUser.isProfileComplete ?? localUser.IsProfileComplete ?? false
+      );
     };
 
     if (user && !checkCompletion()) {

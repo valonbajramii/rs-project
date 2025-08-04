@@ -291,7 +291,7 @@ function App() {
             path="/complete-profile"
             element={
               user ? (
-                user.IsProfileComplete ? (
+                user.isProfileComplete || user.IsProfileComplete ? (
                   <Navigate to="/homepage" />
                 ) : (
                   <CompleteProfile user={user} setUser={setUser} />

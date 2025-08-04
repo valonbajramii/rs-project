@@ -60,23 +60,36 @@ export const authApi = {
     }
   },
 
+  // In your authApi.login function
   login: async (credentials) => {
     try {
       const response = await api.post("/auth/login", credentials);
+      console.log("Raw login response:", response.data); // Debug log
 
-      // Create complete user object from response
+      // Normalize the user data structure
+      const user = response.data.user || {};
       const userData = {
-        ...response.data.user, // Contains all profile data from backend
+        id: user.Id || user.id,
+        email: user.Email || user.email,
+        fullName: user.FullName || user.fullName,
+        dateOfBirth: user.DateOfBirth || user.dateOfBirth,
+        streetAddress: user.StreetAddress || user.streetAddress,
+        city: user.City || user.city,
+        state: user.State || user.state,
+        zipCode: user.ZipCode || user.zipCode,
+        mobileNumber: user.MobileNumber || user.mobileNumber,
+        idDocumentPath: user.IdDocumentPath || user.idDocumentPath,
+        drivingLicensePath: user.DrivingLicensePath || user.drivingLicensePath,
+        isProfileComplete: response.data.profileComplete ?? false,
         token: response.data.token,
-        IsProfileComplete: response.data.profileComplete,
       };
 
-      // Store both token and complete user data
-      localStorage.setItem("token", response.data.token);
+      console.log("Processed user data:", userData); // Debug log
+      localStorage.setItem("token", userData.token);
       localStorage.setItem("user", JSON.stringify(userData));
-
       return userData;
     } catch (error) {
+      console.error("Login API error:", error);
       throw error.response?.data || error.message;
     }
   },
@@ -89,9 +102,15 @@ export const authApi = {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
+        transformRequest: (data) => data, // Important for FormData
       });
       return response.data;
     } catch (error) {
+      console.error("Complete profile API error:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
       throw error.response?.data || error.message;
     }
   },
