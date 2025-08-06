@@ -120,9 +120,24 @@ export const authApi = {
 export const packagesApi = {
   createPackage: async (packageData) => {
     try {
-      const response = await api.post("/packages", packageData);
+      const response = await api.post("/packages", {
+        name: packageData.name,
+        location: packageData.location,
+        destination: packageData.destination,
+        description: packageData.description,
+        weight: parseFloat(packageData.weightinKg),
+        length: parseFloat(packageData.length),
+        height: parseFloat(packageData.height),
+        width: parseFloat(packageData.width),
+        price: parseFloat(packageData.price),
+      });
+
       return response.data;
     } catch (error) {
+      console.error(
+        "Package creation error:",
+        error.response?.data || error.message
+      );
       throw error.response?.data || error.message;
     }
   },

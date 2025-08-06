@@ -177,58 +177,43 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { authApi } from "./API/api";
 
-// function App() {
-//   const [user, setUser] = useState(null);
-
-//   useEffect(() => {
-//     // Check for token and validate it
-//     const token = localStorage.getItem("token");
-//     const storedUser = localStorage.getItem("user");
-
-//     if (token && storedUser) {
-//       // You might want to add token validation here
-//       setUser(JSON.parse(storedUser));
-//     }
-//   }, []);
-
 function App() {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showDeliveryForm, setShowDeliveryForm] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
+    console.log("App component mounted - checking auth state");
+    const validateUserSession = async () => {
+      const token = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("user");
 
-    if (token && storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser({
-          // Map backend PascalCase to frontend camelCase consistently
-          id: parsedUser.Id || parsedUser.id,
-          email: parsedUser.Email || parsedUser.email,
-          fullName: parsedUser.FullName || parsedUser.fullName,
-          dateOfBirth: parsedUser.DateOfBirth || parsedUser.dateOfBirth,
-          streetAddress: parsedUser.StreetAddress || parsedUser.streetAddress,
-          city: parsedUser.City || parsedUser.city,
-          state: parsedUser.State || parsedUser.state,
-          zipCode: parsedUser.ZipCode || parsedUser.zipCode,
-          mobileNumber: parsedUser.MobileNumber || parsedUser.mobileNumber,
-          idDocumentPath:
-            parsedUser.IdDocumentPath || parsedUser.idDocumentPath,
-          drivingLicensePath:
-            parsedUser.DrivingLicensePath || parsedUser.drivingLicensePath,
-          // Handle both PascalCase and camelCase for the flag
-          isProfileComplete:
-            parsedUser.IsProfileComplete ??
-            parsedUser.isProfileComplete ??
-            false,
-          token: parsedUser.token,
-        });
-      } catch (error) {
-        console.error("Failed to parse user data:", error);
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+      if (!token || !storedUser) {
+        setLoading(false);
+        return;
       }
-    }
+
+      try {
+        const validation = await authApi.validateToken();
+
+        if (validation?.isValid) {
+          const parsedUser = JSON.parse(storedUser);
+          setUser({
+            ...parsedUser,
+            isProfileComplete: parsedUser.isProfileComplete ?? false,
+          });
+        } else {
+          handleLogout();
+        }
+      } catch (error) {
+        console.error("Session validation error:", error);
+        handleLogout();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    validateUserSession();
   }, []);
 
   const handleLogout = () => {
@@ -236,6 +221,10 @@ function App() {
     localStorage.removeItem("user");
     setUser(null);
   };
+
+  if (loading) {
+    return <div className="App">Loading...</div>;
+  }
 
   return (
     <div className="App">
@@ -255,7 +244,6 @@ function App() {
             path="/register"
             element={user ? <Navigate to="/homepage" /> : <Register />}
           />
-
           <Route
             path="/profile"
             element={
@@ -266,22 +254,34 @@ function App() {
               )
             }
           />
-
           <Route
             path="/delivery"
-            element={user ? <Delivery user={user} /> : <Navigate to="/login" />}
+            element={
+              user ? (
+                <Delivery
+                  user={user}
+                  onClose={() => setShowDeliveryForm(false)}
+                  show={showDeliveryForm}
+                />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
           />
-
           <Route
             path="/address"
             element={user ? <Address user={user} /> : <Navigate to="/login" />}
           />
-
           <Route
             path="/homepage"
             element={
               user ? (
-                <HomePage user={user} onLogout={handleLogout} />
+                <HomePage
+                  user={user}
+                  onLogout={handleLogout}
+                  showDeliveryForm={showDeliveryForm}
+                  setShowDeliveryForm={setShowDeliveryForm}
+                />
               ) : (
                 <Navigate to="/login" />
               )
@@ -291,7 +291,7 @@ function App() {
             path="/complete-profile"
             element={
               user ? (
-                user.isProfileComplete || user.IsProfileComplete ? (
+                user.isProfileComplete ? (
                   <Navigate to="/homepage" />
                 ) : (
                   <CompleteProfile user={user} setUser={setUser} />
@@ -301,7 +301,6 @@ function App() {
               )
             }
           />
-
           <Route path="/resetpassword" element={<ResetPassword />} />
           <Route path="/newpassword" element={<NewPassword />} />
         </Routes>
