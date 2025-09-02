@@ -7,14 +7,14 @@
 // export default api;
 import axios from "axios";
 
-const API_URL = "http://localhost:5210/api"; // Përdor HTTP pa redirect
+const API_URL = "http://localhost:5210/api";
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: false, // Vendose true nëse përdor credentials
+  withCredentials: false,
 });
 
 // Add request interceptor to include the token if available
@@ -28,6 +28,23 @@ api.interceptors.request.use((config) => {
 
 // Auth API
 export const authApi = {
+  // Add the missing validateToken method
+  validateToken: async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        return { isValid: false };
+      }
+
+      // Simple token validation - you might want to implement proper JWT validation
+      const response = await api.get("/auth/validate");
+      return { isValid: true, user: response.data };
+    } catch (error) {
+      console.error("Token validation error:", error);
+      return { isValid: false };
+    }
+  },
+
   basicRegister: async (userData) => {
     try {
       const response = await api.post(
@@ -47,7 +64,6 @@ export const authApi = {
       );
       return response.data;
     } catch (error) {
-      // Enhanced error parsing
       if (error.response) {
         const serverError = error.response.data;
         throw {
@@ -60,13 +76,11 @@ export const authApi = {
     }
   },
 
-  // In your authApi.login function
   login: async (credentials) => {
     try {
       const response = await api.post("/auth/login", credentials);
-      console.log("Raw login response:", response.data); // Debug log
+      console.log("Raw login response:", response.data);
 
-      // Normalize the user data structure
       const user = response.data.user || {};
       const userData = {
         id: user.Id || user.id,
@@ -84,7 +98,7 @@ export const authApi = {
         token: response.data.token,
       };
 
-      console.log("Processed user data:", userData); // Debug log
+      console.log("Processed user data:", userData);
       localStorage.setItem("token", userData.token);
       localStorage.setItem("user", JSON.stringify(userData));
       return userData;
@@ -94,7 +108,6 @@ export const authApi = {
     }
   },
 
-  // Add this new method for complete profile
   completeProfile: async (formData) => {
     try {
       const response = await api.post("/auth/complete-profile", formData, {
@@ -102,7 +115,7 @@ export const authApi = {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        transformRequest: (data) => data, // Important for FormData
+        transformRequest: (data) => data,
       });
       return response.data;
     } catch (error) {
@@ -132,6 +145,7 @@ export const packagesApi = {
         price: parseFloat(packageData.price),
       });
 
+      console.log("Package creation response:", response.data);
       return response.data;
     } catch (error) {
       console.error(
@@ -157,6 +171,87 @@ export const packagesApi = {
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
+    }
+  },
+
+  // Simple user lookup from localStorage (fallback)
+  getUser: async (identifier) => {
+    try {
+      // First try to get from API if endpoint exists
+      try {
+        const response = await api.get(`/users/${identifier}`);
+        return response.data;
+      } catch (apiError) {
+        console.log(
+          "User API endpoint not available, using localStorage fallback"
+        );
+
+        // Fallback to localStorage
+        const users = JSON.parse(localStorage.getItem("users")) || [];
+        const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+        // Add current user to users array if not already there
+        if (currentUser.id && !users.some((u) => u.id === currentUser.id)) {
+          users.push(currentUser);
+        }
+
+        const user = users.find(
+          (u) => u.id === identifier || u.email === identifier
+        );
+
+        if (user) {
+          return user;
+        }
+
+        // If user not found, return basic info
+        return {
+          id: identifier,
+          name: "Unknown User",
+          email:
+            typeof identifier === "string" && identifier.includes("@")
+              ? identifier
+              : "unknown@example.com",
+          phone: "Not available",
+          isPlaceholder: true,
+        };
+      }
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      throw error;
+    }
+  },
+  resolveReferences: async (references) => {
+    try {
+      const referenceIds = references
+        .map((ref) => {
+          // Extract ID from $ref (could be like '10', '12', etc.)
+          const refValue = ref.$ref;
+          if (!isNaN(refValue)) return parseInt(refValue);
+
+          const match = refValue.match(/\d+/);
+          return match ? parseInt(match[0]) : null;
+        })
+        .filter((id) => id !== null);
+
+      console.log("Reference IDs to resolve:", referenceIds);
+
+      // Fetch each referenced package
+      const resolvedPackages = [];
+      for (const id of referenceIds) {
+        try {
+          const packageDetail = await packagesApi.getPackage(id);
+          if (packageDetail && packageDetail.id) {
+            resolvedPackages.push(packageDetail);
+          }
+        } catch (error) {
+          console.error(`Failed to fetch package ${id}:`, error);
+        }
+      }
+
+      return resolvedPackages;
+    } catch (error) {
+      console.error("Error resolving references:", error);
+      return [];
     }
   },
 };

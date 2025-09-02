@@ -273,15 +273,14 @@
 
 // export default DeliveryOptions;
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./DeliveryOptions.css";
 import HeartIcon from "../../../icons/Heart-icon.svg";
-import { v4 as uuidv4 } from "uuid";
-import audiImage from "../../../images/2025_audi_q7_4dr-suv_prestige_fq_oem_1_1600.avif";
-import { packagesApi } from "../../../API/api";
 import { useNavigate } from "react-router-dom";
+import fallbackImage from "../../../icons/car-front-fill.svg";
 
 const DeliveryOptions = ({
+  deliveryOptions,
   user,
   toggleFavorite,
   favorites = [],
@@ -289,51 +288,13 @@ const DeliveryOptions = ({
   setShowForm,
   setShowProfile,
   setSelectedDelivery,
+  loading,
 }) => {
-  const [deliveryOptions, setDeliveryOptions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchPackages = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const response = await packagesApi.getPackages();
-
-        let packagesArray = [];
-        if (Array.isArray(response)) {
-          packagesArray = response;
-        } else if (response?.$values && Array.isArray(response.$values)) {
-          packagesArray = response.$values;
-        }
-
-        const transformedPackages = packagesArray.map((pkg) => ({
-          id: pkg.id || pkg.Id,
-          name: pkg.name || pkg.Name,
-          images: pkg.images || pkg.Images || [],
-          price: pkg.price?.toString() || pkg.Price?.toString() || "0",
-          location: pkg.location || pkg.Location,
-          destination: pkg.destination || pkg.Destination,
-          description: pkg.description || pkg.Description,
-          weightinKg: pkg.weight || pkg.weightinKg || pkg.Weight,
-          deadline: pkg.deadline || pkg.Deadline,
-          createdBy: pkg.createdBy || pkg.CreatedBy,
-        }));
-
-        setDeliveryOptions(transformedPackages);
-      } catch (err) {
-        setError(err.message || "Failed to load packages");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPackages();
-  }, []);
+  // Debug: log the received deliveryOptions
+  console.log("DeliveryOptions received:", deliveryOptions);
 
   const handleAddPackageClick = () => {
     if (!user) {
@@ -349,28 +310,21 @@ const DeliveryOptions = ({
     setIsAddPackageView(true);
   };
 
+  // Debug: log the filtered options
   const filteredOptions = deliveryOptions.filter((option) => {
-    // Add null checks and provide empty string as fallback
     const location = option.location || "";
     const destination = option.destination || "";
 
-    return (
+    const matches =
       location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      destination.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+      destination.toLowerCase().includes(searchTerm.toLowerCase());
+
+    console.log("Option:", option, "Matches search:", matches);
+
+    return matches;
   });
 
-  if (loading) {
-    return <div className="delivery-option-container">Loading...</div>;
-  }
-
-  if (error) {
-    return (
-      <div className="delivery-option-container">
-        <p className="error-message">{error}</p>
-      </div>
-    );
-  }
+  console.log("Filtered options:", filteredOptions);
 
   return (
     <div className="delivery-option-container">
@@ -382,46 +336,58 @@ const DeliveryOptions = ({
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      <div className="scrollable-container">
-        <div className="dlivery-option-menu">
-          {filteredOptions.length > 0 ? (
-            filteredOptions.map((option) => (
-              <div key={option.id} onClick={() => setSelectedDelivery(option)}>
-                <div className="delivery-option">
-                  <img
-                    className="car-icon"
-                    src={option.images[0] || "https://via.placeholder.com/150"}
-                    alt={option.name}
-                  />
-                  <div className="delivery-option-info">
-                    <p className="delivery-option-name">{option.name}</p>
-                    <p className="delivery-option-destination">
-                      {option.destination}
-                    </p>
-                  </div>
-                  <div className="delivery-price-container">
-                    <p className="delivery-price">CHF {option.price}</p>
-                    <div
-                      className="star-icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleFavorite(option.id);
+      {loading ? (
+        <div className="loading-message">Loading packages...</div>
+      ) : (
+        <div className="scrollable-container">
+          <div className="dlivery-option-menu">
+            {filteredOptions.length > 0 ? (
+              filteredOptions.map((option) => (
+                <div key={option.id}>
+                  <div
+                    className="delivery-option"
+                    onClick={() => setSelectedDelivery(option)}
+                  >
+                    <img
+                      src={option.images?.[0] || fallbackImage}
+                      onError={(e) => {
+                        if (e.target.src !== fallbackImage) {
+                          e.target.src = fallbackImage;
+                        }
                       }}
-                    >
-                      <img src={HeartIcon} alt="Favorite" />
+                      alt={option.name}
+                    />
+
+                    <div className="delivery-option-info">
+                      <p className="delivery-option-name">{option.name}</p>
+                      <p className="delivery-option-destination">
+                        {option.destination}
+                      </p>
+                    </div>
+                    <div className="delivery-price-container">
+                      <p className="delivery-price">CHF {option.price}</p>
+                      <div
+                        className="star-icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(option.id);
+                        }}
+                      >
+                        <img src={HeartIcon} alt="Favorite" />
+                      </div>
                     </div>
                   </div>
+                  <hr className="deliveri-options-hr" />
                 </div>
-                <hr className="deliveri-options-hr" />
-              </div>
-            ))
-          ) : (
-            <p className="no-packages-message">
-              {searchTerm ? "No matching packages" : "No packages available"}
-            </p>
-          )}
+              ))
+            ) : (
+              <p className="no-packages-message">
+                {searchTerm ? "No matching packages" : "No packages available"}
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       <button className="add-new-package-btn" onClick={handleAddPackageClick}>
         {user?.isProfileComplete

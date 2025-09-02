@@ -6,7 +6,7 @@ import chevronLeft from "../../images/chevron-left.svg";
 import { packagesApi } from "../../API/api";
 import { useNavigate } from "react-router-dom";
 
-const Delivery = ({ user, onClose }) => {
+const Delivery = ({ user, onClose, addNewDelivery }) => {
   const navigate = useNavigate();
   const [uploadedImages, setUploadedImages] = useState([]);
   const [newDelivery, setNewDelivery] = useState({
@@ -23,7 +23,6 @@ const Delivery = ({ user, onClose }) => {
     deadline: "",
   });
 
-  // Add this right after your state declarations:
   useEffect(() => {
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
@@ -74,7 +73,6 @@ const Delivery = ({ user, onClose }) => {
         return;
       }
 
-      // Rest of your existing validation
       if (
         !newDelivery.name ||
         !newDelivery.location ||
@@ -86,11 +84,11 @@ const Delivery = ({ user, onClose }) => {
 
       const packageData = {
         ...newDelivery,
-        createdBy: storedUser.email, // Use email from localStorage
+        createdBy: storedUser.email,
         images: uploadedImages.filter((img) => img !== null),
       };
 
-      await packagesApi.createPackage(packageData);
+      await addNewDelivery(packageData);
       alert("Package created successfully!");
       onClose();
     } catch (error) {
