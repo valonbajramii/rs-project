@@ -7,7 +7,7 @@
 // export default api;
 import axios from "axios";
 
-const API_URL = "http://localhost:5210/api";
+const API_URL = "http://192.168.0.66:5210/api";
 
 const api = axios.create({
   baseURL: API_URL,
@@ -131,18 +131,14 @@ export const authApi = {
 
 // Packages API
 export const packagesApi = {
-  createPackage: async (packageData) => {
+  createPackage: async (formData) => {
     try {
-      const response = await api.post("/packages", {
-        name: packageData.name,
-        location: packageData.location,
-        destination: packageData.destination,
-        description: packageData.description,
-        weight: parseFloat(packageData.weightinKg),
-        length: parseFloat(packageData.length),
-        height: parseFloat(packageData.height),
-        width: parseFloat(packageData.width),
-        price: parseFloat(packageData.price),
+      const token = localStorage.getItem("token");
+      const response = await axios.post(`${API_URL}/packages`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       console.log("Package creation response:", response.data);
@@ -159,6 +155,7 @@ export const packagesApi = {
   getPackages: async () => {
     try {
       const response = await api.get("/packages");
+      console.log("API Response:", response.data); // Add this line
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;

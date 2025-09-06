@@ -291,6 +291,7 @@ const DeliveryOptions = ({
   loading,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [imageErrors, setImageErrors] = useState({}); // Track errors by option ID
   const navigate = useNavigate();
 
   // Debug: log the received deliveryOptions
@@ -308,6 +309,22 @@ const DeliveryOptions = ({
     }
     setShowForm(true);
     setIsAddPackageView(true);
+  };
+
+  const handleImageError = (optionId, imageUrl) => {
+    console.error(`Failed to load image for package ${optionId}: ${imageUrl}`);
+    setImageErrors((prev) => ({ ...prev, [optionId]: true }));
+  };
+
+  // Debug function to check image URLs
+  const debugImageUrls = (option) => {
+    console.log(`Package: ${option.name}`);
+    console.log("Image paths:", option.imagePaths);
+    if (option.imagePaths && option.imagePaths.length > 0) {
+      option.imagePaths.forEach((path, index) => {
+        console.log(`Image ${index}: ${path}`);
+      });
+    }
   };
 
   // Debug: log the filtered options
@@ -342,44 +359,60 @@ const DeliveryOptions = ({
         <div className="scrollable-container">
           <div className="dlivery-option-menu">
             {filteredOptions.length > 0 ? (
-              filteredOptions.map((option) => (
-                <div key={option.id}>
-                  <div
-                    className="delivery-option"
-                    onClick={() => setSelectedDelivery(option)}
-                  >
-                    <img
-                      src={option.images?.[0] || fallbackImage}
-                      onError={(e) => {
-                        if (e.target.src !== fallbackImage) {
-                          e.target.src = fallbackImage;
-                        }
-                      }}
-                      alt={option.name}
-                    />
+              filteredOptions.map((option) => {
+                debugImageUrls(option); // Debug each package
 
-                    <div className="delivery-option-info">
-                      <p className="delivery-option-name">{option.name}</p>
-                      <p className="delivery-option-destination">
-                        {option.destination}
-                      </p>
-                    </div>
-                    <div className="delivery-price-container">
-                      <p className="delivery-price">CHF {option.price}</p>
-                      <div
-                        className="star-icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(option.id);
-                        }}
-                      >
-                        <img src={HeartIcon} alt="Favorite" />
+                const hasError = imageErrors[option.id];
+                const hasImages =
+                  option.imagePaths && option.imagePaths.length > 0;
+                const imageUrl = hasImages ? option.imagePaths[0] : null;
+
+                return (
+                  <div key={option.id}>
+                    <div
+                      className="delivery-option"
+                      onClick={() => setSelectedDelivery(option)}
+                    >
+                      {hasImages && !hasError ? (
+                        <img
+                          src={imageUrl}
+                          onError={() => handleImageError(option.id, imageUrl)}
+                          alt={option.name}
+                          className="delivery-option-image"
+                          onLoad={() =>
+                            console.log(`Image loaded: ${imageUrl}`)
+                          }
+                        />
+                      ) : (
+                        <div className="no-image-placeholder">
+                          <img src={fallbackImage} alt="No image" />
+                          <span>No Image</span>
+                        </div>
+                      )}
+
+                      <div className="delivery-option-info">
+                        <p className="delivery-option-name">{option.name}</p>
+                        <p className="delivery-option-destination">
+                          {option.destination}
+                        </p>
+                      </div>
+                      <div className="delivery-price-container">
+                        <p className="delivery-price">CHF {option.price}</p>
+                        <div
+                          className="star-icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(option.id);
+                          }}
+                        >
+                          <img src={HeartIcon} alt="Favorite" />
+                        </div>
                       </div>
                     </div>
+                    <hr className="deliveri-options-hr" />
                   </div>
-                  <hr className="deliveri-options-hr" />
-                </div>
-              ))
+                );
+              })
             ) : (
               <p className="no-packages-message">
                 {searchTerm ? "No matching packages" : "No packages available"}

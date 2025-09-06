@@ -34,21 +34,6 @@ const Delivery = ({ user, onClose, addNewDelivery }) => {
     }
   }, [navigate]);
 
-  const handleImageUpload = (event, index) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setUploadedImages((prev) => {
-        const newImages = [...prev];
-        newImages[index] = reader.result;
-        return newImages;
-      });
-    };
-    reader.readAsDataURL(file);
-  };
-
   const handleImageDelete = (index) => {
     setUploadedImages((prev) => {
       const newImages = [...prev];
@@ -60,6 +45,46 @@ const Delivery = ({ user, onClose, addNewDelivery }) => {
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setNewDelivery((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Helper function to convert base64 to blob
+  const dataURLtoBlob = (dataURL) => {
+    const arr = dataURL.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  };
+
+  // Update handleImageUpload to store File objects
+  const handleImageUpload = (event, index) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Store the file object for later upload
+    setUploadedImages((prev) => {
+      const newImages = [...prev];
+      newImages[index] = file;
+
+      // Also create a preview URL for display
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewDelivery((prev) => ({
+          ...prev,
+          imagePreviews: {
+            ...prev.imagePreviews,
+            [index]: reader.result,
+          },
+        }));
+      };
+      reader.readAsDataURL(file);
+
+      return newImages;
+    });
   };
 
   const handleAddDelivery = async () => {
@@ -82,13 +107,36 @@ const Delivery = ({ user, onClose, addNewDelivery }) => {
         return;
       }
 
-      const packageData = {
-        ...newDelivery,
-        createdBy: storedUser.email,
-        images: uploadedImages.filter((img) => img !== null),
-      };
+      // Create FormData instead of JSON
+      const formData = new FormData();
+      formData.append("name", newDelivery.name);
+      formData.append("location", newDelivery.location);
+      formData.append("destination", newDelivery.destination);
+      formData.append("description", newDelivery.description || "");
+      formData.append("weight", newDelivery.weightinKg);
+      formData.append("length", newDelivery.length);
+      formData.append("height", newDelivery.height);
+      formData.append("width", newDelivery.width);
+      formData.append("price", newDelivery.price);
 
-      await addNewDelivery(packageData);
+      // Append images
+      uploadedImages.forEach((image, index) => {
+        if (image && typeof image !== "string") {
+          // If it's a File object
+          formData.append("images", image);
+        } else if (
+          image &&
+          typeof image === "string" &&
+          image.startsWith("data:")
+        ) {
+          // Convert base64 to blob if needed
+          const blob = dataURLtoBlob(image);
+          formData.append("images", blob, `image_${index}.jpg`);
+        }
+      });
+      console.log("Uploading images:", uploadedImages);
+      // Update API call to use FormData
+      await addNewDelivery(formData);
       alert("Package created successfully!");
       onClose();
     } catch (error) {
@@ -242,7 +290,11 @@ const Delivery = ({ user, onClose, addNewDelivery }) => {
                     <div className="uploaded-image-container">
                       <img
                         className="delivery-image"
-                        src={uploadedImages[index]}
+                        src={
+                          typeof uploadedImages[index] === "string"
+                            ? uploadedImages[index]
+                            : URL.createObjectURL(uploadedImages[index])
+                        }
                         alt={`Uploaded ${index}`}
                       />
                       <button

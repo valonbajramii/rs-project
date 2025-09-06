@@ -2,16 +2,29 @@ import React, { useState, useEffect } from "react";
 import "./DeliveryInfoPanel.css";
 import { v4 as uuidv4 } from "uuid";
 import { packagesApi } from "../../API/api";
+import fallbackImage from "../../icons/car-front-fill.svg";
 
 const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [packageOwner, setPackageOwner] = useState(null);
   const [loadingOwner, setLoadingOwner] = useState(true);
+  const [imageErrors, setImageErrors] = useState({});
 
-  // Ensure images is always an array
-  const images = Array.isArray(deliveryDetails.images)
-    ? deliveryDetails.images
+  // FIXED: Use imagePaths directly as they already contain full URLs
+  const images = Array.isArray(deliveryDetails.imagePaths)
+    ? deliveryDetails.imagePaths
     : [];
+
+  // Add debug logging
+  useEffect(() => {
+    console.log("DeliveryInfoPanel received:", deliveryDetails);
+    console.log("Image paths:", images);
+    if (images.length > 0) {
+      images.forEach((img, index) => {
+        console.log(`Image ${index}: ${img}`);
+      });
+    }
+  }, [deliveryDetails]);
 
   // Fetch package owner information
   useEffect(() => {
@@ -91,6 +104,11 @@ const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
     );
   };
 
+  const handleImageError = (imageUrl, index) => {
+    console.error(`Failed to load image ${index}: ${imageUrl}`);
+    setImageErrors((prev) => ({ ...prev, [index]: true }));
+  };
+
   const handleRequestDelivery = () => {
     const deliveries = JSON.parse(localStorage.getItem("deliveries")) || [];
     const updatedDeliveries = deliveries.map((delivery) => {
@@ -114,8 +132,7 @@ const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
     onClose();
   };
 
-  const currentImage =
-    images[currentImageIndex] || "https://via.placeholder.com/150";
+  const currentImage = images[currentImageIndex] || fallbackImage;
 
   return (
     <div className="delivery-info-panel-content">
@@ -136,7 +153,13 @@ const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
             </>
           )}
 
-          <img className="main-image" src={currentImage} alt="Delivery" />
+          <img
+            className="main-image"
+            src={currentImage}
+            alt="Delivery"
+            onError={() => handleImageError(currentImage, currentImageIndex)}
+            onLoad={() => console.log(`Main image loaded: ${currentImage}`)}
+          />
 
           {images.length > 1 && (
             <div className="mobile-indicator-dots">
@@ -164,6 +187,8 @@ const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
                   alt={`Thumbnail ${index}`}
                   className="thumbnail-image"
                   onClick={() => handleThumbnailClick(index)}
+                  onError={() => handleImageError(image, index)}
+                  onLoad={() => console.log(`Thumbnail loaded: ${image}`)}
                 />
               ))}
           </div>

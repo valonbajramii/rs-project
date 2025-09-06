@@ -43,7 +43,7 @@
 
 .dlivery-option-menu {
   width: 100%;
-  padding: 0px 25px 0px 25px;
+  padding: 0px 20px 0px 20px;
 }
 
 .delivery-option2 {
@@ -64,10 +64,11 @@
 }
 
 .delivery-option {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 125px 1fr 120px; /* Foto | Info | Cmimi/Zemra */
   align-items: center;
-  justify-content: space-around;
+  /* gap: 20px; */
+  padding: 10px;
 }
 
 .deliveri-options-hr {
@@ -75,18 +76,48 @@
   border-top: 1px solid #ebe9e9;
 }
 
-.car-icon {
-  width: 100px;
-  border-radius: 5px;
+.delivery-option-image {
+  width: 120px;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
 .delivery-option-info {
   display: flex;
   flex-direction: column;
+  margin-left: 10px;
+}
+
+.delivery-price-container {
+  display: flex;
+  justify-content: flex-end; /* çmimi + zemra të shkojnë djathtas */
+  align-items: center;
+  gap: 10px;
+}
+
+/* .delivery-option-image {
+  width: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background-color: #f5f5f5;
+  overflow: hidden;
+  border-radius: 8px;
+} */
+
+.car-icon {
+  width: 100px;
+  border-radius: 5px;
+}
+
+/* .delivery-option-info {
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: left;
   gap: 0;
-}
+} */
 
 .delivery-option-name {
   font-size: 20px;
@@ -109,12 +140,12 @@
   margin: 5px;
   padding: 0;
 } */
-.delivery-price-container {
+/* .delivery-price-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-}
+} */
 .delivery-price {
   font-weight: 500;
   color: #3673e4;

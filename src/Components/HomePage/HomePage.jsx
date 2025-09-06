@@ -68,7 +68,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
   );
 
   // Function to refresh packages from API - FIXED
-  // Function to refresh packages from API - FIXED
   const refreshPackages = useCallback(async () => {
     try {
       setLoading(true);
@@ -118,7 +117,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
       const transformedPackages = uniquePackages.map((item) => ({
         id: item.id,
         name: item.name,
-        images: item.images || [],
+        imagePaths: item.imagePaths || [], // ← FIXED: Changed from images to imagePaths
         price: item.price?.toString() || "0",
         location: item.location || "",
         destination: item.destination || "",
@@ -143,12 +142,10 @@ const HomePage = ({ user, setUser, onLogout }) => {
   }, []);
 
   // Load packages on component mount - only once - FIXED
-  // Load packages on component mount and when user changes
   useEffect(() => {
     refreshPackages();
   }, [refreshPackages, user?.id]); // Refresh when user ID changes
 
-  // Handler to add a new delivery
   // Handler to add a new delivery
   const addNewDelivery = useCallback(
     async (newDelivery) => {
@@ -160,7 +157,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
         const transformedPackage = {
           id: response.id,
           name: response.name,
-          images: response.images || [],
+          imagePaths: response.imagePaths || [],
           price: response.price?.toString() || "0",
           location: response.location || "",
           destination: response.destination || "",
