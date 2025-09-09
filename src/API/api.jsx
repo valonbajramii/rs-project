@@ -253,6 +253,38 @@ export const packagesApi = {
   },
 };
 
+// API/api.js
+export const transportApi = {
+  createRequest: async (requestData) => {
+    try {
+      const response = await api.post("/transportrequests", requestData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  getUserRequests: async (userId) => {
+    try {
+      const response = await api.get(`/transportrequests/user/${userId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  updateRequestStatus: async (requestId, status) => {
+    try {
+      const response = await api.put(`/transportrequests/${requestId}/status`, {
+        status: status,
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+};
+
 export default api;
 
 // import axios from "axios";

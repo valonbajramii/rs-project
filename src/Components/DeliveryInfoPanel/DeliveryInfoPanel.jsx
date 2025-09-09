@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./DeliveryInfoPanel.css";
 import { v4 as uuidv4 } from "uuid";
-import { packagesApi } from "../../API/api";
+import { packagesApi, transportApi } from "../../API/api";
 import fallbackImage from "../../icons/car-front-fill.svg";
 
 const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
@@ -18,12 +18,8 @@ const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
   // Add debug logging
   useEffect(() => {
     console.log("DeliveryInfoPanel received:", deliveryDetails);
+    console.log("Creator info:", deliveryDetails.Creator);
     console.log("Image paths:", images);
-    if (images.length > 0) {
-      images.forEach((img, index) => {
-        console.log(`Image ${index}: ${img}`);
-      });
-    }
   }, [deliveryDetails]);
 
   // Fetch package owner information
@@ -32,9 +28,32 @@ const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
       try {
         setLoadingOwner(true);
 
-        // Get the creator identifier from the package
+        // Check if the package already has creator info from backend
+        if (deliveryDetails.Creator) {
+          console.log(
+            "Using creator info from package:",
+            deliveryDetails.Creator
+          );
+          setPackageOwner({
+            id: deliveryDetails.Creator.Id || deliveryDetails.Creator.id,
+            fullName:
+              deliveryDetails.Creator.FullName ||
+              deliveryDetails.Creator.fullName,
+            email:
+              deliveryDetails.Creator.Email || deliveryDetails.Creator.email,
+            mobileNumber:
+              deliveryDetails.Creator.MobileNumber ||
+              deliveryDetails.Creator.mobileNumber,
+            phone:
+              deliveryDetails.Creator.MobileNumber ||
+              deliveryDetails.Creator.mobileNumber,
+          });
+          return;
+        }
+
+        // Fallback to old method if Creator doesn't exist
         const creatorIdentifier =
-          deliveryDetails.createdBy || deliveryDetails.userId;
+          deliveryDetails.userId || deliveryDetails.createdBy;
 
         if (!creatorIdentifier) {
           setPackageOwner({
@@ -46,26 +65,22 @@ const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
           return;
         }
 
-        // If the package was created by the current user, use current user info
         if (creatorIdentifier === user.id || creatorIdentifier === user.email) {
           setPackageOwner(user);
           return;
         }
 
-        // Try to fetch owner info
+        // Try API method to get user details
         try {
           const ownerData = await packagesApi.getUser(creatorIdentifier);
           setPackageOwner(ownerData);
         } catch (error) {
           console.error("Error fetching owner:", error);
-          // If we can't get the owner info, show basic info
           setPackageOwner({
             name: "Unknown User",
-            email:
-              typeof creatorIdentifier === "string" &&
-              creatorIdentifier.includes("@")
-                ? creatorIdentifier
-                : "unknown@example.com",
+            email: creatorIdentifier.includes("@")
+              ? creatorIdentifier
+              : "unknown@example.com",
             phone: "Not available",
             isPlaceholder: true,
           });
@@ -109,27 +124,39 @@ const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
     setImageErrors((prev) => ({ ...prev, [index]: true }));
   };
 
-  const handleRequestDelivery = () => {
-    const deliveries = JSON.parse(localStorage.getItem("deliveries")) || [];
-    const updatedDeliveries = deliveries.map((delivery) => {
-      if (delivery.id === deliveryDetails.id) {
-        const newRequest = {
-          id: uuidv4(),
-          requester: user.email,
-          status: "Pending",
-          timestamp: new Date().toISOString(),
-          deliveryName: deliveryDetails.name,
-        };
-        return {
-          ...delivery,
-          requests: [...(delivery.requests || []), newRequest],
-        };
+  const handleRequestDelivery = async () => {
+    try {
+      const requestData = {
+        PackageId: deliveryDetails.id,
+        Message: `I would like to deliver your package: ${deliveryDetails.name}`,
+      };
+
+      const response = await transportApi.createRequest(requestData);
+
+      // Add to chat contacts when request is sent
+      const newContact = {
+        email: packageOwner.email,
+        name: packageOwner.fullName || packageOwner.name,
+        profileImage: packageOwner.profileImage || null,
+      };
+
+      const storedContacts =
+        JSON.parse(localStorage.getItem("chatContacts")) || [];
+      const contactExists = storedContacts.some(
+        (c) => c.email === newContact.email
+      );
+
+      if (!contactExists) {
+        const updatedContacts = [...storedContacts, newContact];
+        localStorage.setItem("chatContacts", JSON.stringify(updatedContacts));
       }
-      return delivery;
-    });
-    localStorage.setItem("deliveries", JSON.stringify(updatedDeliveries));
-    alert("Delivery request sent!");
-    onClose();
+
+      alert("Delivery request sent successfully!");
+      onClose();
+    } catch (error) {
+      console.error("Failed to send request:", error);
+      alert(error.message || "Failed to send request. Please try again.");
+    }
   };
 
   const currentImage = images[currentImageIndex] || fallbackImage;
@@ -268,7 +295,9 @@ const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
                   <img src={packageOwner.profileImage} alt="Owner" />
                 ) : (
                   <div className="owner-initial">
-                    {packageOwner.name
+                    {packageOwner.fullName
+                      ? packageOwner.fullName.charAt(0).toUpperCase()
+                      : packageOwner.name
                       ? packageOwner.name.charAt(0).toUpperCase()
                       : packageOwner.email
                       ? packageOwner.email.charAt(0).toUpperCase()
@@ -286,9 +315,9 @@ const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
                     packageOwner.phone ||
                     "No phone number"}
                 </span>
-                {packageOwner.email && packageOwner.email !== user.email && (
+                {/* {packageOwner.email && packageOwner.email !== user.email && (
                   <span className="owner-email">{packageOwner.email}</span>
-                )}
+                )} */}
               </div>
             </>
           ) : (
@@ -296,7 +325,7 @@ const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
           )}
 
           <div className="deliveryinfomdal-buttons-container">
-            {deliveryDetails.createdBy !== user.email && (
+            {deliveryDetails.userId !== user.id && (
               <button
                 onClick={handleRequestDelivery}
                 className="infomodal-request-button"

@@ -30,7 +30,7 @@ import DeliveryInfoPanel from "../DeliveryInfoPanel/DeliveryInfoPanel";
 import MobileNotifications from "../MobileNotifications/MobileNotifications";
 import editIcon from "../../icons/edit.svg";
 import Chat from "../Chat/Chat";
-import { packagesApi } from "../../API/api";
+import { packagesApi, transportApi } from "../../API/api";
 
 const HomePage = ({ user, setUser, onLogout }) => {
   const navigate = useNavigate();
@@ -281,31 +281,98 @@ const HomePage = ({ user, setUser, onLogout }) => {
     [deliveryOptions]
   );
 
-  // Pending requests logic
+  // Pending requests logic - FETCH FROM BACKEND
+  // Pending requests logic - FIXED VERSION
   useEffect(() => {
-    const storedDeliveries = deliveryOptions || [];
-    const pending = [];
+    const fetchPendingRequests = async () => {
+      try {
+        if (!user?.id) {
+          console.log("❌ No user ID available");
+          return;
+        }
 
-    storedDeliveries.forEach((delivery) => {
-      if (delivery.createdBy === user.email && delivery.requests) {
-        delivery.requests.forEach((request) => {
-          if (request.status === "Pending") {
-            pending.push({
-              deliveryId: delivery.id,
-              deliveryName: delivery.name,
-              requestId: request.id,
-              requester: request.requester,
-              status: request.status,
-              timestamp: request.timestamp,
-            });
-          }
+        console.log("📡 Fetching pending requests for user:", user.id);
+
+        // Fetch ALL transport requests from backend
+        const requests = await transportApi.getUserRequests(user.id);
+        console.log("📦 Raw requests from API:", requests);
+
+        if (!requests || !Array.isArray(requests)) {
+          console.log("❌ No requests returned or invalid format");
+          setPendingRequests([]);
+          return;
+        }
+
+        // Debug: Log the structure of the first request to see actual field names
+        if (requests.length > 0) {
+          console.log("🔍 First request structure:", requests[0]);
+          console.log("🔍 Available fields:", Object.keys(requests[0]));
+        }
+
+        // First, let's get all packages owned by current user
+        const userPackages = deliveryOptions.filter(
+          (pkg) => pkg.createdBy === user.id
+        );
+        const userPackageIds = userPackages.map((pkg) => pkg.id);
+
+        console.log("📦 User's package IDs:", userPackageIds);
+
+        // Filter for pending requests where:
+        // 1. Status is Pending
+        // 2. The package belongs to current user (package owner)
+        const pending = requests.filter((request) => {
+          // Use the correct field names from your API response
+          const requestId = request.id || request.Id || request.requestId;
+          const packageId = request.packageId || request.PackageId;
+          const status = request.status || request.Status;
+          const isPending = status === "Pending";
+
+          // Check if package belongs to user
+          const isOwner = userPackageIds.includes(packageId);
+
+          console.log(
+            `Request ${requestId}: PackageId=${packageId}, ` +
+              `Status=${status}, IsPending=${isPending}, IsOwner=${isOwner}`
+          );
+
+          return isPending && isOwner;
         });
-      }
-    });
 
-    pending.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-    setPendingRequests(pending);
-  }, [deliveryOptions, user.email]);
+        console.log("⏳ Filtered pending requests:", pending);
+
+        // Transform to match your frontend format
+        const transformedPending = pending.map((request) => {
+          const requestId = request.id || request.Id || request.requestId;
+          const packageId = request.packageId || request.PackageId;
+          const packageName = request.packageName || request.PackageName;
+          const requesterEmail =
+            request.requesterEmail || request.RequesterEmail;
+          const requesterName = request.requesterName || request.RequesterName;
+          const status = request.status || request.Status;
+          const timestamp = request.requestDate || request.RequestDate;
+
+          return {
+            requestId: requestId,
+            deliveryId: packageId,
+            deliveryName: packageName,
+            requester: requesterEmail,
+            requesterName: requesterName,
+            status: status,
+            timestamp: timestamp,
+          };
+        });
+
+        console.log("🔄 Transformed pending requests:", transformedPending);
+        setPendingRequests(transformedPending);
+      } catch (error) {
+        console.error("❌ Error fetching pending requests:", error);
+        console.error("Error details:", error.response?.data || error.message);
+        setPendingRequests([]);
+      }
+    };
+
+    fetchPendingRequests();
+  }, [user?.id, deliveryOptions]);
 
   // Click outside handler
   useEffect(() => {
@@ -331,35 +398,119 @@ const HomePage = ({ user, setUser, onLogout }) => {
     };
   }, [isDropdownOpen, isRequestsDropdownOpen]);
 
+  // Helper functions
+  const addChatContact = useCallback((contact) => {
+    const storedContacts =
+      JSON.parse(localStorage.getItem("chatContacts")) || [];
+    const contactExists = storedContacts.some((c) => c.email === contact.email);
+
+    if (!contactExists) {
+      const updatedContacts = [...storedContacts, contact];
+      localStorage.setItem("chatContacts", JSON.stringify(updatedContacts));
+    }
+  }, []);
+
+  const getRequesterInfo = useCallback((requesterEmail) => {
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const requester = users.find((user) => user.email === requesterEmail);
+
+    return (
+      requester || {
+        email: requesterEmail,
+        name: requesterEmail.split("@")[0],
+        profileImage: null,
+      }
+    );
+  }, []);
+
+  const formatRelativeTime = useCallback((timestamp) => {
+    const now = new Date();
+    const requestTime = new Date(timestamp);
+    const seconds = Math.floor((now - requestTime) / 1000);
+
+    let interval = Math.floor(seconds / 31536000);
+    if (interval >= 1)
+      return `${interval} year${interval === 1 ? "" : "s"} ago`;
+
+    interval = Math.floor(seconds / 2592000);
+    if (interval >= 1)
+      return `${interval} month${interval === 1 ? "" : "s"} ago`;
+
+    interval = Math.floor(seconds / 86400);
+    if (interval >= 1) return `${interval} day${interval === 1 ? "" : "s"} ago`;
+
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1)
+      return `${interval} hour${interval === 1 ? "" : "s"} ago`;
+
+    interval = Math.floor(seconds / 60);
+    if (interval >= 1) return `${interval} min${interval === 1 ? "" : "s"} ago`;
+
+    return "Just now";
+  }, []);
+
+  // Request action handler
   // Request action handler
   const handleRequestAction = useCallback(
-    (deliveryId, requestId, action) => {
-      const updatedDeliveries = deliveryOptions.map((delivery) => {
-        if (delivery.id === deliveryId) {
-          const updatedRequests = delivery.requests.map((request) => {
-            if (request.id === requestId) {
-              if (action === "approve") {
-                const requesterUser = getRequesterInfo(request.requester);
-                addChatContact(requesterUser);
-              }
-              return {
-                ...request,
-                status: action === "approve" ? "Approved" : "Declined",
-              };
-            }
-            return request;
-          });
-          return { ...delivery, requests: updatedRequests };
+    async (requestId, action) => {
+      try {
+        console.log("🔄 Updating request:", requestId, "with action:", action);
+        console.log("📋 Current pending requests:", pendingRequests);
+
+        const status = action === "approve" ? "Accepted" : "Rejected";
+        console.log("📊 Setting status to:", status);
+
+        // Call the API to update the request status
+        const response = await transportApi.updateRequestStatus(
+          requestId,
+          status
+        );
+        console.log("✅ API response:", response);
+
+        // Update local state by removing the processed request
+        setPendingRequests((prev) => {
+          const updatedRequests = prev.filter(
+            (req) => req.requestId !== requestId
+          );
+          console.log("📝 Updated pending requests:", updatedRequests);
+          return updatedRequests;
+        });
+
+        // If approved, ensure contact is added to chat
+        if (action === "approve") {
+          console.log("🤝 Request approved, adding to chat contacts");
+          const request = pendingRequests.find(
+            (req) => req.requestId === requestId
+          );
+
+          if (request) {
+            console.log("📧 Found request:", request);
+            const requesterUser = getRequesterInfo(request.requester);
+            console.log("👤 Requester user info:", requesterUser);
+            addChatContact(requesterUser);
+            console.log("✅ Contact added to chat");
+          } else {
+            console.log("❌ Request not found in pendingRequests");
+          }
         }
-        return delivery;
-      });
 
-      setDeliveryOptions(updatedDeliveries);
-      setFilteredOptions(updatedDeliveries);
+        alert(
+          `Request ${
+            action === "approve" ? "approved" : "rejected"
+          } successfully`
+        );
+        console.log("🎉 Request processed successfully");
+      } catch (error) {
+        console.error("❌ Error updating request:", error);
+        console.error("Error details:", error.response?.data || error.message);
+        alert(
+          "Failed to update request status: " +
+            (error.response?.data?.message || error.message)
+        );
+      }
     },
-    [deliveryOptions]
+    [pendingRequests, getRequesterInfo, addChatContact]
   );
-
   // Toggle functions
   const toggleModal = useCallback(() => {
     setIsModalOpen(!isModalOpen);
@@ -455,57 +606,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
     setActiveIcon("icon5");
   }, []);
 
-  // Helper functions
-  const addChatContact = useCallback((contact) => {
-    const storedContacts =
-      JSON.parse(localStorage.getItem("chatContacts")) || [];
-    const contactExists = storedContacts.some((c) => c.email === contact.email);
-
-    if (!contactExists) {
-      const updatedContacts = [...storedContacts, contact];
-      localStorage.setItem("chatContacts", JSON.stringify(updatedContacts));
-    }
-  }, []);
-
-  const getRequesterInfo = useCallback((requesterEmail) => {
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-    const requester = users.find((user) => user.email === requesterEmail);
-
-    return (
-      requester || {
-        email: requesterEmail,
-        name: requesterEmail.split("@")[0],
-        profileImage: null,
-      }
-    );
-  }, []);
-
-  const formatRelativeTime = useCallback((timestamp) => {
-    const now = new Date();
-    const requestTime = new Date(timestamp);
-    const seconds = Math.floor((now - requestTime) / 1000);
-
-    let interval = Math.floor(seconds / 31536000);
-    if (interval >= 1)
-      return `${interval} year${interval === 1 ? "" : "s"} ago`;
-
-    interval = Math.floor(seconds / 2592000);
-    if (interval >= 1)
-      return `${interval} month${interval === 1 ? "" : "s"} ago`;
-
-    interval = Math.floor(seconds / 86400);
-    if (interval >= 1) return `${interval} day${interval === 1 ? "" : "s"} ago`;
-
-    interval = Math.floor(seconds / 3600);
-    if (interval >= 1)
-      return `${interval} hour${interval === 1 ? "" : "s"} ago`;
-
-    interval = Math.floor(seconds / 60);
-    if (interval >= 1) return `${interval} min${interval === 1 ? "" : "s"} ago`;
-
-    return "Just now";
-  }, []);
-
   const toggleFavorite = useCallback((deliveryId) => {
     setFavorites((prevFavorites) => {
       if (prevFavorites.includes(deliveryId)) {
@@ -524,6 +624,12 @@ const HomePage = ({ user, setUser, onLogout }) => {
         <header className="homepage-header">
           <img className="homepage-sameway-logo" src={samewayLogo} />
           <div className="grouped-elements">
+            <button
+              onClick={() => window.location.reload()}
+              style={{ marginRight: "10px", padding: "5px 10px" }}
+            >
+              Refresh
+            </button>
             <div className="notifications-dropdown-container">
               <div
                 className="bell-icon-container"
@@ -541,12 +647,12 @@ const HomePage = ({ user, setUser, onLogout }) => {
                   {pendingRequests.length > 0 ? (
                     <div className="requests-list">
                       {pendingRequests.map((request, index) => {
-                        const requesterUser = getRequesterInfo(
-                          request.requester
-                        );
-                        const delivery = deliveryOptions.find(
-                          (d) => d.id === request.deliveryId
-                        );
+                        const requesterUser = {
+                          email: request.requester,
+                          name:
+                            request.requesterName ||
+                            request.requester.split("@")[0],
+                        };
 
                         return (
                           <div
@@ -581,7 +687,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
                                   </p>
                                 </div>
                                 <p className="delivery-name">
-                                  Has applied to deliver the: {delivery?.name}
+                                  Has applied to deliver: {request.deliveryName}
                                 </p>
                               </div>
                             </div>
@@ -592,7 +698,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleRequestAction(
-                                      request.deliveryId,
                                       request.requestId,
                                       "approve"
                                     );
@@ -606,7 +711,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleRequestAction(
-                                      request.deliveryId,
                                       request.requestId,
                                       "decline"
                                     );
