@@ -161,50 +161,63 @@ const Chat = ({
 
   // Load contacts and messages from localStorage
   useEffect(() => {
-    const storedContacts =
-      JSON.parse(localStorage.getItem("chatContacts")) || [];
+    if (!user?.id) return;
+
+    const userContactsKey = `chatContacts_${user.id}`;
+    const storedContacts = JSON.parse(
+      localStorage.getItem(userContactsKey) || "[]"
+    );
     setContacts(storedContacts);
 
     if (selectedContact) {
-      setActiveContact(selectedContact);
-      const storedMessages =
-        JSON.parse(
-          localStorage.getItem(`chatMessages_${selectedContact.email}`)
-        ) || [];
+      const userMessagesKey = `chatMessages_${user.id}_${selectedContact.email}`;
+      const storedMessages = JSON.parse(
+        localStorage.getItem(userMessagesKey) || "[]"
+      );
       setMessages(storedMessages);
+
       if (isMobile) {
         setShowMessageView(true);
       }
     }
-  }, [selectedContact, isMobile, setShowFooter]);
+  }, [selectedContact, isMobile, setShowFooter, user]);
 
   const handleSendMessage = () => {
-    if (!newMessage.trim() || !activeContact) return;
+    if (!newMessage.trim() || !activeContact || !user?.id) return;
 
     const message = {
       id: Date.now(),
       sender: user.email,
+      senderId: user.id, // Add sender ID
+      receiverId: activeContact.id, // Add receiver ID
       text: newMessage,
       timestamp: new Date().toISOString(),
     };
 
     const updatedMessages = [...messages, message];
     setMessages(updatedMessages);
-    localStorage.setItem(
-      `chatMessages_${activeContact.email}`,
-      JSON.stringify(updatedMessages)
-    );
+
+    // Use user-specific storage
+    const userMessagesKey = `chatMessages_${user.id}_${activeContact.email}`;
+    localStorage.setItem(userMessagesKey, JSON.stringify(updatedMessages));
+
     setNewMessage("");
   };
 
   const handleContactClick = (contact) => {
     setActiveContact(contact);
-    const storedMessages =
-      JSON.parse(localStorage.getItem(`chatMessages_${contact.email}`)) || [];
-    setMessages(storedMessages);
+
+    if (user?.id) {
+      const userMessagesKey = `chatMessages_${user.id}_${contact.email}`;
+      const storedMessages = JSON.parse(
+        localStorage.getItem(userMessagesKey) || "[]"
+      );
+      setMessages(storedMessages);
+    }
+
     if (isMobile) {
       setShowMessageView(true);
-      setIsInMessageView(true); // This will hide the footer
+      setIsInMessageView(true);
     }
   };
 

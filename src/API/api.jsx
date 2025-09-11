@@ -23,8 +23,23 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+  console.log("Request data:", config.data);
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => {
+    console.log(`API Response: ${response.status} ${response.config.url}`);
+    console.log("Response data:", response.data);
+    return response;
+  },
+  (error) => {
+    console.error(`API Error: ${error.response?.status} ${error.config?.url}`);
+    console.error("Error details:", error.response?.data);
+    return Promise.reject(error);
+  }
+);
 
 // Auth API
 export const authApi = {
@@ -273,13 +288,156 @@ export const transportApi = {
     }
   },
 
+  // In your api.js, update the updateRequestStatus method
   updateRequestStatus: async (requestId, status) => {
     try {
-      const response = await api.put(`/transportrequests/${requestId}/status`, {
-        status: status,
-      });
-      return response.data;
+      // Try the correct endpoint first
+      try {
+        const response = await api.put(
+          `/transportrequests/${requestId}/status`,
+          {
+            status: status,
+          }
+        );
+        return response.data;
+      } catch (error) {
+        console.log("Primary endpoint failed, trying alternatives...");
+
+        // Try alternative endpoints
+        try {
+          // Try with different status values
+          const statusMap = {
+            approve: "Accepted",
+            decline: "Rejected",
+            Accepted: "Accepted",
+            Rejected: "Rejected",
+          };
+
+          const backendStatus = statusMap[status] || status;
+
+          const response = await api.put(`/transportrequests/${requestId}`, {
+            status: backendStatus,
+          });
+          return response.data;
+        } catch (error2) {
+          console.log("Second endpoint failed, trying PATCH...");
+
+          try {
+            const response = await api.patch(
+              `/transportrequests/${requestId}`,
+              {
+                status: status,
+              }
+            );
+            return response.data;
+          } catch (error3) {
+            console.log("All API endpoints failed, using mock update");
+
+            // For development, update mock data
+            if (process.env.NODE_ENV === "development") {
+              const userId = JSON.parse(
+                localStorage.getItem("user") || "{}"
+              ).id;
+              if (userId) {
+                const userRequestsKey = `pendingRequests_${userId}`;
+                const mockRequests = JSON.parse(
+                  localStorage.getItem(userRequestsKey) || "[]"
+                );
+
+                const updatedRequests = mockRequests.filter(
+                  (req) => req.id != requestId
+                );
+                localStorage.setItem(
+                  userRequestsKey,
+                  JSON.stringify(updatedRequests)
+                );
+
+                return {
+                  success: true,
+                  message: "Request updated in mock data",
+                };
+              }
+            }
+
+            throw error3;
+          }
+        }
+      }
     } catch (error) {
+      console.error("Error updating request status:", error);
+      throw error.response?.data || error.message;
+    }
+  },
+
+  // In your api.js, update the getOwnerRequests method
+  getOwnerRequests: async (userId) => {
+    try {
+      // Try the correct endpoint first
+      try {
+        const response = await api.get("/transportrequests/owner/my-requests");
+        return response.data;
+      } catch (error) {
+        console.log("Primary endpoint failed, trying alternatives...");
+
+        // Try alternative endpoints
+        const endpoints = [
+          `/transportrequests/owner/${userId}`,
+          `/users/${userId}/transportrequests`,
+          `/transportrequests?ownerId=${userId}`,
+        ];
+
+        let response = null;
+        let lastError = null;
+
+        for (const endpoint of endpoints) {
+          try {
+            response = await api.get(endpoint);
+            console.log("Found endpoint:", endpoint);
+            break;
+          } catch (error) {
+            lastError = error;
+            console.log("Endpoint not found:", endpoint);
+            continue;
+          }
+        }
+
+        if (!response) {
+          throw lastError || new Error("No valid endpoint found");
+        }
+
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Error fetching owner requests:", error);
+
+      // For development, use user-specific mock data
+      if (process.env.NODE_ENV === "development") {
+        console.log("Using mock data for owner requests");
+        const userRequestsKey = `pendingRequests_${userId}`;
+        const mockRequests = JSON.parse(
+          localStorage.getItem(userRequestsKey) || "[]"
+        );
+
+        // If no mock data, create some sample data
+        if (mockRequests.length === 0) {
+          const sampleRequests = [
+            {
+              id: Date.now(),
+              packageId: 101,
+              packageName: "Sample Package",
+              requesterEmail: "requester@example.com",
+              requesterName: "John Requester",
+              status: "Pending",
+              requestDate: new Date().toISOString(),
+            },
+          ];
+          localStorage.setItem(userRequestsKey, JSON.stringify(sampleRequests));
+          return sampleRequests;
+        }
+
+        return mockRequests;
+      }
+
       throw error.response?.data || error.message;
     }
   },

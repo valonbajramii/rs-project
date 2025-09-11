@@ -291,88 +291,87 @@ const HomePage = ({ user, setUser, onLogout }) => {
           return;
         }
 
-        console.log("📡 Fetching pending requests for user:", user.id);
+        console.log("📡 Fetching owner requests for user:", user.id);
 
-        // Fetch ALL transport requests from backend
-        const requests = await transportApi.getUserRequests(user.id);
-        console.log("📦 Raw requests from API:", requests);
+        try {
+          // Use the user-specific endpoint
+          const requests = await transportApi.getOwnerRequests(user.id);
+          console.log("📦 Owner requests from API:", requests);
 
-        if (!requests || !Array.isArray(requests)) {
-          console.log("❌ No requests returned or invalid format");
-          setPendingRequests([]);
-          return;
-        }
+          if (!requests) {
+            console.log("❌ No requests returned");
+            setPendingRequests([]);
+            return;
+          }
 
-        // Debug: Log the structure of the first request to see actual field names
-        if (requests.length > 0) {
-          console.log("🔍 First request structure:", requests[0]);
-          console.log("🔍 Available fields:", Object.keys(requests[0]));
-        }
+          // Handle different response formats
+          let requestsArray = [];
+          if (Array.isArray(requests)) {
+            requestsArray = requests;
+          } else if (requests.$values && Array.isArray(requests.$values)) {
+            requestsArray = requests.$values;
+          } else if (requests.data && Array.isArray(requests.data)) {
+            requestsArray = requests.data;
+          }
 
-        // First, let's get all packages owned by current user
-        const userPackages = deliveryOptions.filter(
-          (pkg) => pkg.createdBy === user.id
-        );
-        const userPackageIds = userPackages.map((pkg) => pkg.id);
+          console.log("📋 Processed requests array:", requestsArray);
 
-        console.log("📦 User's package IDs:", userPackageIds);
+          // Filter for pending requests only
+          const pending = requestsArray.filter((request) => {
+            const status = request.status || request.Status;
+            return status === "Pending" || status === "pending";
+          });
 
-        // Filter for pending requests where:
-        // 1. Status is Pending
-        // 2. The package belongs to current user (package owner)
-        const pending = requests.filter((request) => {
-          // Use the correct field names from your API response
-          const requestId = request.id || request.Id || request.requestId;
-          const packageId = request.packageId || request.PackageId;
-          const status = request.status || request.Status;
-          const isPending = status === "Pending";
+          console.log("⏳ Filtered pending requests:", pending);
 
-          // Check if package belongs to user
-          const isOwner = userPackageIds.includes(packageId);
+          // Transform to match your frontend format
+          const transformedPending = pending.map((request) => {
+            const requestId = request.id || request.Id || request.requestId;
+            const packageId = request.packageId || request.PackageId;
+            const packageName = request.packageName || request.PackageName;
+            const requesterEmail =
+              request.requesterEmail || request.RequesterEmail;
+            const requesterName =
+              request.requesterName || request.RequesterName;
+            const status = request.status || request.Status;
+            const timestamp =
+              request.requestDate || request.RequestDate || request.createdAt;
 
-          console.log(
-            `Request ${requestId}: PackageId=${packageId}, ` +
-              `Status=${status}, IsPending=${isPending}, IsOwner=${isOwner}`
+            return {
+              requestId: requestId,
+              deliveryId: packageId,
+              deliveryName: packageName,
+              requester: requesterEmail,
+              requesterName: requesterName,
+              status: status,
+              timestamp: timestamp,
+            };
+          });
+
+          console.log("🔄 Transformed pending requests:", transformedPending);
+          setPendingRequests(transformedPending);
+        } catch (apiError) {
+          console.error("❌ API Error:", apiError);
+          // For development, use user-specific mock data
+          const userRequestsKey = `pendingRequests_${user.id}`;
+          const fallbackRequests = JSON.parse(
+            localStorage.getItem(userRequestsKey) || "[]"
           );
-
-          return isPending && isOwner;
-        });
-
-        console.log("⏳ Filtered pending requests:", pending);
-
-        // Transform to match your frontend format
-        const transformedPending = pending.map((request) => {
-          const requestId = request.id || request.Id || request.requestId;
-          const packageId = request.packageId || request.PackageId;
-          const packageName = request.packageName || request.PackageName;
-          const requesterEmail =
-            request.requesterEmail || request.RequesterEmail;
-          const requesterName = request.requesterName || request.RequesterName;
-          const status = request.status || request.Status;
-          const timestamp = request.requestDate || request.RequestDate;
-
-          return {
-            requestId: requestId,
-            deliveryId: packageId,
-            deliveryName: packageName,
-            requester: requesterEmail,
-            requesterName: requesterName,
-            status: status,
-            timestamp: timestamp,
-          };
-        });
-
-        console.log("🔄 Transformed pending requests:", transformedPending);
-        setPendingRequests(transformedPending);
+          setPendingRequests(fallbackRequests);
+        }
       } catch (error) {
-        console.error("❌ Error fetching pending requests:", error);
-        console.error("Error details:", error.response?.data || error.message);
+        console.error("❌ Error in fetchPendingRequests:", error);
         setPendingRequests([]);
       }
     };
 
     fetchPendingRequests();
-  }, [user?.id, deliveryOptions]);
+
+    // Set up polling to check for new requests every 30 seconds
+    const intervalId = setInterval(fetchPendingRequests, 30000);
+
+    return () => clearInterval(intervalId);
+  }, [user?.id]); // Remove deliveryOptions dependency
 
   // Click outside handler
   useEffect(() => {
@@ -450,15 +449,14 @@ const HomePage = ({ user, setUser, onLogout }) => {
   }, []);
 
   // Request action handler
-  // Request action handler
+  // In your HomePage.jsx, update handleRequestAction
   const handleRequestAction = useCallback(
     async (requestId, action) => {
       try {
         console.log("🔄 Updating request:", requestId, "with action:", action);
-        console.log("📋 Current pending requests:", pendingRequests);
 
+        // Use the correct status values that match your backend enum
         const status = action === "approve" ? "Accepted" : "Rejected";
-        console.log("📊 Setting status to:", status);
 
         // Call the API to update the request status
         const response = await transportApi.updateRequestStatus(
@@ -483,14 +481,29 @@ const HomePage = ({ user, setUser, onLogout }) => {
             (req) => req.requestId === requestId
           );
 
-          if (request) {
+          if (request && user?.id) {
             console.log("📧 Found request:", request);
             const requesterUser = getRequesterInfo(request.requester);
             console.log("👤 Requester user info:", requesterUser);
-            addChatContact(requesterUser);
+
+            // Add to user-specific contacts
+            const userContactsKey = `chatContacts_${user.id}`;
+            const storedContacts = JSON.parse(
+              localStorage.getItem(userContactsKey) || "[]"
+            );
+            const contactExists = storedContacts.some(
+              (c) => c.email === requesterUser.email
+            );
+
+            if (!contactExists) {
+              const updatedContacts = [...storedContacts, requesterUser];
+              localStorage.setItem(
+                userContactsKey,
+                JSON.stringify(updatedContacts)
+              );
+            }
+
             console.log("✅ Contact added to chat");
-          } else {
-            console.log("❌ Request not found in pendingRequests");
           }
         }
 
@@ -499,18 +512,17 @@ const HomePage = ({ user, setUser, onLogout }) => {
             action === "approve" ? "approved" : "rejected"
           } successfully`
         );
-        console.log("🎉 Request processed successfully");
       } catch (error) {
         console.error("❌ Error updating request:", error);
-        console.error("Error details:", error.response?.data || error.message);
         alert(
           "Failed to update request status: " +
             (error.response?.data?.message || error.message)
         );
       }
     },
-    [pendingRequests, getRequesterInfo, addChatContact]
+    [pendingRequests, getRequesterInfo, user]
   );
+
   // Toggle functions
   const toggleModal = useCallback(() => {
     setIsModalOpen(!isModalOpen);

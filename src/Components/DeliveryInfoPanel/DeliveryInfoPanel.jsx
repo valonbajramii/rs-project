@@ -3,6 +3,7 @@ import "./DeliveryInfoPanel.css";
 import { v4 as uuidv4 } from "uuid";
 import { packagesApi, transportApi } from "../../API/api";
 import fallbackImage from "../../icons/car-front-fill.svg";
+import chevronLeft from "../../images/chevron-left.svg";
 
 const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -131,31 +132,60 @@ const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
         Message: `I would like to deliver your package: ${deliveryDetails.name}`,
       };
 
+      console.log("Sending request data:", requestData);
+
       const response = await transportApi.createRequest(requestData);
+      console.log("Request created:", response);
 
       // Add to chat contacts when request is sent
-      const newContact = {
-        email: packageOwner.email,
-        name: packageOwner.fullName || packageOwner.name,
-        profileImage: packageOwner.profileImage || null,
-      };
+      if (packageOwner) {
+        const newContact = {
+          id: packageOwner.id,
+          email: packageOwner.email,
+          name: packageOwner.fullName || packageOwner.name,
+          profileImage: packageOwner.profileImage || null,
+        };
 
-      const storedContacts =
-        JSON.parse(localStorage.getItem("chatContacts")) || [];
-      const contactExists = storedContacts.some(
-        (c) => c.email === newContact.email
-      );
+        // Use user-specific storage
+        if (user?.id) {
+          const userContactsKey = `chatContacts_${user.id}`;
+          const storedContacts = JSON.parse(
+            localStorage.getItem(userContactsKey) || "[]"
+          );
+          const contactExists = storedContacts.some(
+            (c) => c.email === newContact.email
+          );
 
-      if (!contactExists) {
-        const updatedContacts = [...storedContacts, newContact];
-        localStorage.setItem("chatContacts", JSON.stringify(updatedContacts));
+          if (!contactExists) {
+            const updatedContacts = [...storedContacts, newContact];
+            localStorage.setItem(
+              userContactsKey,
+              JSON.stringify(updatedContacts)
+            );
+          }
+        }
       }
 
       alert("Delivery request sent successfully!");
       onClose();
     } catch (error) {
       console.error("Failed to send request:", error);
-      alert(error.message || "Failed to send request. Please try again.");
+
+      // Show specific error messages
+      let errorMessage =
+        error.message || "Failed to send request. Please try again.";
+
+      if (error.response?.data) {
+        if (typeof error.response.data === "string") {
+          errorMessage = error.response.data;
+        } else if (error.response.data.message) {
+          errorMessage = error.response.data.message;
+        } else if (error.response.data.Title) {
+          errorMessage = error.response.data.Title;
+        }
+      }
+
+      alert(errorMessage);
     }
   };
 
@@ -164,7 +194,12 @@ const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
   return (
     <div className="delivery-info-panel-content">
       <button className="panel-close-button" onClick={onClose}>
-        ×
+        <img
+          src={chevronLeft}
+          className="chevron-left"
+          alt="Back"
+          onClick={onClose}
+        />
       </button>
 
       <div className="image-gallery">
