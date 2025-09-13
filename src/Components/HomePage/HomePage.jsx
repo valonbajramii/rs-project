@@ -282,96 +282,97 @@ const HomePage = ({ user, setUser, onLogout }) => {
   );
 
   // Pending requests logic - FETCH FROM BACKEND
-  // Pending requests logic - FIXED VERSION
-  useEffect(() => {
-    const fetchPendingRequests = async () => {
+  const fetchPendingRequests = useCallback(async () => {
+    try {
+      if (!user?.id) {
+        console.log("❌ No user ID available");
+        return;
+      }
+
+      console.log("📡 Fetching owner requests for user:", user.id);
+
       try {
-        if (!user?.id) {
-          console.log("❌ No user ID available");
+        // Use the correct endpoint
+        const response = await transportApi.getOwnerRequests(user.id);
+        console.log("📦 Owner requests from API:", response);
+
+        if (!response) {
+          console.log("❌ No requests returned");
+          setPendingRequests([]);
           return;
         }
 
-        console.log("📡 Fetching owner requests for user:", user.id);
-
-        try {
-          // Use the user-specific endpoint
-          const requests = await transportApi.getOwnerRequests(user.id);
-          console.log("📦 Owner requests from API:", requests);
-
-          if (!requests) {
-            console.log("❌ No requests returned");
-            setPendingRequests([]);
-            return;
-          }
-
-          // Handle different response formats
-          let requestsArray = [];
-          if (Array.isArray(requests)) {
-            requestsArray = requests;
-          } else if (requests.$values && Array.isArray(requests.$values)) {
-            requestsArray = requests.$values;
-          } else if (requests.data && Array.isArray(requests.data)) {
-            requestsArray = requests.data;
-          }
-
-          console.log("📋 Processed requests array:", requestsArray);
-
-          // Filter for pending requests only
-          const pending = requestsArray.filter((request) => {
-            const status = request.status || request.Status;
-            return status === "Pending" || status === "pending";
-          });
-
-          console.log("⏳ Filtered pending requests:", pending);
-
-          // Transform to match your frontend format
-          const transformedPending = pending.map((request) => {
-            const requestId = request.id || request.Id || request.requestId;
-            const packageId = request.packageId || request.PackageId;
-            const packageName = request.packageName || request.PackageName;
-            const requesterEmail =
-              request.requesterEmail || request.RequesterEmail;
-            const requesterName =
-              request.requesterName || request.RequesterName;
-            const status = request.status || request.Status;
-            const timestamp =
-              request.requestDate || request.RequestDate || request.createdAt;
-
-            return {
-              requestId: requestId,
-              deliveryId: packageId,
-              deliveryName: packageName,
-              requester: requesterEmail,
-              requesterName: requesterName,
-              status: status,
-              timestamp: timestamp,
-            };
-          });
-
-          console.log("🔄 Transformed pending requests:", transformedPending);
-          setPendingRequests(transformedPending);
-        } catch (apiError) {
-          console.error("❌ API Error:", apiError);
-          // For development, use user-specific mock data
-          const userRequestsKey = `pendingRequests_${user.id}`;
-          const fallbackRequests = JSON.parse(
-            localStorage.getItem(userRequestsKey) || "[]"
-          );
-          setPendingRequests(fallbackRequests);
+        // Handle different response formats
+        let requestsArray = [];
+        if (Array.isArray(response)) {
+          requestsArray = response;
+        } else if (response.$values && Array.isArray(response.$values)) {
+          requestsArray = response.$values;
+        } else if (response.data && Array.isArray(response.data)) {
+          requestsArray = response.data;
         }
-      } catch (error) {
-        console.error("❌ Error in fetchPendingRequests:", error);
-        setPendingRequests([]);
-      }
-    };
 
+        console.log("📋 Processed requests array:", requestsArray);
+
+        // Filter for pending requests only - handle both string and enum values
+        const pending = requestsArray.filter((request) => {
+          const status = request.status || request.Status;
+          console.log("📊 Request status:", status, "Type:", typeof status);
+          return status === "Pending" || status === "pending" || status === 0; // 0 might be enum value
+        });
+
+        console.log("⏳ Filtered pending requests:", pending);
+
+        // Transform to match your frontend format with proper field mapping
+        const transformedPending = pending.map((request) => {
+          // Handle different field name variations
+          const requestId = request.id || request.Id || request.requestId;
+          const packageId = request.packageId || request.PackageId;
+          const packageName = request.packageName || request.PackageName;
+          const requesterEmail =
+            request.requesterEmail || request.RequesterEmail;
+          const requesterName = request.requesterName || request.RequesterName;
+          const status = request.status || request.Status;
+          const timestamp =
+            request.requestDate || request.RequestDate || request.createdAt;
+
+          return {
+            requestId: requestId,
+            deliveryId: packageId,
+            deliveryName: packageName,
+            requester: requesterEmail,
+            requesterName: requesterName,
+            status: status,
+            timestamp: timestamp,
+          };
+        });
+
+        console.log("🔄 Transformed pending requests:", transformedPending);
+        setPendingRequests(transformedPending);
+      } catch (apiError) {
+        console.error("❌ API Error:", apiError);
+        // For development, use user-specific mock data
+        const userRequestsKey = `pendingRequests_${user.id}`;
+        const fallbackRequests = JSON.parse(
+          localStorage.getItem(userRequestsKey) || "[]"
+        );
+        setPendingRequests(fallbackRequests);
+      }
+    } catch (error) {
+      console.error("❌ Error in fetchPendingRequests:", error);
+      setPendingRequests([]);
+    }
+  }, [user?.id]); // Add dependencies here
+
+  // Then update your useEffect to use the function
+  useEffect(() => {
     fetchPendingRequests();
 
     // Set up polling to check for new requests every 30 seconds
     const intervalId = setInterval(fetchPendingRequests, 30000);
 
     return () => clearInterval(intervalId);
-  }, [user?.id]); // Remove deliveryOptions dependency
+  }, [fetchPendingRequests]); // Add fetchPendingRequests to dependencies
 
   // Click outside handler
   useEffect(() => {
@@ -474,38 +475,10 @@ const HomePage = ({ user, setUser, onLogout }) => {
           return updatedRequests;
         });
 
-        // If approved, ensure contact is added to chat
-        if (action === "approve") {
-          console.log("🤝 Request approved, adding to chat contacts");
-          const request = pendingRequests.find(
-            (req) => req.requestId === requestId
-          );
-
-          if (request && user?.id) {
-            console.log("📧 Found request:", request);
-            const requesterUser = getRequesterInfo(request.requester);
-            console.log("👤 Requester user info:", requesterUser);
-
-            // Add to user-specific contacts
-            const userContactsKey = `chatContacts_${user.id}`;
-            const storedContacts = JSON.parse(
-              localStorage.getItem(userContactsKey) || "[]"
-            );
-            const contactExists = storedContacts.some(
-              (c) => c.email === requesterUser.email
-            );
-
-            if (!contactExists) {
-              const updatedContacts = [...storedContacts, requesterUser];
-              localStorage.setItem(
-                userContactsKey,
-                JSON.stringify(updatedContacts)
-              );
-            }
-
-            console.log("✅ Contact added to chat");
-          }
-        }
+        // Refresh the requests list after action
+        setTimeout(() => {
+          fetchPendingRequests();
+        }, 1000);
 
         alert(
           `Request ${
@@ -520,7 +493,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
         );
       }
     },
-    [pendingRequests, getRequesterInfo, user]
+    [fetchPendingRequests] // Add fetchPendingRequests to dependencies
   );
 
   // Toggle functions
@@ -640,6 +613,9 @@ const HomePage = ({ user, setUser, onLogout }) => {
               onClick={() => window.location.reload()}
               style={{ marginRight: "10px", padding: "5px 10px" }}
             >
+              <small>
+                User: {user?.id} | Requests: {pendingRequests.length}
+              </small>
               Refresh
             </button>
             <div className="notifications-dropdown-container">

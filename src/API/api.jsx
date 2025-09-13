@@ -372,72 +372,74 @@ export const transportApi = {
   // In your api.js, update the getOwnerRequests method
   getOwnerRequests: async (userId) => {
     try {
-      // Try the correct endpoint first
-      try {
-        const response = await api.get("/transportrequests/owner/my-requests");
-        return response.data;
-      } catch (error) {
-        console.log("Primary endpoint failed, trying alternatives...");
+      console.log("🔄 Fetching owner requests for user:", userId);
 
-        // Try alternative endpoints
-        const endpoints = [
-          `/transportrequests/owner/${userId}`,
-          `/users/${userId}/transportrequests`,
-          `/transportrequests?ownerId=${userId}`,
-        ];
+      const response = await api.get("/transportrequests/owner/my-requests");
+      console.log("📦 Raw API response:", response);
+      console.log("📦 Response data:", response.data);
 
-        let response = null;
-        let lastError = null;
-
-        for (const endpoint of endpoints) {
-          try {
-            response = await api.get(endpoint);
-            console.log("Found endpoint:", endpoint);
-            break;
-          } catch (error) {
-            lastError = error;
-            console.log("Endpoint not found:", endpoint);
-            continue;
-          }
-        }
-
-        if (!response) {
-          throw lastError || new Error("No valid endpoint found");
-        }
-
-        return response.data;
-      }
+      return response.data;
     } catch (error) {
-      console.error("Error fetching owner requests:", error);
+      console.error("❌ Error in getOwnerRequests:", error);
+      console.error("❌ Error response:", error.response?.data);
 
-      // For development, use user-specific mock data
+      // For development fallback
       if (process.env.NODE_ENV === "development") {
-        console.log("Using mock data for owner requests");
-        const userRequestsKey = `pendingRequests_${userId}`;
-        const mockRequests = JSON.parse(
-          localStorage.getItem(userRequestsKey) || "[]"
-        );
-
-        // If no mock data, create some sample data
-        if (mockRequests.length === 0) {
-          const sampleRequests = [
-            {
-              id: Date.now(),
-              packageId: 101,
-              packageName: "Sample Package",
-              requesterEmail: "requester@example.com",
-              requesterName: "John Requester",
-              status: "Pending",
-              requestDate: new Date().toISOString(),
-            },
-          ];
-          localStorage.setItem(userRequestsKey, JSON.stringify(sampleRequests));
-          return sampleRequests;
-        }
-
-        return mockRequests;
+        console.log("🔄 Using development fallback data");
+        return [
+          {
+            id: 1,
+            packageId: 101,
+            packageName: "Test Package",
+            requesterId: "test-user",
+            requesterName: "Test User",
+            requesterEmail: "test@example.com",
+            message: "Test request message",
+            status: "Pending",
+            requestDate: new Date().toISOString(),
+          },
+        ];
       }
 
+      throw error.response?.data || error.message;
+    }
+  },
+};
+
+// API/api.js - Add to transportApi or create new messagesApi
+export const messagesApi = {
+  sendMessage: async (messageData) => {
+    try {
+      const response = await api.post("/messages", messageData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  getConversation: async (otherUserId) => {
+    try {
+      const response = await api.get(`/messages/conversation/${otherUserId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  getContacts: async () => {
+    try {
+      const response = await api.get("/messages/contacts");
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  markAsRead: async (messageId) => {
+    try {
+      const response = await api.put(`/messages/${messageId}/read`);
+      return response.data;
+    } catch (error) {
       throw error.response?.data || error.message;
     }
   },

@@ -144,6 +144,7 @@ import "./Chat.css";
 import UserAvatar from "../UserAvatar/UserAvatar";
 import chevronLeft from "../../images/chevron-left.svg";
 import { useMediaQuery } from "react-responsive";
+import { messagesApi } from "../../API/api";
 
 const Chat = ({
   user,
@@ -159,61 +160,79 @@ const Chat = ({
   const [showMessageView, setShowMessageView] = useState(false);
   const isMobile = useMediaQuery({ maxWidth: 480 });
 
-  // Load contacts and messages from localStorage
+  // Load contacts from API
   useEffect(() => {
-    if (!user?.id) return;
-
-    const userContactsKey = `chatContacts_${user.id}`;
-    const storedContacts = JSON.parse(
-      localStorage.getItem(userContactsKey) || "[]"
-    );
-    setContacts(storedContacts);
-
-    if (selectedContact) {
-      const userMessagesKey = `chatMessages_${user.id}_${selectedContact.email}`;
-      const storedMessages = JSON.parse(
-        localStorage.getItem(userMessagesKey) || "[]"
-      );
-      setMessages(storedMessages);
-
-      if (isMobile) {
-        setShowMessageView(true);
+    const loadContacts = async () => {
+      try {
+        const contactsData = await messagesApi.getContacts();
+        console.log("📞 Contacts from API:", contactsData); // Debug log
+        setContacts(contactsData);
+      } catch (error) {
+        console.error("Error loading contacts:", error);
+        // Fallback to localStorage if API fails
+        const storedContacts = JSON.parse(
+          localStorage.getItem("chatContacts") || "[]"
+        );
+        setContacts(storedContacts);
       }
-    }
-  }, [selectedContact, isMobile, setShowFooter, user]);
-
-  const handleSendMessage = () => {
-    if (!newMessage.trim() || !activeContact || !user?.id) return;
-
-    const message = {
-      id: Date.now(),
-      sender: user.email,
-      senderId: user.id, // Add sender ID
-      receiverId: activeContact.id, // Add receiver ID
-      text: newMessage,
-      timestamp: new Date().toISOString(),
     };
 
-    const updatedMessages = [...messages, message];
-    setMessages(updatedMessages);
+    if (user?.id) {
+      loadContacts();
+    }
+  }, [user?.id]);
 
-    // Use user-specific storage
-    const userMessagesKey = `chatMessages_${user.id}_${activeContact.email}`;
-    localStorage.setItem(userMessagesKey, JSON.stringify(updatedMessages));
+  // Load messages from API when contact is selected
+  useEffect(() => {
+    const loadMessages = async () => {
+      if (!activeContact || !user?.id) return;
 
-    setNewMessage("");
+      try {
+        const messagesData = await messagesApi.getConversation(
+          activeContact.id
+        );
+        console.log("📨 Messages from API:", messagesData); // Debug log
+        setMessages(messagesData);
+      } catch (error) {
+        console.error("Error loading messages:", error);
+        // Fallback to localStorage if API fails
+        if (user?.id) {
+          const userMessagesKey = `chatMessages_${user.id}_${activeContact.email}`;
+          const storedMessages = JSON.parse(
+            localStorage.getItem(userMessagesKey) || "[]"
+          );
+          setMessages(storedMessages);
+        }
+      }
+    };
+
+    loadMessages();
+  }, [activeContact, user?.id]);
+
+  // Send message to API
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !activeContact || !user?.id) return;
+
+    try {
+      const messageData = {
+        ReceiverId: activeContact.id,
+        Content: newMessage,
+      };
+
+      const sentMessage = await messagesApi.sendMessage(messageData);
+      console.log("✅ Sent message:", sentMessage); // Debug log
+
+      // Add the sent message to local state
+      setMessages((prev) => [...prev, sentMessage]);
+      setNewMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("Failed to send message: " + (error.message || "Unknown error"));
+    }
   };
 
   const handleContactClick = (contact) => {
     setActiveContact(contact);
-
-    if (user?.id) {
-      const userMessagesKey = `chatMessages_${user.id}_${contact.email}`;
-      const storedMessages = JSON.parse(
-        localStorage.getItem(userMessagesKey) || "[]"
-      );
-      setMessages(storedMessages);
-    }
 
     if (isMobile) {
       setShowMessageView(true);
@@ -223,13 +242,7 @@ const Chat = ({
 
   const handleBackToContacts = () => {
     setShowMessageView(false);
-    setIsInMessageView(false); // This will show the footer again
-  };
-
-  // And in the onClose handler for the back button in the header:
-  const handleCloseChat = () => {
-    onClose();
-    setIsInMessageView(false); // Ensure footer shows when closing chat
+    setIsInMessageView(false);
   };
 
   const formatTime = (timestamp) => {
@@ -247,7 +260,9 @@ const Chat = ({
           </button>
           <div className="contact-info-header">
             <UserAvatar user={activeContact} />
-            <span className="contact-name">{activeContact.name}</span>
+            <span className="contact-name">
+              {activeContact.fullName || activeContact.name}
+            </span>
           </div>
         </div>
 
@@ -256,11 +271,11 @@ const Chat = ({
             <div
               key={message.id}
               className={`message ${
-                message.sender === user.email ? "sent" : "received"
+                message.senderId === user.id ? "sent" : "received"
               }`}
             >
               <div className="message-content">
-                <p>{message.text}</p>
+                <p>{message.content || message.text}</p>
                 <span className="message-time">
                   {formatTime(message.timestamp)}
                 </span>
@@ -316,17 +331,19 @@ const Chat = ({
               <div className="contacts-list">
                 {contacts.map((contact) => (
                   <div
-                    key={contact.email}
+                    key={contact.id || contact.email}
                     className={`contact-item ${
-                      activeContact?.email === contact.email ? "active" : ""
+                      activeContact?.id === contact.id ? "active" : ""
                     }`}
                     onClick={() => handleContactClick(contact)}
                   >
                     <UserAvatar user={contact} />
                     <div className="contact-info">
-                      <span className="contact-name">{contact.name}</span>
+                      <span className="contact-name">
+                        {contact.fullName || contact.name}
+                      </span>
                       <span className="last-message">
-                        {contact.lastMessage || ""}
+                        {/* You can add last message logic here later */}
                       </span>
                     </div>
                   </div>
@@ -344,7 +361,9 @@ const Chat = ({
                   <div className="message-header">
                     <UserAvatar user={activeContact} />
                     <div className="contact-details">
-                      <span className="contact-name">{activeContact.name}</span>
+                      <span className="contact-name">
+                        {activeContact.fullName || activeContact.name}
+                      </span>
                       <span className="contact-status">Online</span>
                     </div>
                   </div>
@@ -354,11 +373,11 @@ const Chat = ({
                       <div
                         key={message.id}
                         className={`message ${
-                          message.sender === user.email ? "sent" : "received"
+                          message.senderId === user.id ? "sent" : "received"
                         }`}
                       >
                         <div className="message-content">
-                          <p>{message.text}</p>
+                          <p>{message.content || message.text}</p>
                           <span className="message-time">
                             {formatTime(message.timestamp)}
                           </span>
