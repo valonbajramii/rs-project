@@ -1,5 +1,5 @@
 import React from "react";
-import "./UserAvatar.css"; // You'll need to create this CSS file
+import "./UserAvatar.css";
 
 const UserAvatar = ({ user }) => {
   if (!user) return null;
@@ -13,8 +13,15 @@ const UserAvatar = ({ user }) => {
     );
   }
 
-  // If no profile image, use first letter of name
-  const firstLetter = user.name ? user.name.charAt(0).toUpperCase() : "U";
+  // Get first letter from various possible name fields
+  const getFirstLetter = () => {
+    if (user.fullName) return user.fullName.charAt(0).toUpperCase();
+    if (user.name) return user.name.charAt(0).toUpperCase();
+    if (user.email) return user.email.charAt(0).toUpperCase();
+    return "U";
+  };
+
+  const firstLetter = getFirstLetter();
 
   return <div className="user-avatar avatar-letter">{firstLetter}</div>;
 };
