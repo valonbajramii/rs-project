@@ -292,7 +292,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
       console.log("📡 Fetching owner requests for user:", user.id);
 
       try {
-        // Use the correct endpoint
         const response = await transportApi.getOwnerRequests(user.id);
         console.log("📦 Owner requests from API:", response);
 
@@ -306,7 +305,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
         let requestsArray = [];
         if (Array.isArray(response)) {
           requestsArray = response;
-        } else if (response.$values && Array.isArray(response.$values)) {
+        } else if (response?.$values && Array.isArray(response.$values)) {
           requestsArray = response.$values;
         } else if (response.data && Array.isArray(response.data)) {
           requestsArray = response.data;
@@ -314,38 +313,62 @@ const HomePage = ({ user, setUser, onLogout }) => {
 
         console.log("📋 Processed requests array:", requestsArray);
 
-        // Filter for pending requests only - handle both string and enum values
+        // Filter for pending requests only
         const pending = requestsArray.filter((request) => {
           const status = request.status || request.Status;
-          console.log("📊 Request status:", status, "Type:", typeof status);
-          return status === "Pending" || status === "pending" || status === 0; // 0 might be enum value
+          return status === "Pending" || status === "pending" || status === 0;
         });
 
         console.log("⏳ Filtered pending requests:", pending);
 
         // Transform to match your frontend format with proper field mapping
-        const transformedPending = pending.map((request) => {
-          // Handle different field name variations
-          const requestId = request.id || request.Id || request.requestId;
-          const packageId = request.packageId || request.PackageId;
-          const packageName = request.packageName || request.PackageName;
-          const requesterEmail =
-            request.requesterEmail || request.RequesterEmail;
-          const requesterName = request.requesterName || request.RequesterName;
-          const status = request.status || request.Status;
-          const timestamp =
-            request.requestDate || request.RequestDate || request.createdAt;
+        const transformedPending = await Promise.all(
+          pending.map(async (request) => {
+            // Handle different field name variations
+            const requestId = request.id || request.Id || request.requestId;
+            const packageId = request.packageId || request.PackageId;
 
-          return {
-            requestId: requestId,
-            deliveryId: packageId,
-            deliveryName: packageName,
-            requester: requesterEmail,
-            requesterName: requesterName,
-            status: status,
-            timestamp: timestamp,
-          };
-        });
+            // Try to get package name from multiple possible sources
+            let packageName = request.packageName || request.PackageName;
+
+            // If package name is not available, try to fetch it from the API
+            if (!packageName && packageId) {
+              try {
+                const packageDetails = await packagesApi.getPackageById(
+                  packageId
+                );
+                packageName =
+                  packageDetails.name ||
+                  packageDetails.Name ||
+                  "Unknown Package";
+              } catch (error) {
+                console.error("Error fetching package details:", error);
+                packageName = "Unknown Package";
+              }
+            }
+
+            const requesterEmail =
+              request.requesterEmail || request.RequesterEmail;
+            const requesterName =
+              request.requesterName || request.RequesterName;
+            const requesterProfileImage =
+              request.requesterProfileImage || request.RequesterProfileImage;
+            const status = request.status || request.Status;
+            const timestamp =
+              request.requestDate || request.RequestDate || request.createdAt;
+
+            return {
+              requestId: requestId,
+              deliveryId: packageId,
+              deliveryName: packageName || "Package Delivery", // Fallback name
+              requester: requesterEmail,
+              requesterName: requesterName,
+              requesterProfileImage: requesterProfileImage,
+              status: status,
+              timestamp: timestamp,
+            };
+          })
+        );
 
         console.log("🔄 Transformed pending requests:", transformedPending);
         setPendingRequests(transformedPending);
@@ -424,8 +447,27 @@ const HomePage = ({ user, setUser, onLogout }) => {
   }, []);
 
   const formatRelativeTime = useCallback((timestamp) => {
+    if (!timestamp) return "Just now";
+
+    let requestTime;
+
+    // Handle different timestamp formats
+    if (typeof timestamp === "string") {
+      requestTime = new Date(timestamp);
+    } else if (typeof timestamp === "number") {
+      requestTime = new Date(timestamp);
+    } else if (timestamp instanceof Date) {
+      requestTime = timestamp;
+    } else {
+      return "Just now";
+    }
+
+    // Check if the date is valid
+    if (isNaN(requestTime.getTime())) {
+      return "Just now";
+    }
+
     const now = new Date();
-    const requestTime = new Date(timestamp);
     const seconds = Math.floor((now - requestTime) / 1000);
 
     let interval = Math.floor(seconds / 31536000);
@@ -640,6 +682,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
                           name:
                             request.requesterName ||
                             request.requester.split("@")[0],
+                          profileImage: request.requesterProfileImage, // Add this from the API response
                         };
 
                         return (
@@ -675,7 +718,8 @@ const HomePage = ({ user, setUser, onLogout }) => {
                                   </p>
                                 </div>
                                 <p className="delivery-name">
-                                  Has applied to deliver: {request.deliveryName}
+                                  Has applied to deliver:{" "}
+                                  {request.deliveryName || "your package"}
                                 </p>
                               </div>
                             </div>

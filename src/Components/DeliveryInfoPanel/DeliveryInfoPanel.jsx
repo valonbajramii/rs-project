@@ -327,7 +327,11 @@ const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
             <>
               <div className="owner-avatar">
                 {packageOwner.profileImage ? (
-                  <img src={packageOwner.profileImage} alt="Owner" />
+                  <img
+                    className="owner-avatar-img"
+                    src={packageOwner.profileImage}
+                    alt="Owner"
+                  />
                 ) : (
                   <div className="owner-initial">
                     {packageOwner.fullName

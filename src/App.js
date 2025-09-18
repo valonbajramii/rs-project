@@ -248,7 +248,11 @@ function App() {
             path="/profile"
             element={
               user ? (
-                <Profile user={user} onLogout={handleLogout} />
+                <Profile
+                  user={user}
+                  onLogout={handleLogout}
+                  setUser={setUser}
+                />
               ) : (
                 <Navigate to="/login" />
               )

@@ -840,10 +840,12 @@
 // };
 
 // export default CompleteProfile;
+
 import React, { useState, useEffect } from "react";
 import "./CompleteProfile.css";
 import { useNavigate } from "react-router-dom";
 import paperReplice from "../../icons/paperclip.svg";
+import cameraIcon from "../../icons/camera-fill.svg"; // Add camera icon
 import { authApi } from "../../API/api";
 
 const CompleteProfile = ({ user, setUser }) => {
@@ -856,8 +858,10 @@ const CompleteProfile = ({ user, setUser }) => {
     zip: "",
     idDocument: null,
     drivingLicense: null,
+    profileImage: null, // Add profile image state
   });
 
+  const [previewImage, setPreviewImage] = useState(null); // For image preview
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -884,6 +888,15 @@ const CompleteProfile = ({ user, setUser }) => {
   const handleFileUpload = (e, fieldName) => {
     const file = e.target.files[0];
     if (file) {
+      if (fieldName === "profileImage") {
+        // Create preview for profile image
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreviewImage(reader.result);
+        };
+        reader.readAsDataURL(file);
+      }
+
       setProfileData((prev) => ({
         ...prev,
         [fieldName]: file,
@@ -900,6 +913,7 @@ const CompleteProfile = ({ user, setUser }) => {
     if (!profileData.zip) newErrors.zip = "Required";
     if (!profileData.idDocument) newErrors.idDocument = "Required";
     if (!profileData.drivingLicense) newErrors.drivingLicense = "Required";
+    if (!profileData.profileImage) newErrors.profileImage = "Required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -921,11 +935,10 @@ const CompleteProfile = ({ user, setUser }) => {
       formData.append("IdDocument", profileData.idDocument);
       formData.append("DrivingLicense", profileData.drivingLicense);
 
-      // Debug: Log form data before sending
-      for (let [key, value] of formData.entries()) {
-        console.log(key, value);
+      // Only append profile image if it exists
+      if (profileData.profileImage) {
+        formData.append("ProfileImage", profileData.profileImage);
       }
-
       const response = await authApi.completeProfile(formData);
 
       const updatedUser = {
@@ -939,25 +952,20 @@ const CompleteProfile = ({ user, setUser }) => {
         mobileNumber: response.user.MobileNumber || profileData.mobileNumber,
         idDocumentPath: response.user.IdDocumentPath,
         drivingLicensePath: response.user.DrivingLicensePath,
+        profileImage: response.user.ProfileImagePath, // Add profile image
       };
 
       setUser(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
       navigate("/homepage");
     } catch (error) {
-      console.error("Profile completion error:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
-
+      console.error("Profile completion error:", error);
       let errorMessage = "Error completing profile. Please try again.";
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
       } else if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       }
-
       setErrors({ form: errorMessage });
     } finally {
       setIsLoading(false);
@@ -976,6 +984,40 @@ const CompleteProfile = ({ user, setUser }) => {
         {errors.form && (
           <div className="alert alert-danger mb-4">{errors.form}</div>
         )}
+
+        {/* Profile Image Upload */}
+        <div className="profile-image-upload-container">
+          <div className="profile-image-preview">
+            {previewImage ? (
+              <img
+                src={previewImage}
+                alt="Profile preview"
+                className="profile-preview-image"
+              />
+            ) : (
+              <div className="profile-image-placeholder">
+                <img src={cameraIcon} alt="Upload profile" />
+              </div>
+            )}
+          </div>
+          <div className="file-upload-input">
+            <input
+              type="file"
+              id="profile-upload"
+              accept="image/*"
+              onChange={(e) => handleFileUpload(e, "profileImage")}
+              className="hidden-file-input"
+              disabled={isLoading}
+            />
+            <label htmlFor="profile-upload" className="file-upload-label">
+              <img src={paperReplice} alt="Upload" className="paperclip-icon" />
+              <span>Upload Profile Photo</span>
+            </label>
+          </div>
+          {errors.profileImage && (
+            <span className="error">{errors.profileImage}</span>
+          )}
+        </div>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -1112,18 +1154,7 @@ const CompleteProfile = ({ user, setUser }) => {
             className="complete-profile-button"
             disabled={isLoading}
           >
-            {isLoading ? (
-              <>
-                <span
-                  className="spinner-border spinner-border-sm me-2"
-                  role="status"
-                  aria-hidden="true"
-                ></span>
-                Processing...
-              </>
-            ) : (
-              "Complete Profile"
-            )}
+            {isLoading ? "Processing..." : "Complete Profile"}
           </button>
         </form>
       </div>

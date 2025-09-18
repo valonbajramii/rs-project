@@ -392,6 +392,7 @@ import cameraIcon from "../../icons/camera-fill.svg";
 import paperReplice from "../../icons/paperclip.svg";
 import { useMediaQuery } from "react-responsive";
 import MobileFooter from "../../Components/MobileFooter/MobileFooter";
+import { authApi } from "../../API/api";
 
 const Profile = ({ user, setUser, setShowProfile }) => {
   const isMobile = useMediaQuery({ maxWidth: 480 });
@@ -408,6 +409,7 @@ const Profile = ({ user, setUser, setShowProfile }) => {
     idDocument: user?.IdDocumentPath || user?.idDocumentPath || null,
     drivingLicense:
       user?.DrivingLicensePath || user?.drivingLicensePath || null,
+    profileImageFile: null, // Add this
   });
 
   const navigate = useNavigate();
@@ -468,6 +470,12 @@ const Profile = ({ user, setUser, setShowProfile }) => {
         setUploadedImage(reader.result);
       };
       reader.readAsDataURL(file);
+
+      // Also store the actual file for uploading
+      setProfileData((prev) => ({
+        ...prev,
+        profileImageFile: file, // Store the file object
+      }));
     }
   };
 
@@ -503,31 +511,84 @@ const Profile = ({ user, setUser, setShowProfile }) => {
 
   const handleSave = async () => {
     try {
-      // Call your backend API to update the profile
-      const response = await fetch("/api/profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          ...profileData,
-          profileImage: uploadedImage || user.profileImage,
-        }),
+      const formData = new FormData();
+
+      // Add text fields
+      formData.append(
+        "MobileNumber",
+        profileData.mobileNumber || user.mobileNumber || ""
+      );
+      formData.append(
+        "StreetAddress",
+        profileData.address || user.streetAddress || ""
+      );
+      formData.append("City", profileData.city || user.city || "");
+      formData.append("State", profileData.state || user.state || "");
+      formData.append("ZipCode", profileData.zip || user.zipCode || "");
+
+      // Add DateOfBirth
+      if (profileData.dateOfBirth || user.dateOfBirth) {
+        const dob = profileData.dateOfBirth || user.dateOfBirth;
+        formData.append("DateOfBirth", new Date(dob).toISOString());
+      }
+
+      // Only append files if they exist and are actual File objects
+      if (profileData.idDocument instanceof File) {
+        formData.append("IdDocument", profileData.idDocument);
+      }
+
+      if (profileData.drivingLicense instanceof File) {
+        formData.append("DrivingLicense", profileData.drivingLicense);
+      }
+
+      if (profileData.profileImageFile instanceof File) {
+        formData.append("ProfileImage", profileData.profileImageFile);
+      }
+
+      console.log("Sending form data with files:", {
+        hasIdDocument: profileData.idDocument instanceof File,
+        hasDrivingLicense: profileData.drivingLicense instanceof File,
+        hasProfileImage: profileData.profileImageFile instanceof File,
       });
 
-      if (!response.ok) throw new Error("Failed to update profile");
+      const response = await authApi.updateProfile(formData);
 
-      const updatedUser = await response.json();
+      // Update user state and local storage - FIXED: Check if setUser exists
+      const updatedUser = {
+        ...user,
+        ...response,
+        profileImage: response.profileImagePath || response.profileImage,
+      };
 
-      // Update user state and local storage
-      setUser(updatedUser);
+      // Only call setUser if it's a function
+      if (typeof setUser === "function") {
+        setUser(updatedUser);
+      } else {
+        console.warn("setUser is not a function. Component might be embedded.");
+      }
+
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
       alert("Profile updated successfully!");
     } catch (error) {
-      console.error("Profile update error:", error);
-      alert("Error updating profile. Please try again.");
+      console.error("Full error details:", error);
+      console.error("Error response:", error.response);
+      console.error("Error data:", error.response?.data);
+
+      // Better error handling
+      if (error.response?.data?.errors) {
+        const validationErrors = error.response.data.errors;
+        const errorMessages = Object.entries(validationErrors)
+          .map(([field, errors]) => `${field}: ${errors.join(", ")}`)
+          .join("\n");
+        alert(`Validation errors:\n${errorMessages}`);
+      } else if (error.response?.data?.message) {
+        alert(`Error: ${error.response.data.message}`);
+      } else if (error.message) {
+        alert(`Error: ${error.message}`);
+      } else {
+        alert("Error updating profile. Please try again.");
+      }
     }
   };
 
@@ -713,9 +774,9 @@ const Profile = ({ user, setUser, setShowProfile }) => {
             </div>
 
             <div className="profile-actions">
-              {/* <button className="profile-save-button" onClick={handleSave}>
+              <button className="profile-save-button" onClick={handleSave}>
                 Save Changes
-              </button> */}
+              </button>
               <button className="profile-logout-button" onClick={handleLogout}>
                 Log out
               </button>
