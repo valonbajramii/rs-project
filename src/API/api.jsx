@@ -933,7 +933,24 @@ export const transportApi = {
   getUserRequests: async (userId) => {
     try {
       const response = await api.get(`/transportrequests/user/${userId}`);
-      return response.data;
+
+      // Transform the response to include both owner and requester info
+      const requests = response.data.map((request) => ({
+        id: request.id,
+        packageId: request.packageId,
+        packageName: request.packageName,
+        ownerId: request.ownerId, // The package owner
+        requesterId: request.requesterId, // The person who requested to deliver
+        ownerEmail: request.ownerEmail,
+        requesterEmail: request.requesterEmail,
+        ownerName: request.ownerName,
+        requesterName: request.requesterName,
+        status: request.status,
+        requestDate: request.requestDate,
+        // Add other fields as needed
+      }));
+
+      return requests;
     } catch (error) {
       throw error.response?.data || error.message;
     }
@@ -1059,17 +1076,35 @@ export const transportApi = {
   getOwnerRequests: async (userId) => {
     try {
       const response = await api.get("/transportrequests/owner/my-requests");
+      console.log("📦 Raw owner requests response:", response.data);
 
-      // The response should now include profile image data
-      return response.data.map((request) => ({
-        requestId: request.id,
-        deliveryId: request.packageId,
-        deliveryName: request.packageName,
-        requester: request.requesterEmail,
-        requesterName: request.requesterName,
-        requesterProfileImage: request.requesterProfileImage, // Add this
-        status: request.status,
-        timestamp: request.requestDate,
+      // Handle different response formats
+      let requestsArray = [];
+      if (Array.isArray(response.data)) {
+        requestsArray = response.data;
+      } else if (
+        response.data?.$values &&
+        Array.isArray(response.data.$values)
+      ) {
+        requestsArray = response.data.$values;
+      } else if (Array.isArray(response.data.data)) {
+        requestsArray = response.data.data;
+      } else {
+        requestsArray = [response.data]; // Single object
+      }
+
+      console.log("📋 Processed requests array:", requestsArray);
+
+      return requestsArray.map((request) => ({
+        requestId: request.id || request.Id || request.requestId,
+        deliveryId: request.packageId || request.PackageId,
+        deliveryName: request.packageName || request.PackageName,
+        requester: request.requesterEmail || request.RequesterEmail,
+        requesterName: request.requesterName || request.RequesterName,
+        requesterProfileImage: request.requesterProfileImage,
+        status: request.status || request.Status,
+        timestamp:
+          request.requestDate || request.RequestDate || request.createdAt,
       }));
     } catch (error) {
       console.error("Error fetching requests:", error);

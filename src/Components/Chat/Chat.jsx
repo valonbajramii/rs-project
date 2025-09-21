@@ -3,7 +3,7 @@ import "./Chat.css";
 import UserAvatar from "../UserAvatar/UserAvatar";
 import chevronLeft from "../../images/chevron-left.svg";
 import { useMediaQuery } from "react-responsive";
-import { messagesApi, transportApi } from "../../API/api";
+import { messagesApi, transportApi, packagesApi } from "../../API/api";
 
 const Chat = ({
   user,
@@ -23,58 +23,179 @@ const Chat = ({
   useEffect(() => {
     const loadContacts = async () => {
       try {
-        // First, get transport requests to see who you've accepted
+        // Get all transport requests to see relationships
         const transportRequests = await transportApi.getUserRequests(user.id);
 
-        // Filter to only get accepted requests
-        const acceptedRequests = transportRequests.filter(
-          (request) =>
-            request.status === "Accepted" || request.status === "accepted"
+        // Also get requests where you are the requester (you applied to deliver)
+        const ownerRequests = await transportApi.getOwnerRequests(user.id);
+
+        console.log("📞 Your requests (transportRequests):", transportRequests);
+        console.log("📞 Requests to you (ownerRequests):", ownerRequests);
+
+        // Get ALL accepted requests from both perspectives
+        const allAcceptedRequests = [
+          ...transportRequests.filter(
+            (request) =>
+              request.status === "Accepted" ||
+              request.status === "accepted" ||
+              request.Status === "Accepted"
+          ),
+          ...ownerRequests.filter(
+            (request) =>
+              request.status === "Accepted" ||
+              request.status === "accepted" ||
+              request.Status === "Accepted"
+          ),
+        ];
+
+        console.log("✅ All accepted requests:", allAcceptedRequests);
+
+        // Get unique user IDs from both sides
+        const contactIds = new Set();
+
+        // Add users from all accepted relationships
+        allAcceptedRequests.forEach((request) => {
+          console.log("🔍 Processing request:", request);
+
+          // Determine who the other user is in this relationship
+          if (request.ownerId === user.id || request.OwnerId === user.id) {
+            // Current user is the owner, so the other user is the requester
+            const otherUserId = request.requesterId || request.RequesterId;
+            if (otherUserId && otherUserId !== user.id) {
+              console.log(`➕ Adding requester as contact: ${otherUserId}`);
+              contactIds.add(otherUserId);
+            }
+          } else if (
+            request.requesterId === user.id ||
+            request.RequesterId === user.id
+          ) {
+            // Current user is the requester, so the other user is the owner
+            const otherUserId = request.ownerId || request.OwnerId;
+            if (otherUserId && otherUserId !== user.id) {
+              console.log(`➕ Adding owner as contact: ${otherUserId}`);
+              contactIds.add(otherUserId);
+            }
+          } else {
+            // Fallback: try to extract from any available ID fields
+            const possibleIds = [
+              request.ownerId,
+              request.requesterId,
+              request.OwnerId,
+              request.RequesterId,
+              request.ownerID,
+              request.requesterID,
+              request.OwnerID,
+              request.RequesterID,
+            ];
+
+            possibleIds.forEach((id) => {
+              if (id && id !== user.id) {
+                console.log(`➕ Adding contact ID (fallback): ${id}`);
+                contactIds.add(id);
+              }
+            });
+          }
+        });
+
+        console.log("👥 Contact IDs:", Array.from(contactIds));
+
+        if (contactIds.size === 0) {
+          console.warn(
+            "⚠️ No contact IDs found. Trying email-based approach..."
+          );
+
+          // Try email-based approach as fallback
+          allAcceptedRequests.forEach((request) => {
+            if (
+              request.requesterEmail &&
+              request.requesterEmail !== user.email
+            ) {
+              console.log(
+                `📧 Using requester email as ID: ${request.requesterEmail}`
+              );
+              contactIds.add(request.requesterEmail);
+            }
+            if (request.ownerEmail && request.ownerEmail !== user.email) {
+              console.log(`📧 Using owner email as ID: ${request.ownerEmail}`);
+              contactIds.add(request.ownerEmail);
+            }
+          });
+        }
+
+        console.log("👥 Final Contact IDs:", Array.from(contactIds));
+
+        // Fetch user details for all contact IDs
+        const contactsPromises = Array.from(contactIds).map(
+          async (contactIdentifier) => {
+            try {
+              // Try to get user by ID/email
+              const userDetails = await packagesApi.getUser(contactIdentifier);
+              return userDetails;
+            } catch (error) {
+              console.error(`Error fetching user ${contactIdentifier}:`, error);
+
+              // Create basic contact info from request data
+              const matchingRequest = allAcceptedRequests.find(
+                (req) =>
+                  req.requesterId === contactIdentifier ||
+                  req.ownerId === contactIdentifier ||
+                  req.requesterEmail === contactIdentifier ||
+                  req.ownerEmail === contactIdentifier
+              );
+
+              if (matchingRequest) {
+                return {
+                  id: contactIdentifier,
+                  name:
+                    matchingRequest.requesterName ||
+                    matchingRequest.ownerName ||
+                    (contactIdentifier.includes("@")
+                      ? contactIdentifier.split("@")[0]
+                      : "Unknown User"),
+                  email:
+                    matchingRequest.requesterEmail ||
+                    matchingRequest.ownerEmail ||
+                    (contactIdentifier.includes("@") ? contactIdentifier : ""),
+                  profileImage: matchingRequest.requesterProfileImage || null,
+                };
+              }
+              return null;
+            }
+          }
         );
 
-        // Get the user IDs of people you've accepted
-        const acceptedUserIds = acceptedRequests.map(
-          (request) => request.requesterId
+        const contactsData = (await Promise.all(contactsPromises)).filter(
+          (contact) => contact !== null
         );
 
-        // Now get contacts from API but filter them
-        const contactsData = await messagesApi.getContacts();
+        console.log("📞 Final contacts:", contactsData);
 
-        // Only show contacts that you've accepted OR that have accepted you
-        const filteredContacts = contactsData.filter(
-          (contact) =>
-            acceptedUserIds.includes(contact.id) ||
-            contact.status === "Accepted" // If the contact has accepted you
+        // Also check localStorage for any previously saved contacts
+        const userContactsKey = `chatContacts_${user.id}`;
+        const storedContacts = JSON.parse(
+          localStorage.getItem(userContactsKey) || "[]"
         );
 
-        console.log("📞 Filtered contacts (accepted only):", filteredContacts);
-        setContacts(filteredContacts);
+        // Merge and deduplicate contacts
+        const allContacts = [...contactsData, ...storedContacts];
+        const uniqueContacts = allContacts.filter(
+          (contact, index, array) =>
+            array.findIndex(
+              (c) => c.id === contact.id || c.email === contact.email
+            ) === index
+        );
+
+        console.log("👥 All unique contacts:", uniqueContacts);
+        setContacts(uniqueContacts);
       } catch (error) {
         console.error("Error loading contacts:", error);
-        // Fallback: use localStorage but still filter
+        // Fallback to localStorage
+        const userContactsKey = `chatContacts_${user.id}`;
         const storedContacts = JSON.parse(
-          localStorage.getItem("chatContacts") || "[]"
+          localStorage.getItem(userContactsKey) || "[]"
         );
-
-        // Try to get accepted requests for filtering
-        try {
-          const transportRequests = await transportApi.getUserRequests(user.id);
-          const acceptedRequests = transportRequests.filter(
-            (request) =>
-              request.status === "Accepted" || request.status === "accepted"
-          );
-          const acceptedUserIds = acceptedRequests.map(
-            (request) => request.requesterId
-          );
-
-          const filteredContacts = storedContacts.filter((contact) =>
-            acceptedUserIds.includes(contact.id)
-          );
-          setContacts(filteredContacts);
-        } catch {
-          // If all else fails, show all contacts
-          setContacts(storedContacts);
-        }
+        console.log("📦 Using stored contacts:", storedContacts);
+        setContacts(storedContacts);
       }
     };
 

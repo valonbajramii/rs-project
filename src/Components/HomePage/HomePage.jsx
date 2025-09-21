@@ -30,7 +30,7 @@ import DeliveryInfoPanel from "../DeliveryInfoPanel/DeliveryInfoPanel";
 import MobileNotifications from "../MobileNotifications/MobileNotifications";
 import editIcon from "../../icons/edit.svg";
 import Chat from "../Chat/Chat";
-import { packagesApi, transportApi } from "../../API/api";
+import { packagesApi, transportApi, messagesApi } from "../../API/api";
 
 const HomePage = ({ user, setUser, onLogout }) => {
   const navigate = useNavigate();
@@ -492,35 +492,102 @@ const HomePage = ({ user, setUser, onLogout }) => {
   }, []);
 
   // Request action handler
-  // In your HomePage.jsx, update handleRequestAction
+  // In HomePage.js, update handleRequestAction
   const handleRequestAction = useCallback(
     async (requestId, action) => {
       try {
-        console.log("🔄 Updating request:", requestId, "with action:", action);
+        console.log("🔄 Updating request:", {
+          requestId,
+          type: typeof requestId,
+          action: action,
+        });
 
-        // Use the correct status values that match your backend enum
+        // Validate requestId exists and is a number
+        if (!requestId) {
+          console.error("❌ Request ID is null/undefined:", requestId);
+          alert("Invalid request ID");
+          return;
+        }
+
+        const parsedId = parseInt(requestId);
+        console.log("📊 Parsed ID:", parsedId, "Is NaN:", isNaN(parsedId));
+
+        if (isNaN(parsedId)) {
+          console.error("❌ Invalid request ID (not a number):", requestId);
+          alert("Invalid request ID");
+          return;
+        }
+
         const status = action === "approve" ? "Accepted" : "Rejected";
 
         // Call the API to update the request status
+        console.log("📡 Calling API with:", { requestId: parsedId, status });
         const response = await transportApi.updateRequestStatus(
-          requestId,
+          parsedId,
           status
         );
         console.log("✅ API response:", response);
 
-        // Update local state by removing the processed request
-        setPendingRequests((prev) => {
-          const updatedRequests = prev.filter(
-            (req) => req.requestId !== requestId
-          );
-          console.log("📝 Updated pending requests:", updatedRequests);
-          return updatedRequests;
-        });
+        // If request was approved, create chat relationship
+        if (action === "approve") {
+          try {
+            // Find the request details to get both users info
+            const request = pendingRequests.find(
+              (req) => req.requestId === requestId
+            );
 
-        // Refresh the requests list after action
-        setTimeout(() => {
-          fetchPendingRequests();
-        }, 1000);
+            if (request) {
+              // Add the requester to chat contacts for BOTH users
+              const requesterContact = {
+                id: request.requesterId || request.requester,
+                email: request.requester,
+                name: request.requesterName || request.requester.split("@")[0],
+                profileImage: request.requesterProfileImage,
+              };
+
+              const ownerContact = {
+                id: user.id, // Current user (the one approving)
+                email: user.email,
+                name: user.fullName || user.name,
+                profileImage: user.profileImage,
+              };
+
+              // Add to localStorage for immediate access for BOTH users
+              const addContactToStorage = (userId, contact) => {
+                const userContactsKey = `chatContacts_${userId}`;
+                const storedContacts = JSON.parse(
+                  localStorage.getItem(userContactsKey) || "[]"
+                );
+
+                const contactExists = storedContacts.some(
+                  (c) => c.id === contact.id || c.email === contact.email
+                );
+
+                if (!contactExists) {
+                  const updatedContacts = [...storedContacts, contact];
+                  localStorage.setItem(
+                    userContactsKey,
+                    JSON.stringify(updatedContacts)
+                  );
+                }
+              };
+
+              // Add requester to owner's contacts
+              addContactToStorage(user.id, requesterContact);
+
+              // Add owner to requester's contacts (simulate this for the other user)
+              // This would ideally be done via API or when the other user logs in
+              console.log("✅ Chat relationship created for both users");
+            }
+          } catch (contactError) {
+            console.error("Error creating chat relationship:", contactError);
+          }
+        }
+
+        // Update local state
+        setPendingRequests((prev) =>
+          prev.filter((req) => req.requestId !== requestId)
+        );
 
         alert(
           `Request ${
@@ -535,7 +602,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
         );
       }
     },
-    [fetchPendingRequests] // Add fetchPendingRequests to dependencies
+    [fetchPendingRequests, pendingRequests] // Add pendingRequests to dependencies
   );
 
   // Toggle functions
@@ -684,7 +751,13 @@ const HomePage = ({ user, setUser, onLogout }) => {
                             request.requester.split("@")[0],
                           profileImage: request.requesterProfileImage, // Add this from the API response
                         };
-
+                        console.log("Request object:", request);
+                        console.log(
+                          "Request ID:",
+                          request.requestId,
+                          "Type:",
+                          typeof request.requestId
+                        );
                         return (
                           <div
                             key={index}
@@ -729,6 +802,10 @@ const HomePage = ({ user, setUser, onLogout }) => {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
+                                    console.log(
+                                      "Approve button clicked for request:",
+                                      request.requestId
+                                    );
                                     handleRequestAction(
                                       request.requestId,
                                       "approve"

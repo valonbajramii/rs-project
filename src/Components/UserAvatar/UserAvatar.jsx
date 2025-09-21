@@ -37,6 +37,14 @@ import { getProfileImageUrl, packagesApi } from "../../API/api";
 const UserAvatar = ({ user }) => {
   const [userData, setUserData] = useState(user);
   const [isLoading, setIsLoading] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  // Reset state when user prop changes
+  useEffect(() => {
+    setUserData(user);
+    setImageError(false);
+    setIsLoading(false);
+  }, [user]); // Reset when user prop changes
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -61,8 +69,8 @@ const UserAvatar = ({ user }) => {
 
   if (!userData) return null;
 
-  // If user has a profile image
-  if (userData.profileImage) {
+  // If user has a profile image and no error
+  if (userData.profileImage && !imageError) {
     const imageUrl = getProfileImageUrl(userData.profileImage);
     return (
       <div className="user-avatar">
@@ -71,9 +79,10 @@ const UserAvatar = ({ user }) => {
           alt="Profile"
           className="avatar-image"
           onError={(e) => {
+            setImageError(true); // Set error state to trigger fallback
             e.target.style.display = "none";
-            // Fallback to letter avatar will be shown
           }}
+          key={imageUrl} // Add key to force re-render when image changes
         />
       </div>
     );
