@@ -20,188 +20,187 @@ const Chat = ({
   const isMobile = useMediaQuery({ maxWidth: 480 });
 
   // Load contacts from API
+  // In Chat.jsx - Replace the entire useEffect that loads contacts
+  // In Chat.jsx - Replace the contact processing logic
   useEffect(() => {
     const loadContacts = async () => {
       try {
-        // Get all transport requests to see relationships
-        const transportRequests = await transportApi.getUserRequests(user.id);
+        if (!user?.id) return;
 
-        // Also get requests where you are the requester (you applied to deliver)
-        const ownerRequests = await transportApi.getOwnerRequests(user.id);
+        console.log("🔄 Loading contacts from backend for user:", user.id);
 
-        console.log("📞 Your requests (transportRequests):", transportRequests);
-        console.log("📞 Requests to you (ownerRequests):", ownerRequests);
+        // Get transport requests from both perspectives
+        const [transportRequests, ownerRequests] = await Promise.all([
+          transportApi.getUserRequests(user.id),
+          transportApi.getOwnerRequests(user.id),
+        ]);
 
-        // Get ALL accepted requests from both perspectives
-        const allAcceptedRequests = [
-          ...transportRequests.filter(
-            (request) =>
-              request.status === "Accepted" ||
-              request.status === "accepted" ||
-              request.Status === "Accepted"
-          ),
-          ...ownerRequests.filter(
-            (request) =>
-              request.status === "Accepted" ||
-              request.status === "accepted" ||
-              request.Status === "Accepted"
-          ),
-        ];
+        console.log("📞 Transport requests:", transportRequests);
+        console.log("📞 Owner requests:", ownerRequests);
 
-        console.log("✅ All accepted requests:", allAcceptedRequests);
+        // Combine all requests and filter accepted ones
+        const allRequests = [...transportRequests, ...ownerRequests];
 
-        // Get unique user IDs from both sides
+        // Debug function
+        const debugRequests = (requests, currentUser) => {
+          console.log("🐛 DEBUG REQUESTS ANALYSIS:");
+          requests.forEach((request, index) => {
+            console.log(`Request ${index + 1}:`, {
+              id: request.id,
+              requesterId: request.requesterId,
+              ownerId: request.ownerId,
+              packageId: request.packageId,
+              status: request.status,
+              currentUserIsRequester: request.requesterId === currentUser.id,
+              currentUserIsOwner: request.ownerId === currentUser.id,
+              hasRequesterId: !!request.requesterId,
+              hasOwnerId: !!request.ownerId,
+            });
+          });
+        };
+
+        debugRequests(allRequests, user);
+
+        const acceptedRequests = allRequests.filter(
+          (request) =>
+            request.status === "Accepted" ||
+            request.status === "accepted" ||
+            request.Status === "Accepted"
+        );
+
+        console.log("✅ Accepted requests:", acceptedRequests);
+
+        // Use Set for proper deduplication
         const contactIds = new Set();
 
-        // Add users from all accepted relationships
-        allAcceptedRequests.forEach((request) => {
+        // NEW LOGIC: Extract unique user IDs with better relationship detection
+        acceptedRequests.forEach((request) => {
           console.log("🔍 Processing request:", request);
 
-          // Determine who the other user is in this relationship
-          if (request.ownerId === user.id || request.OwnerId === user.id) {
-            // Current user is the owner, so the other user is the requester
-            const otherUserId = request.requesterId || request.RequesterId;
-            if (otherUserId && otherUserId !== user.id) {
-              console.log(`➕ Adding requester as contact: ${otherUserId}`);
-              contactIds.add(otherUserId);
-            }
-          } else if (
-            request.requesterId === user.id ||
-            request.RequesterId === user.id
-          ) {
-            // Current user is the requester, so the other user is the owner
-            const otherUserId = request.ownerId || request.OwnerId;
-            if (otherUserId && otherUserId !== user.id) {
-              console.log(`➕ Adding owner as contact: ${otherUserId}`);
-              contactIds.add(otherUserId);
-            }
-          } else {
-            // Fallback: try to extract from any available ID fields
-            const possibleIds = [
-              request.ownerId,
-              request.requesterId,
-              request.OwnerId,
-              request.RequesterId,
-              request.ownerID,
-              request.requesterID,
-              request.OwnerID,
-              request.RequesterID,
-            ];
+          const currentUserId = user.id;
 
-            possibleIds.forEach((id) => {
-              if (id && id !== user.id) {
-                console.log(`➕ Adding contact ID (fallback): ${id}`);
-                contactIds.add(id);
-              }
-            });
+          // CASE 1: If requesterId is the current user, then the OTHER user is the package owner
+          if (request.requesterId === currentUserId) {
+            console.log("🎯 Current user is the REQUESTER");
+
+            // Try to get the package owner ID
+            if (request.packageId) {
+              console.log(
+                `🔍 Package ID found: ${request.packageId}, fetching package details...`
+              );
+
+              // We need to fetch the package to get the owner ID
+              // Since ownerId is undefined in the request, we'll handle this differently
+            }
+
+            // Since ownerId is undefined, we need to find the actual package owner
+            // This is a backend issue, but we can work around it
+            console.log(
+              "⚠️ ownerId is undefined, cannot determine package owner"
+            );
+          }
+          // CASE 2: If ownerId is the current user (or we can infer it), then the OTHER user is the requester
+          else if (
+            request.ownerId === currentUserId ||
+            (request.requesterId && request.requesterId !== currentUserId)
+          ) {
+            console.log(
+              "🎯 Current user is the PACKAGE OWNER (or can be inferred)"
+            );
+
+            // The other user is the requester
+            if (request.requesterId && request.requesterId !== currentUserId) {
+              console.log(
+                `➕ Adding requester as contact: ${request.requesterId}`
+              );
+              contactIds.add(request.requesterId);
+            }
+          }
+          // CASE 3: Manual fallback - if requesterId exists and is different from current user
+          else if (
+            request.requesterId &&
+            request.requesterId !== currentUserId
+          ) {
+            console.log(
+              `🔄 Fallback: Adding requester: ${request.requesterId}`
+            );
+            contactIds.add(request.requesterId);
+          }
+
+          // SPECIAL CASE: Handle the bug where requesterId equals current user ID
+          // This means the backend has incorrect data, but we can try to find the real other user
+          if (request.requesterId === currentUserId && request.packageId) {
+            console.log("🚨 BUG DETECTED: requesterId equals current user ID");
+            console.log("🔄 Attempting to find real package owner...");
+
+            // We need to fetch the package to get the real owner
+            // This will be handled in the next step
           }
         });
 
-        console.log("👥 Contact IDs:", Array.from(contactIds));
+        // NEW: If we have package IDs but missing owner IDs, fetch package details
+        const packagesToFetch = acceptedRequests
+          .filter((req) => req.packageId && !req.ownerId)
+          .map((req) => req.packageId);
 
-        if (contactIds.size === 0) {
-          console.warn(
-            "⚠️ No contact IDs found. Trying email-based approach..."
+        if (packagesToFetch.length > 0) {
+          console.log(
+            `📦 Fetching details for ${packagesToFetch.length} packages to find owners...`
           );
 
-          // Try email-based approach as fallback
-          allAcceptedRequests.forEach((request) => {
-            if (
-              request.requesterEmail &&
-              request.requesterEmail !== user.email
-            ) {
-              console.log(
-                `📧 Using requester email as ID: ${request.requesterEmail}`
-              );
-              contactIds.add(request.requesterEmail);
-            }
-            if (request.ownerEmail && request.ownerEmail !== user.email) {
-              console.log(`📧 Using owner email as ID: ${request.ownerEmail}`);
-              contactIds.add(request.ownerEmail);
-            }
-          });
-        }
-
-        console.log("👥 Final Contact IDs:", Array.from(contactIds));
-
-        // Fetch user details for all contact IDs
-        const contactsPromises = Array.from(contactIds).map(
-          async (contactIdentifier) => {
+          for (const packageId of packagesToFetch) {
             try {
-              // Try to get user by ID/email
-              const userDetails = await packagesApi.getUser(contactIdentifier);
-              return userDetails;
-            } catch (error) {
-              console.error(`Error fetching user ${contactIdentifier}:`, error);
-
-              // Create basic contact info from request data
-              const matchingRequest = allAcceptedRequests.find(
-                (req) =>
-                  req.requesterId === contactIdentifier ||
-                  req.ownerId === contactIdentifier ||
-                  req.requesterEmail === contactIdentifier ||
-                  req.ownerEmail === contactIdentifier
+              const packageDetails = await packagesApi.getPackage(packageId);
+              console.log(
+                `📦 Package ${packageId} owner: ${packageDetails.userId}`
               );
 
-              if (matchingRequest) {
-                return {
-                  id: contactIdentifier,
-                  name:
-                    matchingRequest.requesterName ||
-                    matchingRequest.ownerName ||
-                    (contactIdentifier.includes("@")
-                      ? contactIdentifier.split("@")[0]
-                      : "Unknown User"),
-                  email:
-                    matchingRequest.requesterEmail ||
-                    matchingRequest.ownerEmail ||
-                    (contactIdentifier.includes("@") ? contactIdentifier : ""),
-                  profileImage: matchingRequest.requesterProfileImage || null,
-                };
+              if (packageDetails.userId && packageDetails.userId !== user.id) {
+                console.log(
+                  `➕ Adding package owner as contact: ${packageDetails.userId}`
+                );
+                contactIds.add(packageDetails.userId);
               }
-              return null;
+            } catch (error) {
+              console.warn(`❌ Error fetching package ${packageId}:`, error);
             }
           }
-        );
+        }
 
-        const contactsData = (await Promise.all(contactsPromises)).filter(
+        const uniqueContactIds = Array.from(contactIds);
+        console.log("👥 Unique contact IDs:", uniqueContactIds);
+
+        // Fetch user details for each contact ID
+        const contactsPromises = uniqueContactIds.map(async (userId) => {
+          try {
+            const userDetails = await packagesApi.getUser(userId);
+            console.log(`✅ Found user: ${userDetails.fullName} (${userId})`);
+
+            return {
+              id: userDetails.id,
+              name: userDetails.fullName || userDetails.name || "Unknown User",
+              email: userDetails.email || "",
+              profileImage: userDetails.profileImage || null,
+            };
+          } catch (error) {
+            console.warn(`❌ User not found by ID ${userId}:`, error);
+            return null;
+          }
+        });
+
+        const contacts = (await Promise.all(contactsPromises)).filter(
           (contact) => contact !== null
         );
 
-        console.log("📞 Final contacts:", contactsData);
-
-        // Also check localStorage for any previously saved contacts
-        const userContactsKey = `chatContacts_${user.id}`;
-        const storedContacts = JSON.parse(
-          localStorage.getItem(userContactsKey) || "[]"
-        );
-
-        // Merge and deduplicate contacts
-        const allContacts = [...contactsData, ...storedContacts];
-        const uniqueContacts = allContacts.filter(
-          (contact, index, array) =>
-            array.findIndex(
-              (c) => c.id === contact.id || c.email === contact.email
-            ) === index
-        );
-
-        console.log("👥 All unique contacts:", uniqueContacts);
-        setContacts(uniqueContacts);
+        console.log("📞 Final contacts from backend:", contacts);
+        setContacts(contacts);
       } catch (error) {
-        console.error("Error loading contacts:", error);
-        // Fallback to localStorage
-        const userContactsKey = `chatContacts_${user.id}`;
-        const storedContacts = JSON.parse(
-          localStorage.getItem(userContactsKey) || "[]"
-        );
-        console.log("📦 Using stored contacts:", storedContacts);
-        setContacts(storedContacts);
+        console.error("❌ Error loading contacts from backend:", error);
+        setContacts([]);
       }
     };
 
-    if (user?.id) {
-      loadContacts();
-    }
+    loadContacts();
   }, [user?.id]);
 
   // Load messages from API when contact is selected
@@ -353,7 +352,7 @@ const Chat = ({
               <div className="contacts-list">
                 {contacts.map((contact) => (
                   <div
-                    key={contact.id || contact.email}
+                    key={contact.uniqueKey || contact.id || contact.email} // Use uniqueKey first
                     className={`contact-item ${
                       activeContact?.id === contact.id ? "active" : ""
                     }`}

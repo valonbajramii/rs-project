@@ -5,7 +5,15 @@ import { packagesApi, transportApi } from "../../API/api";
 import fallbackImage from "../../icons/car-front-fill.svg";
 import chevronLeft from "../../images/chevron-left.svg";
 
-const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
+const DeliveryInfoPanel = ({
+  deliveryDetails,
+  user,
+  onClose,
+  setShowCompleteProfile,
+  setShowForm,
+  setIsAddPackageView,
+  setShowProfile,
+}) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [packageOwner, setPackageOwner] = useState(null);
   const [loadingOwner, setLoadingOwner] = useState(true);
@@ -126,6 +134,17 @@ const DeliveryInfoPanel = ({ deliveryDetails, user, onClose }) => {
   };
 
   const handleRequestDelivery = async () => {
+    // Check profile completeness FIRST, before making any API calls
+    if (!user?.isProfileComplete) {
+      // Redirect to complete profile (similar to your package addition flow)
+      setShowCompleteProfile(true);
+      setShowForm(false);
+      setIsAddPackageView(false);
+      setShowProfile(false);
+      onClose(); // Close the info panel
+      return; // Stop execution here
+    }
+
     try {
       const requestData = {
         PackageId: deliveryDetails.id,

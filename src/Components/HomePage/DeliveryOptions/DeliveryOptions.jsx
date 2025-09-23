@@ -287,28 +287,35 @@ const DeliveryOptions = ({
   setIsAddPackageView,
   setShowForm,
   setShowProfile,
+  setShowCompleteProfile, // Add this prop
   setSelectedDelivery,
   loading,
+  onAddPackageClick, // Add this prop
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [imageErrors, setImageErrors] = useState({}); // Track errors by option ID
+  const [imageErrors, setImageErrors] = useState({});
   const navigate = useNavigate();
 
-  // Debug: log the received deliveryOptions
-  console.log("DeliveryOptions received:", deliveryOptions);
-
+  // Use the passed handler instead of local logic
   const handleAddPackageClick = () => {
-    if (!user) {
-      navigate("/login");
-      return;
+    if (onAddPackageClick) {
+      onAddPackageClick();
+    } else {
+      // Fallback to original logic
+      if (!user) {
+        navigate("/login");
+        return;
+      }
+      if (!user.isProfileComplete) {
+        setShowCompleteProfile(true);
+        setShowForm(false);
+        setIsAddPackageView(false);
+        setShowProfile(false);
+        return;
+      }
+      setShowForm(true);
+      setIsAddPackageView(true);
     }
-    if (!user.isProfileComplete) {
-      alert("Please complete your profile before adding packages");
-      navigate("/complete-profile");
-      return;
-    }
-    setShowForm(true);
-    setIsAddPackageView(true);
   };
 
   const handleImageError = (optionId, imageUrl) => {

@@ -75,11 +75,6 @@
   cursor: not-allowed;
 }
 
-/* .complete-profile-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-} */
-
 .alert-danger {
   color: #721c24;
   background-color: #f8d7da;
@@ -130,4 +125,298 @@
   font-size: 14px;
   margin-top: 5px;
   display: block;
+}
+
+/* Profile Image Upload Styles */
+.profile-image-upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.profile-image-preview {
+  margin-bottom: 15px;
+}
+
+.profile-preview-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ddd;
+}
+
+.profile-image-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #ddd;
+}
+
+.profile-image-placeholder img {
+  width: 40px;
+  height: 40px;
+  opacity: 0.5;
+}
+
+/* For embedded mode in homepage */
+.complete-profile-container.embedded {
+  min-height: auto;
+  padding: 0;
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.complete-profile-container.embedded .complete-profile-card {
+  box-shadow: none;
+  padding: 20px;
+  max-width: 100%;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  border-radius: 0;
+}
+
+/* Back button header for embedded mode */
+.complete-profile-back-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 15px;
+}
+
+.complete-profile-back-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  color: #2f80ed;
+  cursor: pointer;
+  padding: 5px;
+  font-size: 14px;
+}
+
+.complete-profile-back-button:hover {
+  opacity: 0.8;
+}
+
+.complete-profile-back-button img {
+  width: 16px;
+  height: 16px;
+}
+
+/* Actions container for back + submit buttons */
+.complete-profile-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.complete-profile-back-btn {
+  flex: 1;
+  padding: 12px;
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.complete-profile-back-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.complete-profile-back-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mobile styles for embedded mode */
+@media (max-width: 480px) {
+  .complete-profile-container {
+    padding: 10px;
+    min-height: calc(100vh - 80px);
+  }
+
+  .complete-profile-card {
+    padding: 20px;
+    border-radius: 8px;
+  }
+
+  .complete-profile-container.embedded {
+    padding: 0;
+    min-height: auto;
+  }
+
+  .complete-profile-container.embedded .complete-profile-card {
+    padding: 15px;
+    border-radius: 0;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .profile-image-upload-container {
+    margin-bottom: 15px;
+  }
+
+  .profile-preview-image,
+  .profile-image-placeholder {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* Tablet styles */
+@media (max-width: 768px) {
+  .complete-profile-card {
+    max-width: 500px;
+  }
+
+  .form-row {
+    gap: 10px;
+  }
+}
+
+/* Form responsiveness */
+@media (max-width: 360px) {
+  .complete-profile-card {
+    padding: 15px;
+  }
+
+  .complete-profile-card h2 {
+    font-size: 1.3rem;
+  }
+
+  .complete-profile-card p {
+    font-size: 0.9rem;
+  }
+
+  .form-group input {
+    padding: 8px;
+    font-size: 14px;
+  }
+}
+
+/* Focus states for better accessibility */
+.form-group input:focus {
+  outline: none;
+  border-color: #2f80ed;
+  box-shadow: 0 0 0 2px rgba(47, 128, 237, 0.2);
+}
+
+.file-upload-label:focus {
+  outline: none;
+  border-color: #2f80ed;
+}
+
+.complete-profile-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(47, 128, 237, 0.5);
+}
+
+/* Loading state improvements */
+.complete-profile-button:disabled {
+  background-color: #a0c4ff;
+  cursor: not-allowed;
+}
+
+/* File upload status indicators */
+.file-upload-label[data-uploaded="true"] {
+  border-color: #4caf50;
+  background-color: #f8fff8;
+}
+
+.file-upload-label[data-uploaded="true"] span {
+  color: #4caf50;
+  font-weight: 500;
+}
+
+/* Error state styling */
+.form-group input.error-border {
+  border-color: #e74c3c;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 5px;
+  display: block;
+}
+
+/* Success state */
+.form-group input.success-border {
+  border-color: #4caf50;
+}
+
+/* Animation for smooth transitions */
+.complete-profile-card {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-image-preview {
+  transition: all 0.3s ease;
+}
+
+.file-upload-label {
+  transition: all 0.2s ease;
+}
+
+/* Scrollbar styling for embedded mode */
+.complete-profile-container.embedded .complete-profile-card::-webkit-scrollbar {
+  width: 6px;
+}
+
+.complete-profile-container.embedded
+  .complete-profile-card::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.complete-profile-container.embedded
+  .complete-profile-card::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.complete-profile-container.embedded
+  .complete-profile-card::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Adjust the button to take 2/3 space when with back button */
+.complete-profile-actions .complete-profile-button {
+  flex: 2;
+}
+
+/* For non-embedded mode, keep full width button */
+.complete-profile-container:not(.embedded) .complete-profile-button {
+  width: 100%;
+}
+
+.complete-profile-container:not(.embedded) .complete-profile-actions {
+  flex-direction: column;
 }

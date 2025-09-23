@@ -223,7 +223,15 @@ const Register = ({ onRegister }) => {
         ConfirmPassword: confirmPassword,
       };
 
+      // In Register.jsx - after successful registration
       const response = await authApi.basicRegister(registrationData);
+
+      // Ensure the response includes the user ID
+      if (response.user) {
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("user", JSON.stringify(response.user)); // Store user data
+        navigate("/complete-profile");
+      }
 
       localStorage.setItem("token", response.token);
       navigate("/complete-profile");

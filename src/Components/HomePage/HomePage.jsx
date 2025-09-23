@@ -12,6 +12,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import audiImage from "../../images/2025_audi_q7_4dr-suv_prestige_fq_oem_1_1600.avif";
 import mercedesImage from "../../images/2023-mercedes-amg-c63-s-e-performance-114-65d79698b0e26.avif";
 import MyProductModal from "./MyProductModal/MyProductModal";
+import CompleteProfile from "../../Pages/CompleteProfile/CompleteProfile";
 import { v4 as uuidv4 } from "uuid";
 import { Dropdown } from "react-bootstrap";
 import FavoritedeliveryModal from "../FavoritedeliveryModal/FavoritedeliveryModal";
@@ -49,6 +50,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
   const [showFooter, setShowFooter] = useState(true);
   const [isInMessageView, setIsInMessageView] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showCompleteProfile, setShowCompleteProfile] = useState(false); // Add this state
   const [activeRequestId, setActiveRequestId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -67,6 +69,33 @@ const HomePage = ({ user, setUser, onLogout }) => {
     location.state?.showForm === false ? "icon2" : "icon1"
   );
 
+  // useEffect(() => {
+  //   if (user && !user.isProfileComplete) {
+  //     setShowCompleteProfile(true);
+  //     setShowForm(false);
+  //     setIsAddPackageView(false);
+  //     setShowProfile(false);
+  //     setShowNotifications(false);
+  //     setShowChatView(false);
+  //   }
+  // }, [user]);
+
+  useEffect(() => {
+    // Sync user from localStorage on component mount and when user might be updated elsewhere
+    const syncUserFromStorage = () => {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        // Only update if the user data is different
+        if (JSON.stringify(parsedUser) !== JSON.stringify(user)) {
+          setUser(parsedUser);
+        }
+      }
+    };
+
+    syncUserFromStorage();
+  }, [user, setUser]); // Add dependencies to re-run when user changes
+
   // Function to refresh packages from API - FIXED
   const refreshPackages = useCallback(async () => {
     try {
@@ -84,7 +113,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
 
       console.log("Packages array:", packagesArray);
 
-      // Separate actual packages from references
       const actualPackages = packagesArray.filter(
         (item) => item && item.id && item.name
       );
@@ -95,7 +123,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
       console.log("Actual packages:", actualPackages);
       console.log("References:", references);
 
-      // Resolve references if any
       let resolvedReferences = [];
       if (references.length > 0) {
         console.log("Resolving references...");
@@ -103,21 +130,17 @@ const HomePage = ({ user, setUser, onLogout }) => {
         console.log("Resolved references:", resolvedReferences);
       }
 
-      // Combine actual packages with resolved references
       const allPackages = [...actualPackages, ...resolvedReferences];
-
-      // Remove duplicates
       const uniquePackages = allPackages.filter(
         (pkg, index, array) => array.findIndex((p) => p.id === pkg.id) === index
       );
 
       console.log("All packages after resolving:", uniquePackages);
 
-      // Transform packages
       const transformedPackages = uniquePackages.map((item) => ({
         id: item.id,
         name: item.name,
-        imagePaths: item.imagePaths || [], // ← FIXED: Changed from images to imagePaths
+        imagePaths: item.imagePaths || [],
         price: item.price?.toString() || "0",
         location: item.location || "",
         destination: item.destination || "",
@@ -131,7 +154,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
       }));
 
       console.log("Transformed packages:", transformedPackages);
-
       setDeliveryOptions(transformedPackages);
       setFilteredOptions(transformedPackages);
     } catch (error) {
@@ -140,6 +162,53 @@ const HomePage = ({ user, setUser, onLogout }) => {
       setLoading(false);
     }
   }, []);
+  // Function to handle profile completion
+  // In HomePage.jsx - fix the handleProfileComplete function
+  const handleProfileComplete = useCallback(
+    (updatedUser) => {
+      console.log("🔄 Profile complete callback received:", updatedUser);
+
+      // Ensure we have the complete user data with ID
+      if (!updatedUser.id && user?.id) {
+        updatedUser.id = user.id; // Preserve the original ID
+      }
+
+      // Update both localStorage and state
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      if (typeof setUser === "function") {
+        setUser(updatedUser);
+      }
+
+      // Close the complete profile view
+      setShowCompleteProfile(false);
+      setShowForm(true);
+      setActiveIcon("icon1");
+
+      // Refresh packages
+      refreshPackages();
+    },
+    [setUser, refreshPackages, user?.id] // Add user.id as dependency
+  );
+
+  // Update the handleAddPackageClick logic in DeliveryOptions
+  // You'll need to pass setShowCompleteProfile to DeliveryOptions
+  const handleAddPackageClick = useCallback(() => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    if (!user.isProfileComplete) {
+      setShowCompleteProfile(true);
+      setShowForm(false);
+      setIsAddPackageView(false);
+      setShowProfile(false);
+      setActiveIcon("profile");
+      return;
+    }
+    setShowForm(true);
+    setIsAddPackageView(true);
+  }, [user, navigate]);
 
   // Load packages on component mount - only once - FIXED
   useEffect(() => {
@@ -639,57 +708,78 @@ const HomePage = ({ user, setUser, onLogout }) => {
     setActiveIcon("options");
   }, []);
 
-  const handleFooterClick = useCallback((view) => {
-    if (view === "form") {
-      setShowForm(true);
-      setIsAddPackageView(false);
-      setShowProfile(false);
-      setShowNotifications(false);
-      setShowChatView(false);
-      setIsInMessageView(false);
-      setActiveIcon("icon1");
-    } else if (view === "options") {
-      setShowForm(false);
-      setIsAddPackageView(false);
-      setShowProfile(false);
-      setShowNotifications(false);
-      setShowChatView(false);
-      setIsInMessageView(false);
-      setActiveIcon("icon2");
-    } else if (view === "add") {
-      setShowForm(false);
-      setIsAddPackageView(true);
-      setShowProfile(false);
-      setShowNotifications(false);
-      setShowChatView(false);
-      setIsInMessageView(false);
-      setActiveIcon("icon3");
-    } else if (view === "profile") {
-      setShowForm(false);
-      setIsAddPackageView(false);
-      setShowProfile(true);
-      setShowNotifications(false);
-      setShowChatView(false);
-      setIsInMessageView(false);
-      setActiveIcon("icon4");
-    } else if (view === "messages") {
-      setShowForm(false);
-      setIsAddPackageView(false);
-      setShowProfile(false);
-      setShowNotifications(true);
-      setShowChatView(true);
-      setIsInMessageView(false);
-      setActiveIcon("icon5");
-    } else if (view === "chat") {
-      setShowForm(false);
-      setIsAddPackageView(false);
-      setShowProfile(false);
-      setShowNotifications(false);
-      setShowChatView(true);
-      setIsInMessageView(false);
-      setActiveIcon("icon5");
-    }
-  }, []);
+  const handleFooterClick = useCallback(
+    (view) => {
+      if (view === "form") {
+        setShowForm(true);
+        setIsAddPackageView(false);
+        setShowProfile(false);
+        setShowCompleteProfile(false);
+        setShowNotifications(false);
+        setShowChatView(false);
+        setIsInMessageView(false);
+        setActiveIcon("icon1");
+      } else if (view === "options") {
+        setShowForm(false);
+        setIsAddPackageView(false);
+        setShowProfile(false);
+        setShowCompleteProfile(false);
+        setShowNotifications(false);
+        setShowChatView(false);
+        setIsInMessageView(false);
+        setActiveIcon("icon2");
+      } else if (view === "add") {
+        // Check if profile is complete before allowing add package
+        if (!user?.isProfileComplete) {
+          setShowCompleteProfile(true);
+          setShowForm(false);
+          setIsAddPackageView(false);
+          setShowProfile(false);
+          setActiveIcon("profile");
+          return;
+        }
+        setShowForm(false);
+        setIsAddPackageView(true);
+        setShowProfile(false);
+        setShowCompleteProfile(false);
+        setShowNotifications(false);
+        setShowChatView(false);
+        setIsInMessageView(false);
+        setActiveIcon("icon3");
+      } else if (view === "profile") {
+        if (!user?.isProfileComplete) {
+          setShowCompleteProfile(true);
+        } else {
+          setShowProfile(true);
+        }
+        setShowForm(false);
+        setIsAddPackageView(false);
+        setShowNotifications(false);
+        setShowChatView(false);
+        setIsInMessageView(false);
+        setActiveIcon("icon4");
+      } else if (view === "messages") {
+        setShowForm(false);
+        setIsAddPackageView(false);
+        setShowProfile(false);
+        setShowCompleteProfile(false);
+        setShowNotifications(true);
+        setShowChatView(false); // Don't show chat view here
+        setIsInMessageView(false);
+        setActiveIcon("icon5");
+      } else if (view === "chat") {
+        setShowForm(false);
+        setIsAddPackageView(false);
+        setShowProfile(false);
+        setShowCompleteProfile(false);
+        setShowNotifications(false);
+        setShowChatView(true);
+        setIsInMessageView(false);
+        setActiveIcon("icon5");
+      }
+    },
+    [user]
+  );
 
   const handleMessagingClick = useCallback(() => {
     setShowChatView(true);
@@ -711,6 +801,12 @@ const HomePage = ({ user, setUser, onLogout }) => {
       }
     });
   }, []);
+
+  const handleCompleteProfileBack = () => {
+    setShowCompleteProfile(false);
+    setShowForm(true); // Show the normal view
+    setActiveIcon("icon1");
+  };
 
   return (
     <div className="Homepage-container">
@@ -872,9 +968,18 @@ const HomePage = ({ user, setUser, onLogout }) => {
                 <div
                   className="dropdown-item"
                   onClick={() => {
-                    setShowProfile(true);
-                    setShowForm(false);
-                    setActiveIcon("profile");
+                    // Check if profile is complete before showing profile
+                    if (!user?.isProfileComplete) {
+                      setShowCompleteProfile(true);
+                      setShowForm(false);
+                      setIsAddPackageView(false);
+                      setShowProfile(false);
+                      setActiveIcon("profile");
+                    } else {
+                      setShowProfile(true);
+                      setShowForm(false);
+                      setActiveIcon("profile");
+                    }
                   }}
                 >
                   <img src={profileImg} />
@@ -927,11 +1032,16 @@ const HomePage = ({ user, setUser, onLogout }) => {
                 deliveryOptions={deliveryOptions}
               />
             ) : (
+              // Only show Chat when chat tab is active
               <Chat
                 user={user}
                 selectedContact={selectedChatContact}
-                onClose={() => setShowChatView(false)}
+                onClose={() => {
+                  setShowNotifications(false);
+                  setShowFooter(true);
+                }}
                 setShowFooter={setShowFooter}
+                setIsInMessageView={setIsInMessageView}
               />
             )}
           </div>
@@ -944,7 +1054,15 @@ const HomePage = ({ user, setUser, onLogout }) => {
           {isMobile && showForm && <DeliveryMap />}
           <div className="main-content-container">
             <div className="Components-container1">
-              {showProfile ? (
+              {showCompleteProfile ? (
+                <CompleteProfile
+                  user={user}
+                  setUser={setUser}
+                  onProfileComplete={handleProfileComplete}
+                  onBack={handleCompleteProfileBack}
+                  isEmbedded={true}
+                />
+              ) : showProfile ? (
                 <Profile
                   user={user}
                   setUser={setUser}
@@ -957,6 +1075,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
                   addNewDelivery={addNewDelivery}
                 />
               ) : showChatView ? (
+                // Only show Chat when showChatView is true (not in mobile notifications)
                 <Chat
                   user={user}
                   selectedContact={selectedChatContact}
@@ -1046,8 +1165,10 @@ const HomePage = ({ user, setUser, onLogout }) => {
                         setIsAddPackageView={setIsAddPackageView}
                         setShowForm={setShowForm}
                         setShowProfile={setShowProfile}
+                        setShowCompleteProfile={setShowCompleteProfile} // Pass this prop
                         setSelectedDelivery={setSelectedDelivery}
                         loading={loading}
+                        onAddPackageClick={handleAddPackageClick} // Pass the handler
                       />
                     )}
                   </div>
@@ -1064,6 +1185,10 @@ const HomePage = ({ user, setUser, onLogout }) => {
                   deliveryDetails={selectedDelivery}
                   user={user}
                   onClose={() => setSelectedDelivery(null)}
+                  setShowCompleteProfile={setShowCompleteProfile}
+                  setShowForm={setShowForm}
+                  setIsAddPackageView={setIsAddPackageView}
+                  setShowProfile={setShowProfile}
                 />
               </div>
             )}

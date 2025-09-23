@@ -845,10 +845,25 @@ import React, { useState, useEffect } from "react";
 import "./CompleteProfile.css";
 import { useNavigate } from "react-router-dom";
 import paperReplice from "../../icons/paperclip.svg";
-import cameraIcon from "../../icons/camera-fill.svg"; // Add camera icon
+import cameraIcon from "../../icons/camera-fill.svg";
+import chevronLeft from "../../images/chevron-left.svg"; // Add this import
 import { authApi } from "../../API/api";
 
-const CompleteProfile = ({ user, setUser }) => {
+const CompleteProfile = ({
+  user,
+  setUser,
+  onProfileComplete,
+  isEmbedded = false,
+  onBack, // Add this prop for going back
+}) => {
+  console.log("CompleteProfile props received:", {
+    userExists: !!user,
+    userId: user?.id,
+    setUserType: typeof setUser,
+    setUserExists: !!setUser,
+    onProfileCompleteType: typeof onProfileComplete,
+    isEmbedded,
+  });
   const navigate = useNavigate();
   const [profileData, setProfileData] = useState({
     mobileNumber: "",
@@ -858,24 +873,41 @@ const CompleteProfile = ({ user, setUser }) => {
     zip: "",
     idDocument: null,
     drivingLicense: null,
-    profileImage: null, // Add profile image state
+    profileImage: null,
   });
 
-  const [previewImage, setPreviewImage] = useState(null); // For image preview
+  const [previewImage, setPreviewImage] = useState(null);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
+  // Remove the automatic redirect when embedded
   useEffect(() => {
-    const checkCompletion = () => {
-      const storedUser = localStorage.getItem("user");
-      const localUser = storedUser ? JSON.parse(storedUser) : null;
-      return user?.isProfileComplete || localUser?.isProfileComplete;
-    };
+    if (!isEmbedded) {
+      const checkCompletion = () => {
+        const storedUser = localStorage.getItem("user");
+        const localUser = storedUser ? JSON.parse(storedUser) : null;
+        return user?.isProfileComplete || localUser?.isProfileComplete;
+      };
 
-    if (checkCompletion()) {
+      if (checkCompletion()) {
+        navigate("/homepage");
+      }
+    }
+  }, [user, navigate, isEmbedded]);
+
+  // Function to handle going back
+  const handleBack = () => {
+    if (onBack) {
+      onBack(); // Call the back function if provided
+    } else if (isEmbedded) {
+      // Default behavior for embedded mode
+      if (onProfileComplete) {
+        onProfileComplete(user); // Go back without completing
+      }
+    } else {
       navigate("/homepage");
     }
-  }, [user, navigate]);
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -889,7 +921,6 @@ const CompleteProfile = ({ user, setUser }) => {
     const file = e.target.files[0];
     if (file) {
       if (fieldName === "profileImage") {
-        // Create preview for profile image
         const reader = new FileReader();
         reader.onloadend = () => {
           setPreviewImage(reader.result);
@@ -919,6 +950,7 @@ const CompleteProfile = ({ user, setUser }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // In CompleteProfile.jsx - fix the handleSubmit function
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isLoading) return;
@@ -935,14 +967,15 @@ const CompleteProfile = ({ user, setUser }) => {
       formData.append("IdDocument", profileData.idDocument);
       formData.append("DrivingLicense", profileData.drivingLicense);
 
-      // Only append profile image if it exists
       if (profileData.profileImage) {
         formData.append("ProfileImage", profileData.profileImage);
       }
+
       const response = await authApi.completeProfile(formData);
 
+      // PRESERVE THE ORIGINAL USER ID
       const updatedUser = {
-        ...user,
+        ...user, // This includes the original ID
         ...response.user,
         isProfileComplete: true,
         streetAddress: response.user.StreetAddress || profileData.address,
@@ -952,34 +985,52 @@ const CompleteProfile = ({ user, setUser }) => {
         mobileNumber: response.user.MobileNumber || profileData.mobileNumber,
         idDocumentPath: response.user.IdDocumentPath,
         drivingLicensePath: response.user.DrivingLicensePath,
-        profileImage: response.user.ProfileImagePath, // Add profile image
+        profileImage: response.user.ProfileImagePath,
       };
 
-      setUser(updatedUser);
+      console.log("✅ Updated user with ID:", updatedUser.id);
+
       localStorage.setItem("user", JSON.stringify(updatedUser));
-      navigate("/homepage");
+
+      if (isEmbedded && typeof onProfileComplete === "function") {
+        onProfileComplete(updatedUser);
+      }
     } catch (error) {
       console.error("Profile completion error:", error);
-      let errorMessage = "Error completing profile. Please try again.";
-      if (error.response?.data?.errors) {
-        setErrors(error.response.data.errors);
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      }
-      setErrors({ form: errorMessage });
+      // error handling...
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="complete-profile-container">
+    <div
+      className={`complete-profile-container ${isEmbedded ? "embedded" : ""}`}
+    >
       <div className="complete-profile-card">
-        <h2>Complete Your Profile</h2>
-        <p>
-          Please provide the following information to continue using our
-          services
-        </p>
+        {/* Add Back Button Header */}
+        {isEmbedded && (
+          <div className="complete-profile-back-header">
+            <button
+              className="complete-profile-back-button"
+              onClick={handleBack}
+            >
+              <img src={chevronLeft} alt="Back" />
+              <span>Back</span>
+            </button>
+            <h2>Complete Your Profile</h2>
+          </div>
+        )}
+
+        {!isEmbedded && (
+          <>
+            <h2>Complete Your Profile</h2>
+            <p>
+              Please provide the following information to continue using our
+              services
+            </p>
+          </>
+        )}
 
         {errors.form && (
           <div className="alert alert-danger mb-4">{errors.form}</div>
@@ -1149,13 +1200,23 @@ const CompleteProfile = ({ user, setUser }) => {
             </div>
           </div>
 
-          <button
-            type="submit"
-            className="complete-profile-button"
-            disabled={isLoading}
-          >
-            {isLoading ? "Processing..." : "Complete Profile"}
-          </button>
+          <div className="complete-profile-actions">
+            <button
+              type="button"
+              className="complete-profile-back-btn"
+              onClick={handleBack}
+              disabled={isLoading}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="complete-profile-button"
+              disabled={isLoading}
+            >
+              {isLoading ? "Processing..." : "Complete Profile"}
+            </button>
+          </div>
         </form>
       </div>
     </div>

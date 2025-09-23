@@ -832,9 +832,11 @@ export const packagesApi = {
     }
   },
 
+  // In api.js - Update getPackage method
   getPackage: async (id) => {
     try {
       const response = await api.get(`/packages/${id}`);
+      console.log("📦 Package details response:", response.data); // Add this log
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -930,26 +932,28 @@ export const transportApi = {
     }
   },
 
+  // In your api.js - Update the getUserRequests method to ensure ownerId is included
   getUserRequests: async (userId) => {
     try {
       const response = await api.get(`/transportrequests/user/${userId}`);
+      console.log("🔍 RAW getUserRequests response:", response.data);
 
-      // Transform the response to include both owner and requester info
+      // Transform the response to ensure all fields are properly mapped
       const requests = response.data.map((request) => ({
         id: request.id,
         packageId: request.packageId,
         packageName: request.packageName,
-        ownerId: request.ownerId, // The package owner
-        requesterId: request.requesterId, // The person who requested to deliver
+        ownerId: request.ownerId || request.Package?.UserId, // Try alternative source
+        requesterId: request.requesterId,
         ownerEmail: request.ownerEmail,
         requesterEmail: request.requesterEmail,
         ownerName: request.ownerName,
         requesterName: request.requesterName,
         status: request.status,
         requestDate: request.requestDate,
-        // Add other fields as needed
       }));
 
+      console.log("📋 Processed getUserRequests:", requests);
       return requests;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -1078,7 +1082,6 @@ export const transportApi = {
       const response = await api.get("/transportrequests/owner/my-requests");
       console.log("📦 Raw owner requests response:", response.data);
 
-      // Handle different response formats
       let requestsArray = [];
       if (Array.isArray(response.data)) {
         requestsArray = response.data;
@@ -1087,19 +1090,16 @@ export const transportApi = {
         Array.isArray(response.data.$values)
       ) {
         requestsArray = response.data.$values;
-      } else if (Array.isArray(response.data.data)) {
-        requestsArray = response.data.data;
       } else {
-        requestsArray = [response.data]; // Single object
+        requestsArray = [response.data];
       }
-
-      console.log("📋 Processed requests array:", requestsArray);
 
       return requestsArray.map((request) => ({
         requestId: request.id || request.Id || request.requestId,
         deliveryId: request.packageId || request.PackageId,
         deliveryName: request.packageName || request.PackageName,
         requester: request.requesterEmail || request.RequesterEmail,
+        requesterId: request.requesterId || request.RequesterId, // ADD THIS
         requesterName: request.requesterName || request.RequesterName,
         requesterProfileImage: request.requesterProfileImage,
         status: request.status || request.Status,
@@ -1115,21 +1115,39 @@ export const transportApi = {
 
 // API/api.js - Add to transportApi or create new messagesApi
 export const messagesApi = {
-  sendMessage: async (messageData) => {
-    try {
-      const response = await api.post("/messages", messageData);
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || error.message;
-    }
-  },
-
   getConversation: async (otherUserId) => {
     try {
+      // Validate the ID
+      if (!otherUserId) {
+        throw new Error("User ID is required");
+      }
+
       const response = await api.get(`/messages/conversation/${otherUserId}`);
       return response.data;
     } catch (error) {
-      throw error.response?.data || error.message;
+      console.error(
+        `Error getting conversation for user ${otherUserId}:`,
+        error
+      );
+      throw error;
+    }
+  },
+
+  sendMessage: async (messageData) => {
+    try {
+      // Validate message data
+      if (!messageData.ReceiverId) {
+        throw new Error("ReceiverId is required");
+      }
+      if (!messageData.Content) {
+        throw new Error("Message content is required");
+      }
+
+      const response = await api.post("/messages", messageData);
+      return response.data;
+    } catch (error) {
+      console.error("Error sending message:", error);
+      throw error;
     }
   },
 

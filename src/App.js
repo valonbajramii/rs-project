@@ -282,6 +282,7 @@ function App() {
               user ? (
                 <HomePage
                   user={user}
+                  setUser={setUser}
                   onLogout={handleLogout}
                   showDeliveryForm={showDeliveryForm}
                   setShowDeliveryForm={setShowDeliveryForm}
