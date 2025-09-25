@@ -943,7 +943,7 @@ export const transportApi = {
         id: request.id,
         packageId: request.packageId,
         packageName: request.packageName,
-        ownerId: request.ownerId || request.Package?.UserId, // Try alternative source
+        ownerId: request.ownerId, // This should now be available
         requesterId: request.requesterId,
         ownerEmail: request.ownerEmail,
         requesterEmail: request.requesterEmail,
@@ -1079,35 +1079,75 @@ export const transportApi = {
 
   getOwnerRequests: async (userId) => {
     try {
+      console.log("🔍 Fetching owner requests from backend...");
       const response = await api.get("/transportrequests/owner/my-requests");
-      console.log("📦 Raw owner requests response:", response.data);
+      console.log("📦 RAW API RESPONSE:", response);
+      console.log("📦 Response data:", response.data);
+      console.log("📦 Response status:", response.status);
 
       let requestsArray = [];
       if (Array.isArray(response.data)) {
         requestsArray = response.data;
+        console.log("✅ Response is array, length:", requestsArray.length);
       } else if (
         response.data?.$values &&
         Array.isArray(response.data.$values)
       ) {
         requestsArray = response.data.$values;
+        console.log(
+          "✅ Response has $values array, length:",
+          requestsArray.length
+        );
       } else {
         requestsArray = [response.data];
+        console.log("✅ Response is single object, wrapped in array");
       }
 
-      return requestsArray.map((request) => ({
-        requestId: request.id || request.Id || request.requestId,
-        deliveryId: request.packageId || request.PackageId,
-        deliveryName: request.packageName || request.PackageName,
-        requester: request.requesterEmail || request.RequesterEmail,
-        requesterId: request.requesterId || request.RequesterId, // ADD THIS
-        requesterName: request.requesterName || request.RequesterName,
-        requesterProfileImage: request.requesterProfileImage,
-        status: request.status || request.Status,
-        timestamp:
-          request.requestDate || request.RequestDate || request.createdAt,
-      }));
+      // Log each request to see the actual fields
+      console.log("🔍 DETAILED REQUEST ANALYSIS:");
+      requestsArray.forEach((request, index) => {
+        console.log(`📋 Request ${index}:`, {
+          id: request.id,
+          Id: request.Id,
+          requestId: request.requestId,
+          packageId: request.packageId,
+          PackageId: request.PackageId,
+          packageName: request.packageName,
+          PackageName: request.PackageName,
+          requesterEmail: request.requesterEmail,
+          RequesterEmail: request.RequesterEmail,
+          requesterId: request.requesterId,
+          RequesterId: request.RequesterId,
+          // Add all possible field variations
+          ALL_FIELDS: Object.keys(request),
+        });
+      });
+
+      // SIMPLIFIED - No need to fetch packages separately anymore
+      const mappedRequests = requestsArray.map((request) => {
+        const mapped = {
+          requestId: request.id || request.Id || request.requestId,
+          deliveryId: request.packageId || request.PackageId,
+          deliveryName: request.packageName || request.PackageName,
+          requester: request.requesterEmail || request.RequesterEmail,
+          requesterId: request.requesterId || request.RequesterId,
+          requesterName: request.requesterName || request.RequesterName,
+          requesterProfileImage: request.requesterProfileImage,
+          ownerId: request.ownerId || request.OwnerId,
+          status: request.status || request.Status,
+          timestamp:
+            request.requestDate || request.RequestDate || request.createdAt,
+        };
+
+        console.log(`🔄 Mapping request ${mapped.requestId}:`, mapped);
+        return mapped;
+      });
+
+      console.log("🔄 FINAL Mapped requests:", mappedRequests);
+      return mappedRequests;
     } catch (error) {
-      console.error("Error fetching requests:", error);
+      console.error("❌ Error fetching requests:", error);
+      console.error("❌ Error response:", error.response?.data);
       throw error;
     }
   },

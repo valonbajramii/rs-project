@@ -21,7 +21,6 @@ const Chat = ({
 
   // Load contacts from API
   // In Chat.jsx - Replace the entire useEffect that loads contacts
-  // In Chat.jsx - Replace the contact processing logic
   useEffect(() => {
     const loadContacts = async () => {
       try {
@@ -40,27 +39,6 @@ const Chat = ({
 
         // Combine all requests and filter accepted ones
         const allRequests = [...transportRequests, ...ownerRequests];
-
-        // Debug function
-        const debugRequests = (requests, currentUser) => {
-          console.log("🐛 DEBUG REQUESTS ANALYSIS:");
-          requests.forEach((request, index) => {
-            console.log(`Request ${index + 1}:`, {
-              id: request.id,
-              requesterId: request.requesterId,
-              ownerId: request.ownerId,
-              packageId: request.packageId,
-              status: request.status,
-              currentUserIsRequester: request.requesterId === currentUser.id,
-              currentUserIsOwner: request.ownerId === currentUser.id,
-              hasRequesterId: !!request.requesterId,
-              hasOwnerId: !!request.ownerId,
-            });
-          });
-        };
-
-        debugRequests(allRequests, user);
-
         const acceptedRequests = allRequests.filter(
           (request) =>
             request.status === "Accepted" ||
@@ -73,97 +51,77 @@ const Chat = ({
         // Use Set for proper deduplication
         const contactIds = new Set();
 
-        // NEW LOGIC: Extract unique user IDs with better relationship detection
-        acceptedRequests.forEach((request) => {
+        // Process each accepted request to find the other user to chat with
+        for (const request of acceptedRequests) {
           console.log("🔍 Processing request:", request);
 
           const currentUserId = user.id;
 
-          // CASE 1: If requesterId is the current user, then the OTHER user is the package owner
-          if (request.requesterId === currentUserId) {
-            console.log("🎯 Current user is the REQUESTER");
+          // Try multiple possible property names for ownerId
+          const ownerId =
+            request.ownerId || request.packageOwnerId || request.ownerUserId;
+          const requesterId = request.requesterId || request.requesterUserId;
 
-            // Try to get the package owner ID
-            if (request.packageId) {
-              console.log(
-                `🔍 Package ID found: ${request.packageId}, fetching package details...`
-              );
-
-              // We need to fetch the package to get the owner ID
-              // Since ownerId is undefined in the request, we'll handle this differently
-            }
-
-            // Since ownerId is undefined, we need to find the actual package owner
-            // This is a backend issue, but we can work around it
-            console.log(
-              "⚠️ ownerId is undefined, cannot determine package owner"
-            );
-          }
-          // CASE 2: If ownerId is the current user (or we can infer it), then the OTHER user is the requester
-          else if (
-            request.ownerId === currentUserId ||
-            (request.requesterId && request.requesterId !== currentUserId)
-          ) {
-            console.log(
-              "🎯 Current user is the PACKAGE OWNER (or can be inferred)"
-            );
-
-            // The other user is the requester
-            if (request.requesterId && request.requesterId !== currentUserId) {
-              console.log(
-                `➕ Adding requester as contact: ${request.requesterId}`
-              );
-              contactIds.add(request.requesterId);
-            }
-          }
-          // CASE 3: Manual fallback - if requesterId exists and is different from current user
-          else if (
-            request.requesterId &&
-            request.requesterId !== currentUserId
-          ) {
-            console.log(
-              `🔄 Fallback: Adding requester: ${request.requesterId}`
-            );
-            contactIds.add(request.requesterId);
-          }
-
-          // SPECIAL CASE: Handle the bug where requesterId equals current user ID
-          // This means the backend has incorrect data, but we can try to find the real other user
-          if (request.requesterId === currentUserId && request.packageId) {
-            console.log("🚨 BUG DETECTED: requesterId equals current user ID");
-            console.log("🔄 Attempting to find real package owner...");
-
-            // We need to fetch the package to get the real owner
-            // This will be handled in the next step
-          }
-        });
-
-        // NEW: If we have package IDs but missing owner IDs, fetch package details
-        const packagesToFetch = acceptedRequests
-          .filter((req) => req.packageId && !req.ownerId)
-          .map((req) => req.packageId);
-
-        if (packagesToFetch.length > 0) {
           console.log(
-            `📦 Fetching details for ${packagesToFetch.length} packages to find owners...`
+            `🔍 Current user: ${currentUserId}, Owner: ${ownerId}, Requester: ${requesterId}`
           );
 
-          for (const packageId of packagesToFetch) {
+          // CASE 1: Current user is the package owner - chat with requester
+          if (
+            ownerId === currentUserId &&
+            requesterId &&
+            requesterId !== currentUserId
+          ) {
+            console.log(`🎯 User is OWNER - Adding requester: ${requesterId}`);
+            contactIds.add(requesterId);
+          }
+          // CASE 2: Current user is the requester - chat with package owner
+          else if (
+            requesterId === currentUserId &&
+            ownerId &&
+            ownerId !== currentUserId
+          ) {
+            console.log(`🎯 User is REQUESTER - Adding owner: ${ownerId}`);
+            contactIds.add(ownerId);
+          }
+          // CASE 3: If ownerId is missing but we have packageId, fetch package details
+          else if (
+            requesterId === currentUserId &&
+            request.packageId &&
+            !ownerId
+          ) {
+            console.log(
+              `🔄 Owner ID missing, fetching package ${request.packageId} details...`
+            );
             try {
-              const packageDetails = await packagesApi.getPackage(packageId);
-              console.log(
-                `📦 Package ${packageId} owner: ${packageDetails.userId}`
+              const packageDetails = await packagesApi.getPackage(
+                request.packageId
               );
+              console.log("📦 Package details:", packageDetails);
 
-              if (packageDetails.userId && packageDetails.userId !== user.id) {
-                console.log(
-                  `➕ Adding package owner as contact: ${packageDetails.userId}`
-                );
-                contactIds.add(packageDetails.userId);
+              // Try different property names for package owner
+              const packageOwnerId =
+                packageDetails.userId ||
+                packageDetails.ownerId ||
+                packageDetails.ownerUserId ||
+                packageDetails.userID;
+
+              if (packageOwnerId && packageOwnerId !== currentUserId) {
+                console.log(`➕ Found package owner: ${packageOwnerId}`);
+                contactIds.add(packageOwnerId);
+              } else {
+                console.warn("❌ Could not find valid package owner ID");
               }
             } catch (error) {
-              console.warn(`❌ Error fetching package ${packageId}:`, error);
+              console.error("❌ Error fetching package details:", error);
             }
+          }
+          // CASE 4: Fallback - if we can infer the relationship
+          else if (requesterId && requesterId !== currentUserId && !ownerId) {
+            console.log(`🔄 Fallback - Adding requester: ${requesterId}`);
+            contactIds.add(requesterId);
+          } else {
+            console.log("⚪ Skipping request - no valid chat partner found");
           }
         }
 

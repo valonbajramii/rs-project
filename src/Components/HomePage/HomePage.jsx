@@ -351,6 +351,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
   );
 
   // Pending requests logic - FETCH FROM BACKEND
+  // Pending requests logic - FETCH FROM BACKEND
   const fetchPendingRequests = useCallback(async () => {
     try {
       if (!user?.id) {
@@ -385,61 +386,37 @@ const HomePage = ({ user, setUser, onLogout }) => {
         // Filter for pending requests only
         const pending = requestsArray.filter((request) => {
           const status = request.status || request.Status;
+          console.log(`📊 Request ${request.requestId} status:`, status);
           return status === "Pending" || status === "pending" || status === 0;
         });
 
         console.log("⏳ Filtered pending requests:", pending);
 
         // Transform to match your frontend format with proper field mapping
-        const transformedPending = await Promise.all(
-          pending.map(async (request) => {
-            // Handle different field name variations
-            const requestId = request.id || request.Id || request.requestId;
-            const packageId = request.packageId || request.PackageId;
+        const transformedPending = pending.map((request) => {
+          console.log("🔍 Transforming request:", request);
 
-            // Try to get package name from multiple possible sources
-            let packageName = request.packageName || request.PackageName;
+          const transformed = {
+            requestId: request.requestId,
+            deliveryId: request.deliveryId,
+            deliveryName: request.deliveryName,
+            requester: request.requester,
+            requesterId: request.requesterId,
+            ownerId: request.ownerId,
+            requesterName: request.requesterName,
+            requesterProfileImage: request.requesterProfileImage,
+            status: request.status,
+            timestamp: request.timestamp,
+          };
 
-            // If package name is not available, try to fetch it from the API
-            if (!packageName && packageId) {
-              try {
-                const packageDetails = await packagesApi.getPackageById(
-                  packageId
-                );
-                packageName =
-                  packageDetails.name ||
-                  packageDetails.Name ||
-                  "Unknown Package";
-              } catch (error) {
-                console.error("Error fetching package details:", error);
-                packageName = "Unknown Package";
-              }
-            }
+          console.log("✅ Transformed request:", transformed);
+          return transformed;
+        });
 
-            const requesterEmail =
-              request.requesterEmail || request.RequesterEmail;
-            const requesterName =
-              request.requesterName || request.RequesterName;
-            const requesterProfileImage =
-              request.requesterProfileImage || request.RequesterProfileImage;
-            const status = request.status || request.Status;
-            const timestamp =
-              request.requestDate || request.RequestDate || request.createdAt;
-
-            return {
-              requestId: requestId,
-              deliveryId: packageId,
-              deliveryName: packageName || "Package Delivery", // Fallback name
-              requester: requesterEmail,
-              requesterName: requesterName,
-              requesterProfileImage: requesterProfileImage,
-              status: status,
-              timestamp: timestamp,
-            };
-          })
+        console.log(
+          "🔄 FINAL Transformed pending requests:",
+          transformedPending
         );
-
-        console.log("🔄 Transformed pending requests:", transformedPending);
         setPendingRequests(transformedPending);
       } catch (apiError) {
         console.error("❌ API Error:", apiError);
@@ -454,7 +431,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
       console.error("❌ Error in fetchPendingRequests:", error);
       setPendingRequests([]);
     }
-  }, [user?.id]); // Add dependencies here
+  }, [user?.id]);
 
   // Then update your useEffect to use the function
   useEffect(() => {
