@@ -13,6 +13,7 @@ import audiImage from "../../images/2025_audi_q7_4dr-suv_prestige_fq_oem_1_1600.
 import mercedesImage from "../../images/2023-mercedes-amg-c63-s-e-performance-114-65d79698b0e26.avif";
 import MyProductModal from "./MyProductModal/MyProductModal";
 import CompleteProfile from "../../Pages/CompleteProfile/CompleteProfile";
+import FavoritePackageView from "./FavoritePackageView/FavoritePackageView";
 import { v4 as uuidv4 } from "uuid";
 import { Dropdown } from "react-bootstrap";
 import FavoritedeliveryModal from "../FavoritedeliveryModal/FavoritedeliveryModal";
@@ -61,6 +62,8 @@ const HomePage = ({ user, setUser, onLogout }) => {
   const [filterCriteria, setFilterCriteria] = useState({});
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [loading, setLoading] = useState(true);
+  // Add to your existing state variables
+  const [showFavoritePackageView, setShowFavoritePackageView] = useState(false);
 
   const dropdownRef = useRef(null);
   const hasFetchedRef = useRef(false); // Use ref instead of state for fetch tracking
@@ -694,6 +697,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
         setShowCompleteProfile(false);
         setShowNotifications(false);
         setShowChatView(false);
+        setShowFavoritePackageView(false); // Add this
         setIsInMessageView(false);
         setActiveIcon("icon1");
       } else if (view === "options") {
@@ -703,11 +707,15 @@ const HomePage = ({ user, setUser, onLogout }) => {
         setShowCompleteProfile(false);
         setShowNotifications(false);
         setShowChatView(false);
+        setShowFavoritePackageView(false); // Add this
         setIsInMessageView(false);
         setActiveIcon("icon2");
       } else if (view === "add") {
-        // Check if profile is complete before allowing add package
-        if (!user?.isProfileComplete) {
+        if (!user) {
+          navigate("/login");
+          return;
+        }
+        if (!user.isProfileComplete) {
           setShowCompleteProfile(true);
           setShowForm(false);
           setIsAddPackageView(false);
@@ -721,6 +729,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
         setShowCompleteProfile(false);
         setShowNotifications(false);
         setShowChatView(false);
+        setShowFavoritePackageView(false); // Add this
         setIsInMessageView(false);
         setActiveIcon("icon3");
       } else if (view === "profile") {
@@ -733,6 +742,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
         setIsAddPackageView(false);
         setShowNotifications(false);
         setShowChatView(false);
+        setShowFavoritePackageView(false); // Add this
         setIsInMessageView(false);
         setActiveIcon("icon4");
       } else if (view === "messages") {
@@ -741,7 +751,8 @@ const HomePage = ({ user, setUser, onLogout }) => {
         setShowProfile(false);
         setShowCompleteProfile(false);
         setShowNotifications(true);
-        setShowChatView(false); // Don't show chat view here
+        setShowChatView(false);
+        setShowFavoritePackageView(false); // Add this
         setIsInMessageView(false);
         setActiveIcon("icon5");
       } else if (view === "chat") {
@@ -751,11 +762,23 @@ const HomePage = ({ user, setUser, onLogout }) => {
         setShowCompleteProfile(false);
         setShowNotifications(false);
         setShowChatView(true);
+        setShowFavoritePackageView(false); // Add this
         setIsInMessageView(false);
         setActiveIcon("icon5");
+      } else if (view === "favorites") {
+        // Add this case
+        setShowForm(false);
+        setIsAddPackageView(false);
+        setShowProfile(false);
+        setShowCompleteProfile(false);
+        setShowNotifications(false);
+        setShowChatView(false);
+        setShowFavoritePackageView(true);
+        setIsInMessageView(false);
+        setActiveIcon("favorites");
       }
     },
-    [user]
+    [user, navigate]
   );
 
   const handleMessagingClick = useCallback(() => {
@@ -784,6 +807,12 @@ const HomePage = ({ user, setUser, onLogout }) => {
     setShowForm(true); // Show the normal view
     setActiveIcon("icon1");
   };
+
+  const handleBackFromFavorites = useCallback(() => {
+    setShowFavoritePackageView(false);
+    setShowForm(false);
+    setActiveIcon("icon2"); // Go back to packages view
+  }, []);
 
   return (
     <div className="Homepage-container">
@@ -927,7 +956,17 @@ const HomePage = ({ user, setUser, onLogout }) => {
               <div className={`dropdown-menu ${isDropdownOpen ? "show" : ""}`}>
                 <div
                   className="dropdown-item"
-                  onClick={toggleFavoritedeliveryModal}
+                  onClick={() => {
+                    setShowFavoritePackageView(true);
+                    setShowForm(false);
+                    setIsAddPackageView(false);
+                    setShowProfile(false);
+                    setShowCompleteProfile(false);
+                    setShowNotifications(false);
+                    setShowChatView(false);
+                    setActiveIcon("favorites");
+                    setIsDropdownOpen(false);
+                  }}
                 >
                   <img src={heartIcon} />
                   Favourites
@@ -1027,6 +1066,17 @@ const HomePage = ({ user, setUser, onLogout }) => {
 
       <div className={`${showForm ? "form-view" : "delivery-view"}`}>
         <div className="Components-container">
+          {isMobile && !showFavoritePackageView && (
+            <div className="mobile-favorites-button-container">
+              <button
+                className="mobile-favorites-button"
+                onClick={() => handleFooterClick("favorites")}
+              >
+                <img src={heartIcon} alt="Favorites" />
+                <span>Favorites ({favorites.length})</span>
+              </button>
+            </div>
+          )}
           {!isMobile && <DeliveryMap />}
           {isMobile && showForm && <DeliveryMap />}
           <div className="main-content-container">
@@ -1052,7 +1102,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
                   addNewDelivery={addNewDelivery}
                 />
               ) : showChatView ? (
-                // Only show Chat when showChatView is true (not in mobile notifications)
                 <Chat
                   user={user}
                   selectedContact={selectedChatContact}
@@ -1063,6 +1112,15 @@ const HomePage = ({ user, setUser, onLogout }) => {
                   }}
                   setShowFooter={setShowFooter}
                   setIsInMessageView={setIsInMessageView}
+                />
+              ) : showFavoritePackageView ? ( // Add this condition
+                <FavoritePackageView
+                  favorites={favorites}
+                  deliveryOptions={deliveryOptions}
+                  user={user}
+                  toggleFavorite={toggleFavorite}
+                  onBack={handleBackFromFavorites}
+                  setSelectedDelivery={setSelectedDelivery}
                 />
               ) : (
                 <>
@@ -1142,10 +1200,10 @@ const HomePage = ({ user, setUser, onLogout }) => {
                         setIsAddPackageView={setIsAddPackageView}
                         setShowForm={setShowForm}
                         setShowProfile={setShowProfile}
-                        setShowCompleteProfile={setShowCompleteProfile} // Pass this prop
+                        setShowCompleteProfile={setShowCompleteProfile}
                         setSelectedDelivery={setSelectedDelivery}
                         loading={loading}
-                        onAddPackageClick={handleAddPackageClick} // Pass the handler
+                        onAddPackageClick={handleAddPackageClick}
                       />
                     )}
                   </div>
@@ -1204,14 +1262,14 @@ const HomePage = ({ user, setUser, onLogout }) => {
           editDelivery={editDelivery}
         />
       )}
-      {isFavoritedeliveryModal && (
+      {/* {isFavoritedeliveryModal && (
         <FavoritedeliveryModal
           favorites={favorites}
           deliveryOptions={deliveryOptions}
           show={isFavoritedeliveryModal}
           onClose={toggleFavoritedeliveryModal}
         />
-      )}
+      )} */}
     </div>
   );
 };

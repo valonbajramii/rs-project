@@ -640,6 +640,36 @@ homepage-request-item:hover {
   color: #666;
 }
 
+/* Mobile favorites button */
+.mobile-favorites-button-container {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+}
+
+.mobile-favorites-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-favorites-button img {
+  width: 16px;
+  height: 16px;
+}
+
+.mobile-favorites-button:hover {
+  background: #f5f5f5;
+}
+
 @media (max-width: 480px) {
   .Homepage-container {
     display: flex;
