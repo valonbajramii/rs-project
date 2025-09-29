@@ -589,8 +589,33 @@ const api = axios.create({
 // Add request interceptor to include the token if available
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
+
+  // Debug token information
+  console.log("🔐 Token Debug:", {
+    hasToken: !!token,
+    tokenLength: token?.length,
+    endpoint: config.url,
+    method: config.method,
+  });
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    console.log("✅ Token added to Authorization header");
+
+    // Debug: Log the token payload (for development only)
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      console.log("🔐 Token payload:", {
+        userId: payload.userId,
+        name: payload.unique_name,
+        nameIdentifier: payload.nameid,
+        expires: new Date(payload.exp * 1000),
+      });
+    } catch (e) {
+      console.log("🔐 Could not parse token payload");
+    }
+  } else {
+    console.warn("⚠️ No token found in localStorage");
   }
 
   // Don't log FormData content as it's not easily readable
@@ -1238,6 +1263,94 @@ export const getProfileImageUrl = (imagePath) => {
   // Remove any leading slashes to ensure proper path construction
   const cleanPath = imagePath.replace(/^\/+/, "");
   return `${API_URL}/${cleanPath}`;
+};
+
+// Favorites API
+export const favoritesApi = {
+  getUserFavorites: async () => {
+    try {
+      const response = await api.get("/favoritepackages");
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  addFavorite: async (packageId) => {
+    try {
+      const response = await api.post("/favoritepackages", {
+        packageId: packageId,
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  removeFavorite: async (packageId) => {
+    try {
+      const response = await api.delete(`/favoritepackages/${packageId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  checkFavorite: async (packageId) => {
+    try {
+      const response = await api.get(`/favoritepackages/check/${packageId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+};
+
+// Token validation utility
+export const tokenUtils = {
+  getTokenInfo: () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return { isValid: false, message: "No token found" };
+    }
+
+    try {
+      const tokenParts = token.split(".");
+      if (tokenParts.length !== 3) {
+        return { isValid: false, message: "Invalid token format" };
+      }
+
+      const payload = JSON.parse(atob(tokenParts[1]));
+      const isExpired = payload.exp && Date.now() >= payload.exp * 1000;
+
+      return {
+        isValid: !isExpired,
+        payload: payload,
+        expires: payload.exp ? new Date(payload.exp * 1000) : null,
+        isExpired: isExpired,
+      };
+    } catch (error) {
+      return { isValid: false, message: "Error parsing token" };
+    }
+  },
+
+  clearAuthData: () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    console.log("🗑️ Cleared authentication data");
+  },
+};
+
+// Add this to check token on app start
+export const initializeAuth = () => {
+  const tokenInfo = tokenUtils.getTokenInfo();
+  console.log("🔐 Initial Auth Check:", tokenInfo);
+
+  if (!tokenInfo.isValid) {
+    tokenUtils.clearAuthData();
+  }
+
+  return tokenInfo;
 };
 
 export default api;

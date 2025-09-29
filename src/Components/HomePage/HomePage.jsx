@@ -16,7 +16,6 @@ import CompleteProfile from "../../Pages/CompleteProfile/CompleteProfile";
 import FavoritePackageView from "./FavoritePackageView/FavoritePackageView";
 import { v4 as uuidv4 } from "uuid";
 import { Dropdown } from "react-bootstrap";
-import FavoritedeliveryModal from "../FavoritedeliveryModal/FavoritedeliveryModal";
 import carIcon from "../../icons/car-front-outlined.svg";
 import Vector from "../../icons/Vector2.svg";
 import samewayLogo from "../../logo/sameway_logo.png";
@@ -32,7 +31,12 @@ import DeliveryInfoPanel from "../DeliveryInfoPanel/DeliveryInfoPanel";
 import MobileNotifications from "../MobileNotifications/MobileNotifications";
 import editIcon from "../../icons/edit.svg";
 import Chat from "../Chat/Chat";
-import { packagesApi, transportApi, messagesApi } from "../../API/api";
+import {
+  packagesApi,
+  transportApi,
+  messagesApi,
+  favoritesApi,
+} from "../../API/api";
 
 const HomePage = ({ user, setUser, onLogout }) => {
   const navigate = useNavigate();
@@ -51,45 +55,50 @@ const HomePage = ({ user, setUser, onLogout }) => {
   const [showFooter, setShowFooter] = useState(true);
   const [isInMessageView, setIsInMessageView] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [showCompleteProfile, setShowCompleteProfile] = useState(false); // Add this state
+  const [showCompleteProfile, setShowCompleteProfile] = useState(false);
   const [activeRequestId, setActiveRequestId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-  const [isFavoritedeliveryModal, setIsFavoritedeliveryModal] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const [deliveryOptions, setDeliveryOptions] = useState([]);
   const [filterCriteria, setFilterCriteria] = useState({});
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [loading, setLoading] = useState(true);
-  // Add to your existing state variables
   const [showFavoritePackageView, setShowFavoritePackageView] = useState(false);
 
   const dropdownRef = useRef(null);
-  const hasFetchedRef = useRef(false); // Use ref instead of state for fetch tracking
+  const hasFetchedRef = useRef(false);
   const [showForm, setShowForm] = useState(location.state?.showForm ?? true);
   const [activeIcon, setActiveIcon] = useState(
     location.state?.showForm === false ? "icon2" : "icon1"
   );
 
-  // useEffect(() => {
-  //   if (user && !user.isProfileComplete) {
-  //     setShowCompleteProfile(true);
-  //     setShowForm(false);
-  //     setIsAddPackageView(false);
-  //     setShowProfile(false);
-  //     setShowNotifications(false);
-  //     setShowChatView(false);
-  //   }
-  // }, [user]);
+  // Add function to load favorites from backend
+  const loadUserFavorites = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      const response = await favoritesApi.getUserFavorites();
+      const favoritePackageIds = response.map((fav) => fav.packageId);
+      setFavorites(favoritePackageIds);
+      console.log("Loaded favorites from backend:", favoritePackageIds);
+    } catch (error) {
+      console.error("Error loading favorites:", error);
+    }
+  }, [user?.id]);
+
+  // Load favorites on mount and when user changes
+  useEffect(() => {
+    loadUserFavorites();
+  }, [loadUserFavorites]);
 
   useEffect(() => {
-    // Sync user from localStorage on component mount and when user might be updated elsewhere
+    // Sync user from localStorage
     const syncUserFromStorage = () => {
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
-        // Only update if the user data is different
         if (JSON.stringify(parsedUser) !== JSON.stringify(user)) {
           setUser(parsedUser);
         }
@@ -97,9 +106,9 @@ const HomePage = ({ user, setUser, onLogout }) => {
     };
 
     syncUserFromStorage();
-  }, [user, setUser]); // Add dependencies to re-run when user changes
+  }, [user, setUser]);
 
-  // Function to refresh packages from API - FIXED
+  // Function to refresh packages from API
   const refreshPackages = useCallback(async () => {
     try {
       setLoading(true);
@@ -165,37 +174,29 @@ const HomePage = ({ user, setUser, onLogout }) => {
       setLoading(false);
     }
   }, []);
-  // Function to handle profile completion
-  // In HomePage.jsx - fix the handleProfileComplete function
+
   const handleProfileComplete = useCallback(
     (updatedUser) => {
       console.log("🔄 Profile complete callback received:", updatedUser);
 
-      // Ensure we have the complete user data with ID
       if (!updatedUser.id && user?.id) {
-        updatedUser.id = user.id; // Preserve the original ID
+        updatedUser.id = user.id;
       }
 
-      // Update both localStorage and state
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
       if (typeof setUser === "function") {
         setUser(updatedUser);
       }
 
-      // Close the complete profile view
       setShowCompleteProfile(false);
       setShowForm(true);
       setActiveIcon("icon1");
-
-      // Refresh packages
       refreshPackages();
     },
-    [setUser, refreshPackages, user?.id] // Add user.id as dependency
+    [setUser, refreshPackages, user?.id]
   );
 
-  // Update the handleAddPackageClick logic in DeliveryOptions
-  // You'll need to pass setShowCompleteProfile to DeliveryOptions
   const handleAddPackageClick = useCallback(() => {
     if (!user) {
       navigate("/login");
@@ -213,19 +214,17 @@ const HomePage = ({ user, setUser, onLogout }) => {
     setIsAddPackageView(true);
   }, [user, navigate]);
 
-  // Load packages on component mount - only once - FIXED
+  // Load packages on component mount
   useEffect(() => {
     refreshPackages();
-  }, [refreshPackages, user?.id]); // Refresh when user ID changes
+  }, [refreshPackages, user?.id]);
 
-  // Handler to add a new delivery
   const addNewDelivery = useCallback(
     async (newDelivery) => {
       try {
         const response = await packagesApi.createPackage(newDelivery);
         console.log("Package creation response:", response);
 
-        // Transform the response to match your package format
         const transformedPackage = {
           id: response.id,
           name: response.name,
@@ -248,11 +247,9 @@ const HomePage = ({ user, setUser, onLogout }) => {
 
         console.log("Transformed new package:", transformedPackage);
 
-        // Add the new package to both deliveryOptions and filteredOptions
         setDeliveryOptions((prev) => [...prev, transformedPackage]);
         setFilteredOptions((prev) => [...prev, transformedPackage]);
 
-        // Also refresh the packages to ensure we have the latest data
         setTimeout(() => {
           refreshPackages();
         }, 1000);
@@ -261,7 +258,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
       } catch (error) {
         console.error("Failed to create package:", error);
 
-        // Handle duplicate name error specifically
         if (
           error.message &&
           error.message.includes("duplicate key") &&
@@ -324,12 +320,10 @@ const HomePage = ({ user, setUser, onLogout }) => {
     applyFilters();
   }, [filterCriteria, deliveryOptions]);
 
-  // Function to update filter criteria
   const updateFilterCriteria = useCallback((criteria) => {
     setFilterCriteria(criteria);
   }, []);
 
-  // Handler to delete a delivery
   const deleteDelivery = useCallback(
     (deletedDelivery) => {
       const updatedDeliveryOptions = deliveryOptions.filter(
@@ -341,7 +335,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
     [deliveryOptions]
   );
 
-  // Edit delivery handler
   const editDelivery = useCallback(
     (updatedDelivery) => {
       const updatedOptions = deliveryOptions.map((delivery) =>
@@ -353,8 +346,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
     [deliveryOptions]
   );
 
-  // Pending requests logic - FETCH FROM BACKEND
-  // Pending requests logic - FETCH FROM BACKEND
   const fetchPendingRequests = useCallback(async () => {
     try {
       if (!user?.id) {
@@ -374,7 +365,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
           return;
         }
 
-        // Handle different response formats
         let requestsArray = [];
         if (Array.isArray(response)) {
           requestsArray = response;
@@ -386,7 +376,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
 
         console.log("📋 Processed requests array:", requestsArray);
 
-        // Filter for pending requests only
         const pending = requestsArray.filter((request) => {
           const status = request.status || request.Status;
           console.log(`📊 Request ${request.requestId} status:`, status);
@@ -395,7 +384,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
 
         console.log("⏳ Filtered pending requests:", pending);
 
-        // Transform to match your frontend format with proper field mapping
         const transformedPending = pending.map((request) => {
           console.log("🔍 Transforming request:", request);
 
@@ -423,7 +411,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
         setPendingRequests(transformedPending);
       } catch (apiError) {
         console.error("❌ API Error:", apiError);
-        // For development, use user-specific mock data
         const userRequestsKey = `pendingRequests_${user.id}`;
         const fallbackRequests = JSON.parse(
           localStorage.getItem(userRequestsKey) || "[]"
@@ -436,17 +423,14 @@ const HomePage = ({ user, setUser, onLogout }) => {
     }
   }, [user?.id]);
 
-  // Then update your useEffect to use the function
   useEffect(() => {
     fetchPendingRequests();
 
-    // Set up polling to check for new requests every 30 seconds
     const intervalId = setInterval(fetchPendingRequests, 30000);
 
     return () => clearInterval(intervalId);
-  }, [fetchPendingRequests]); // Add fetchPendingRequests to dependencies
+  }, [fetchPendingRequests]);
 
-  // Click outside handler
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -470,7 +454,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
     };
   }, [isDropdownOpen, isRequestsDropdownOpen]);
 
-  // Helper functions
   const addChatContact = useCallback((contact) => {
     const storedContacts =
       JSON.parse(localStorage.getItem("chatContacts")) || [];
@@ -500,7 +483,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
 
     let requestTime;
 
-    // Handle different timestamp formats
     if (typeof timestamp === "string") {
       requestTime = new Date(timestamp);
     } else if (typeof timestamp === "number") {
@@ -511,7 +493,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
       return "Just now";
     }
 
-    // Check if the date is valid
     if (isNaN(requestTime.getTime())) {
       return "Just now";
     }
@@ -540,8 +521,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
     return "Just now";
   }, []);
 
-  // Request action handler
-  // In HomePage.js, update handleRequestAction
   const handleRequestAction = useCallback(
     async (requestId, action) => {
       try {
@@ -551,7 +530,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
           action: action,
         });
 
-        // Validate requestId exists and is a number
         if (!requestId) {
           console.error("❌ Request ID is null/undefined:", requestId);
           alert("Invalid request ID");
@@ -569,7 +547,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
 
         const status = action === "approve" ? "Accepted" : "Rejected";
 
-        // Call the API to update the request status
         console.log("📡 Calling API with:", { requestId: parsedId, status });
         const response = await transportApi.updateRequestStatus(
           parsedId,
@@ -577,16 +554,13 @@ const HomePage = ({ user, setUser, onLogout }) => {
         );
         console.log("✅ API response:", response);
 
-        // If request was approved, create chat relationship
         if (action === "approve") {
           try {
-            // Find the request details to get both users info
             const request = pendingRequests.find(
               (req) => req.requestId === requestId
             );
 
             if (request) {
-              // Add the requester to chat contacts for BOTH users
               const requesterContact = {
                 id: request.requesterId || request.requester,
                 email: request.requester,
@@ -595,13 +569,12 @@ const HomePage = ({ user, setUser, onLogout }) => {
               };
 
               const ownerContact = {
-                id: user.id, // Current user (the one approving)
+                id: user.id,
                 email: user.email,
                 name: user.fullName || user.name,
                 profileImage: user.profileImage,
               };
 
-              // Add to localStorage for immediate access for BOTH users
               const addContactToStorage = (userId, contact) => {
                 const userContactsKey = `chatContacts_${userId}`;
                 const storedContacts = JSON.parse(
@@ -621,11 +594,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
                 }
               };
 
-              // Add requester to owner's contacts
               addContactToStorage(user.id, requesterContact);
-
-              // Add owner to requester's contacts (simulate this for the other user)
-              // This would ideally be done via API or when the other user logs in
               console.log("✅ Chat relationship created for both users");
             }
           } catch (contactError) {
@@ -633,7 +602,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
           }
         }
 
-        // Update local state
         setPendingRequests((prev) =>
           prev.filter((req) => req.requestId !== requestId)
         );
@@ -651,10 +619,9 @@ const HomePage = ({ user, setUser, onLogout }) => {
         );
       }
     },
-    [fetchPendingRequests, pendingRequests] // Add pendingRequests to dependencies
+    [fetchPendingRequests, pendingRequests]
   );
 
-  // Toggle functions
   const toggleModal = useCallback(() => {
     setIsModalOpen(!isModalOpen);
   }, [isModalOpen]);
@@ -662,10 +629,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
   const toggleProductModal = useCallback(() => {
     setIsProductModalOpen(!isProductModalOpen);
   }, [isProductModalOpen]);
-
-  const toggleFavoritedeliveryModal = useCallback(() => {
-    setIsFavoritedeliveryModal(!isFavoritedeliveryModal);
-  }, [isFavoritedeliveryModal]);
 
   const toggleDropdown = useCallback(() => {
     setIsDropdownOpen((prev) => !prev);
@@ -677,7 +640,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
     navigate("/login");
   }, [navigate, onLogout]);
 
-  // View handlers
   const showDeliveryForm = useCallback(() => {
     setShowForm(true);
     setActiveIcon("form");
@@ -697,7 +659,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
         setShowCompleteProfile(false);
         setShowNotifications(false);
         setShowChatView(false);
-        setShowFavoritePackageView(false); // Add this
+        setShowFavoritePackageView(false);
         setIsInMessageView(false);
         setActiveIcon("icon1");
       } else if (view === "options") {
@@ -707,7 +669,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
         setShowCompleteProfile(false);
         setShowNotifications(false);
         setShowChatView(false);
-        setShowFavoritePackageView(false); // Add this
+        setShowFavoritePackageView(false);
         setIsInMessageView(false);
         setActiveIcon("icon2");
       } else if (view === "add") {
@@ -729,7 +691,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
         setShowCompleteProfile(false);
         setShowNotifications(false);
         setShowChatView(false);
-        setShowFavoritePackageView(false); // Add this
+        setShowFavoritePackageView(false);
         setIsInMessageView(false);
         setActiveIcon("icon3");
       } else if (view === "profile") {
@@ -742,7 +704,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
         setIsAddPackageView(false);
         setShowNotifications(false);
         setShowChatView(false);
-        setShowFavoritePackageView(false); // Add this
+        setShowFavoritePackageView(false);
         setIsInMessageView(false);
         setActiveIcon("icon4");
       } else if (view === "messages") {
@@ -752,7 +714,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
         setShowCompleteProfile(false);
         setShowNotifications(true);
         setShowChatView(false);
-        setShowFavoritePackageView(false); // Add this
+        setShowFavoritePackageView(false);
         setIsInMessageView(false);
         setActiveIcon("icon5");
       } else if (view === "chat") {
@@ -762,11 +724,10 @@ const HomePage = ({ user, setUser, onLogout }) => {
         setShowCompleteProfile(false);
         setShowNotifications(false);
         setShowChatView(true);
-        setShowFavoritePackageView(false); // Add this
+        setShowFavoritePackageView(false);
         setIsInMessageView(false);
         setActiveIcon("icon5");
       } else if (view === "favorites") {
-        // Add this case
         setShowForm(false);
         setIsAddPackageView(false);
         setShowProfile(false);
@@ -790,29 +751,59 @@ const HomePage = ({ user, setUser, onLogout }) => {
     setActiveIcon("icon5");
   }, []);
 
-  const toggleFavorite = useCallback((deliveryId) => {
-    setFavorites((prevFavorites) => {
-      if (prevFavorites.includes(deliveryId)) {
-        // Nëse pakoja është tashmë favorite → e heq
-        return prevFavorites.filter((id) => id !== deliveryId);
-      } else {
-        // Nëse nuk është favorite → e shton
-        return [...prevFavorites, deliveryId];
+  const toggleFavorite = useCallback(
+    async (packageId) => {
+      try {
+        const isCurrentlyFavorited = favorites.includes(packageId);
+
+        if (isCurrentlyFavorited) {
+          await favoritesApi.removeFavorite(packageId);
+          setFavorites((prev) => prev.filter((id) => id !== packageId));
+        } else {
+          await favoritesApi.addFavorite(packageId);
+          setFavorites((prev) => [...prev, packageId]);
+        }
+      } catch (error) {
+        console.error("Error toggling favorite:", error);
+        alert(error.message || "Failed to update favorites");
       }
-    });
-  }, []);
+    },
+    [favorites]
+  );
 
   const handleCompleteProfileBack = () => {
     setShowCompleteProfile(false);
-    setShowForm(true); // Show the normal view
+    setShowForm(true);
     setActiveIcon("icon1");
   };
 
   const handleBackFromFavorites = useCallback(() => {
     setShowFavoritePackageView(false);
     setShowForm(false);
-    setActiveIcon("icon2"); // Go back to packages view
+    setActiveIcon("icon2");
   }, []);
+
+  // Add this useEffect to check authentication on component load
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      const userData = localStorage.getItem("user");
+
+      console.log("🔐 HomePage Auth Check:", {
+        hasToken: !!token,
+        hasUser: !!userData,
+        tokenLength: token?.length,
+        currentUser: user,
+      });
+
+      if (!token && user) {
+        console.warn("⚠️ Token missing but user state exists - logging out");
+        handleLogout();
+      }
+    };
+
+    checkAuth();
+  }, [user, handleLogout]);
 
   return (
     <div className="Homepage-container">
@@ -851,7 +842,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
                           name:
                             request.requesterName ||
                             request.requester.split("@")[0],
-                          profileImage: request.requesterProfileImage, // Add this from the API response
+                          profileImage: request.requesterProfileImage,
                         };
                         console.log("Request object:", request);
                         console.log(
@@ -984,7 +975,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
                 <div
                   className="dropdown-item"
                   onClick={() => {
-                    // Check if profile is complete before showing profile
                     if (!user?.isProfileComplete) {
                       setShowCompleteProfile(true);
                       setShowForm(false);
@@ -1048,7 +1038,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
                 deliveryOptions={deliveryOptions}
               />
             ) : (
-              // Only show Chat when chat tab is active
               <Chat
                 user={user}
                 selectedContact={selectedChatContact}
@@ -1113,7 +1102,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
                   setShowFooter={setShowFooter}
                   setIsInMessageView={setIsInMessageView}
                 />
-              ) : showFavoritePackageView ? ( // Add this condition
+              ) : showFavoritePackageView ? (
                 <FavoritePackageView
                   favorites={favorites}
                   deliveryOptions={deliveryOptions}
@@ -1262,14 +1251,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
           editDelivery={editDelivery}
         />
       )}
-      {/* {isFavoritedeliveryModal && (
-        <FavoritedeliveryModal
-          favorites={favorites}
-          deliveryOptions={deliveryOptions}
-          show={isFavoritedeliveryModal}
-          onClose={toggleFavoritedeliveryModal}
-        />
-      )} */}
     </div>
   );
 };
