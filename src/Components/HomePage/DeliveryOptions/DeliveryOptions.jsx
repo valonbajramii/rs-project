@@ -276,8 +276,10 @@
 import React, { useState } from "react";
 import "./DeliveryOptions.css";
 import HeartIcon from "../../../icons/Heart-icon.svg";
+import HeartFilledIcon from "../../../icons/HeartShape.svg"; // Add this import
 import { useNavigate } from "react-router-dom";
 import fallbackImage from "../../../icons/car-front-fill.svg";
+import { useMediaQuery } from "react-responsive";
 
 const DeliveryOptions = ({
   deliveryOptions,
@@ -287,21 +289,21 @@ const DeliveryOptions = ({
   setIsAddPackageView,
   setShowForm,
   setShowProfile,
-  setShowCompleteProfile, // Add this prop
+  setShowCompleteProfile,
   setSelectedDelivery,
   loading,
-  onAddPackageClick, // Add this prop
+  onAddPackageClick,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [imageErrors, setImageErrors] = useState({});
   const navigate = useNavigate();
 
-  // Use the passed handler instead of local logic
+  const isMobile = useMediaQuery({ maxWidth: 480 });
+
   const handleAddPackageClick = () => {
     if (onAddPackageClick) {
       onAddPackageClick();
     } else {
-      // Fallback to original logic
       if (!user) {
         navigate("/login");
         return;
@@ -323,7 +325,6 @@ const DeliveryOptions = ({
     setImageErrors((prev) => ({ ...prev, [optionId]: true }));
   };
 
-  // Debug function to check image URLs
   const debugImageUrls = (option) => {
     console.log(`Package: ${option.name}`);
     console.log("Image paths:", option.imagePaths);
@@ -334,7 +335,6 @@ const DeliveryOptions = ({
     }
   };
 
-  // Debug: log the filtered options
   const filteredOptions = deliveryOptions.filter((option) => {
     const location = option.location || "";
     const destination = option.destination || "";
@@ -343,12 +343,13 @@ const DeliveryOptions = ({
       location.toLowerCase().includes(searchTerm.toLowerCase()) ||
       destination.toLowerCase().includes(searchTerm.toLowerCase());
 
-    console.log("Option:", option, "Matches search:", matches);
-
     return matches;
   });
 
-  console.log("Filtered options:", filteredOptions);
+  // Check if a package is favorited
+  const isFavorited = (packageId) => {
+    return favorites.includes(packageId);
+  };
 
   return (
     <div className="delivery-option-container">
@@ -364,15 +365,16 @@ const DeliveryOptions = ({
         <div className="loading-message">Loading packages...</div>
       ) : (
         <div className="scrollable-container">
-          <div className="dlivery-option-menu">
+          <div className="delivery-option-menu">
             {filteredOptions.length > 0 ? (
               filteredOptions.map((option) => {
-                debugImageUrls(option); // Debug each package
+                debugImageUrls(option);
 
                 const hasError = imageErrors[option.id];
                 const hasImages =
                   option.imagePaths && option.imagePaths.length > 0;
                 const imageUrl = hasImages ? option.imagePaths[0] : null;
+                const favorited = isFavorited(option.id); // Check if package is favorited
 
                 return (
                   <div key={option.id}>
@@ -406,17 +408,23 @@ const DeliveryOptions = ({
                       <div className="delivery-price-container">
                         <p className="delivery-price">CHF {option.price}</p>
                         <div
-                          className="star-icon"
+                          className={`star-icon ${
+                            favorited ? "favorited" : ""
+                          }`}
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleFavorite(option.id);
                           }}
                         >
-                          <img src={HeartIcon} alt="Favorite" />
+                          {/* Use filled icon when favorited, outline when not */}
+                          <img
+                            src={favorited ? HeartFilledIcon : HeartIcon}
+                            alt="Favorite"
+                          />
                         </div>
                       </div>
                     </div>
-                    <hr className="deliveri-options-hr" />
+                    {!isMobile && <hr className="deliveri-options-hr" />}
                   </div>
                 );
               })

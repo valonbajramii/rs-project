@@ -61,7 +61,7 @@ const RequestsModal = ({ delivery, onClose, handleRequestAction }) => {
           x
         </button>
         <h2>Requests for {delivery.name}</h2>
-        <hr />
+        <hr className="requestmodal-hr" />
         {delivery.requests && delivery.requests.length > 0 ? (
           delivery.requests.map((request, index) => (
             <div key={index} className="request-item">

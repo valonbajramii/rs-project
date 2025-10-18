@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+
 .Homepage-container {
   display: flex;
   width: 100%;
@@ -39,9 +41,11 @@
 
 .main-content-container {
   display: flex;
-  flex: 1;
+  /* flex: 1; */
   overflow: hidden;
   position: relative;
+  margin-top: 50px;
+  /* height: 800px; */
 }
 
 .delivery-info-panel {
@@ -51,12 +55,14 @@
   background: white;
   border-left: 1px solid #eee;
   position: relative;
+  margin-top: 10px;
 }
 
 .delivery-info-panel.open {
   width: 400px;
   min-width: 400px;
   overflow-y: auto;
+  border-radius: 0px 20px 20px 0px;
 }
 
 .Components-container1 {
@@ -64,14 +70,16 @@
   flex-direction: column;
   margin-top: 10px;
   background-color: white;
-  /* padding: 20px;  */
-  box-sizing: border-box; /* Include padding and borders in element's total width and height */
-  overflow: hidden; /* Prevent content from spilling outside the container */
+  box-sizing: border-box;
+  overflow: hidden;
   margin-left: 20px;
-  /* max-width: 500px; */
   max-height: 605px;
   border-radius: 20px;
   z-index: 1;
+}
+
+.Components-container1.panel-open {
+  border-radius: 20px 0px 00px 20px;
 }
 
 .Components-container2 {
@@ -85,10 +93,15 @@
   z-index: 1;
 }
 
+.test-header {
+  background-color: #fcfcfc;
+}
+
 .Components-header {
   display: flex;
   justify-content: center;
   justify-content: space-around;
+  background-color: #fcfcfc;
   margin-top: 15px;
 }
 
@@ -106,10 +119,16 @@
 
 .homepage-icons-label {
   color: #d5d7d9;
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-size: 13px;
 }
 
 .homepage-icons-label.activelabel {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
   color: #3673e4;
+  font-size: 13px;
 }
 
 .Components-header-icons-hr {
@@ -221,18 +240,20 @@
 }
 
 .homepage-car-icon {
-  width: 30px;
-}
-
-.vector-icon {
   width: 25px;
 }
 
+.vector-icon {
+  width: 22px;
+}
+
 .header-hr {
-  height: 0.5px; /* Sets the line to be very thin */
-  background-color: #d3cece; /* Sets the color of the line */
+  height: 2px; /* Sets the line to be very thin */
+  background-color: #f0f4fa; /* Sets the color of the line */
   border: none; /* Removes default border */
   display: block; /* Ensure the height is applied */
+  margin: 0;
+  margin-top: 10px;
 }
 
 .active-icon {
@@ -691,11 +712,37 @@ homepage-request-item:hover {
     margin: 0; /* Remove extra margin */
   }
 
-  .form-view .Components-container {
-    margin-top: 350px;
-    height: 60vh; /* Full screen height */
+  .main-content-container {
+    margin-top: 0px;
   }
 
+  .form-view .Components-container1 {
+    flex: 1;
+    overflow: hidden;
+    margin-top: 100%;
+    background-color: #888;
+    background-color: #ffffff; /* Changed from gray to white */
+    border-radius: 20px 20px 0 0;
+    padding: 20px;
+    height: 385px; /* FIXED HEIGHT */
+    min-height: 385px; /* Prevent shrinking */
+    max-height: 385px; /* Prevent growing */
+    justify-content: flex-start;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    overflow-y: auto; /* Allow scrolling inside form if needed */
+    margin-bottom: 60px;
+  }
+
+  .form-view .Components-container2 {
+    flex: 1;
+    overflow: hidden;
+    background-color: #ffffff;
+  }
   /* No margin-top when delivery options are active on mobile */
   .delivery-view .Components-container {
     margin-top: 0;

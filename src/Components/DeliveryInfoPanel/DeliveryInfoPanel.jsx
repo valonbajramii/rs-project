@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./DeliveryInfoPanel.css";
 import { v4 as uuidv4 } from "uuid";
 import { packagesApi, transportApi } from "../../API/api";
 import fallbackImage from "../../icons/car-front-fill.svg";
 import chevronLeft from "../../images/chevron-left.svg";
+import locationIcon from "../../icons/Group 3.svg";
+import destinationIcon from "../../icons/Group 5.png";
 
 const DeliveryInfoPanel = ({
   deliveryDetails,
@@ -18,11 +20,51 @@ const DeliveryInfoPanel = ({
   const [packageOwner, setPackageOwner] = useState(null);
   const [loadingOwner, setLoadingOwner] = useState(true);
   const [imageErrors, setImageErrors] = useState({});
+  const [isMobile, setIsMobile] = useState(false);
+  const panelRef = useRef(null);
 
   // FIXED: Use imagePaths directly as they already contain full URLs
   const images = Array.isArray(deliveryDetails.imagePaths)
     ? deliveryDetails.imagePaths
     : [];
+
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth <= 768); // You can adjust this breakpoint
+    };
+
+    // Initial check
+    checkScreenSize();
+
+    // Add event listener
+    window.addEventListener("resize", checkScreenSize);
+
+    // Cleanup
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  // Handle outside click for desktop
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        !isMobile &&
+        panelRef.current &&
+        !panelRef.current.contains(event.target)
+      ) {
+        onClose();
+      }
+    };
+
+    // Add event listener only for desktop
+    if (!isMobile) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMobile, onClose]);
 
   // Add debug logging
   useEffect(() => {
@@ -211,15 +253,18 @@ const DeliveryInfoPanel = ({
   const currentImage = images[currentImageIndex] || fallbackImage;
 
   return (
-    <div className="delivery-info-panel-content">
-      <button className="panel-close-button" onClick={onClose}>
-        <img
-          src={chevronLeft}
-          className="chevron-left"
-          alt="Back"
-          onClick={onClose}
-        />
-      </button>
+    <div className="delivery-info-panel-content" ref={panelRef}>
+      {/* Only show close button on mobile */}
+      {isMobile && (
+        <button className="panel-close-button" onClick={onClose}>
+          <img
+            src={chevronLeft}
+            className="chevron-left"
+            alt="Back"
+            onClick={onClose}
+          />
+        </button>
+      )}
 
       <div className="image-gallery">
         <div className="main-image-container">
@@ -294,12 +339,12 @@ const DeliveryInfoPanel = ({
         <div className="location-section">
           <h3 className="section-heading">Location to Destination</h3>
           <div className="location-dots">
-            <span className="location-dot">☉</span>
+            <img className="location-dot" src={locationIcon} />
             <span className="location-text">
               {deliveryDetails.location || "Unknown location"}
             </span>
             <span className="location-arrow">⋯</span>
-            <span className="location-dot">☐</span>
+            <img className="location-dot" src={destinationIcon} />
             <span className="location-text">
               {deliveryDetails.destination || "Unknown destination"}
             </span>
@@ -309,25 +354,28 @@ const DeliveryInfoPanel = ({
 
       <div className="dimensions-section">
         <h3 className="section-heading">Dimensions</h3>
-        <div className="dimensions-grid">
+        <div className="dimensions-container">
           <div className="dimension-item">
             <span className="dimension-label">Weight:</span>
             <span className="dimension-value">
               {deliveryDetails.weightinKg || "0"} Kg
             </span>
           </div>
+          <hr className="deliveryinfopanel-verticalhr" />
           <div className="dimension-item">
             <span className="dimension-label">Length:</span>
             <span className="dimension-value">
               {deliveryDetails.length || "0"} cm
             </span>
           </div>
+          <hr className="deliveryinfopanel-verticalhr" />
           <div className="dimension-item">
             <span className="dimension-label">Height:</span>
             <span className="dimension-value">
               {deliveryDetails.height || "0"} cm
             </span>
           </div>
+          <hr className="deliveryinfopanel-verticalhr" />
           <div className="dimension-item">
             <span className="dimension-label">Width:</span>
             <span className="dimension-value">
@@ -373,9 +421,6 @@ const DeliveryInfoPanel = ({
                     packageOwner.phone ||
                     "No phone number"}
                 </span>
-                {/* {packageOwner.email && packageOwner.email !== user.email && (
-                  <span className="owner-email">{packageOwner.email}</span>
-                )} */}
               </div>
             </>
           ) : (
