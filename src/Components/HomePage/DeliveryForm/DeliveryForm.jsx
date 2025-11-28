@@ -168,9 +168,9 @@
 
 import React, { useState, useEffect } from "react";
 import "./DeliveryForm.css";
-import MyLocationIcon from "../../../icons/MyLocationIcon.svg";
+import { ReactComponent as MyLocationIcon } from "../../../icons/MyLocationIcon.svg";
 import Three from "../../../icons/Three.svg";
-import destinationIcon from "../../../icons/Destionation-icon.svg";
+import { ReactComponent as DestinationIcon } from "../../../icons/Destionation-icon.svg";
 import Clock from "../../../icons/Clock.svg";
 import swapIcon from "../../../icons/swapIcon.svg";
 import { useMediaQuery } from "react-responsive";
@@ -223,21 +223,19 @@ const DeliveryForm = ({ updateFilterCriteria }) => {
 
       <div className="input-icons-container">
         <div className="form-icons-container">
-          <img
+          <MyLocationIcon
             className={`my-location-icon ${
               formValues.location ? "active" : ""
             }`}
-            src={MyLocationIcon}
           />
           <img
             className={`three ${formValues.destination ? "active" : ""}`}
             src={Three}
           />
-          <img
+          <DestinationIcon
             className={`destination-icon ${
               formValues.destination ? "active" : ""
             }`}
-            src={destinationIcon}
           />
         </div>
         <div className="form-inputs-container">

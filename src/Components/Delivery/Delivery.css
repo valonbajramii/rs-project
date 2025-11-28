@@ -17,7 +17,8 @@
   /* padding: 20px; */
   background-color: white;
   border-radius: 10px;
-  margin-top: 20px; /* Add some spacing */
+  padding-top: 8px;
+  /* margin-top: 20px; */
 }
 
 .delivery-modal-content {
@@ -35,7 +36,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background-color: rgb(255, 255, 255);
+  background-color: #FAFAFA(255, 255, 255);
   width: 100%;
 }
 
@@ -100,10 +101,80 @@
   color: #333;
 }
 
+.divs-icons-container {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+}
+
+.icons-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  margin-left: 20px;
+}
+
+.delivery-my-location-icon {
+  width: 30px;
+}
+
+/* Jo aktive → gri e qelur */
+.delivery-my-location-icon circle,
+.delivery-my-location-icon ellipse {
+  fill: #e0e2e5 !important;
+  transition: fill 0.3s ease;
+}
+
+/* Aktive → blu */
+.delivery-my-location-icon.active circle,
+.delivery-my-location-icon.active ellipse {
+  fill: #3673e4 !important;
+}
+
+/* ============================
+   DELIVERY — DESTINATION ICON
+   ============================ */
+
+.delivery-destination-icon {
+  width: 30px;
+}
+
+/* Jo aktive → gri e qelur */
+.delivery-destination-icon circle,
+.delivery-destination-icon ellipse {
+  fill: #e0e2e5 !important;
+  transition: fill 0.3s ease;
+}
+
+/* Aktive → blu */
+.delivery-destination-icon.active circle,
+.delivery-destination-icon.active ellipse {
+  fill: #3673e4 !important;
+}
+
+/* ============================
+   DELIVERY — THREE ICON
+   ============================ */
+
+/* Jo aktive → gri e zbehtë */
+.delivery-three {
+  filter: grayscale(100%) brightness(180%);
+  transition: filter 0.3s ease;
+}
+
+/* Aktive → blu */
+.delivery-three.active {
+  filter: brightness(0) saturate(100%) invert(50%) sepia(70%) saturate(500%)
+    hue-rotate(175deg) brightness(90%) contrast(100%);
+}
+
 .input-group {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  width: 100%;
 }
 
 .delivery-input {
@@ -112,7 +183,7 @@
   box-sizing: border-box;
   border: 1px solid #ccc;
   border-radius: 10px;
-  height: 50px;
+  height: 40px;
   /* border-color: rgb(0, 97, 252);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
   outline: none;
@@ -269,7 +340,7 @@
 .Container-delivery-button {
   width: 100%;
   text-align: center;
-  margin-top: 20px;
+  margin-top: 30px;
 }
 
 .delivery-button {
@@ -297,6 +368,7 @@
   .delivery-container {
     flex-direction: row;
     justify-content: space-between;
+    background-color: #ffffff;
   }
 
   .delivery-content,

@@ -1,48 +1,123 @@
 .mobile-notifications-container {
-  padding: 20px;
+  padding: 0;
   background: white;
   height: 100%;
   overflow-y: auto;
 }
 
 .mobile-notifications-header {
-  margin-bottom: 20px;
+  padding: 15px;
+  border-bottom: 1px solid #f0f0f0;
+  background: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .mobile-notifications-header h3 {
-  margin: 0;
-  font-size: 20px;
+  margin: 0 0 5px 0;
+  font-size: 18px;
 }
 
 .mobile-notifications-header p {
-  margin: 5px 0 0;
+  margin: 0;
   color: #666;
   font-size: 14px;
 }
 
 .mobile-notification-item {
-  padding: 15px 0;
-  border-bottom: 1px solid #eee;
+  padding: 15px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-notification-item.active-request {
+  margin: 10px;
+  border-radius: 5px;
+  background-color: #e3ebf3;
 }
 
 .notification-header {
   display: flex;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 0;
 }
 
 .notification-details {
   flex: 1;
 }
 
-.notification-actions {
+.requester-info {
   display: flex;
-  gap: 10px;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.requester-name {
+  font-weight: 500;
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.request-time {
+  color: #888;
+  margin: 0;
+  font-size: 12px;
+}
+
+.delivery-name {
+  color: #666;
+  margin: 0;
+  font-size: 13px;
+}
+
+.mobile-notification-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+  justify-content: center;
+  border-top: 1px solid #e2e2e7;
+}
+
+.mobile-approve-btn,
+.mobile-decline-btn {
+  width: 100%;
+  height: 50px;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  min-width: 80px;
+  margin-top: 12px;
+}
+
+.mobile-approve-btn {
+  background-color: #3673e4;
+  color: white;
+}
+
+.mobile-decline-btn {
+  background-color: transparent;
+  color: #3673e4;
+  border: 1px solid #3673e4;
 }
 
 .no-notifications {
   text-align: center;
-  padding: 40px 0;
+  padding: 40px 20px;
   color: #666;
+}
+
+.mobile-notifications-container .user-avatar,
+.mobile-notifications-container .avatar-image,
+.mobile-notifications-container .avatar-letter {
+  border-radius: 7% !important;
+}
+
+@media (min-width: 768px) {
 }

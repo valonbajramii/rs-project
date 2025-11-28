@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import "./MobileFooter.css";
+import { ReactComponent as HouseIcon } from "../../icons/House.svg";
 import houseicon from "../../icons/House.svg";
+import { ReactComponent as MessageLeft } from "../../icons/message-bootstrap.svg";
+
 import messageSquare from "../../icons/message-square.svg";
-import Vector from "../../icons/Vector2.svg";
+import { ReactComponent as Vector } from "../../icons/Vector2.svg";
+// import Vector from "../../icons/Vector2.svg";
+import { ReactComponent as ProfileIcon } from "../../icons/person-fill.svg";
 import profileIcon from "../../icons/person-fill.svg";
 
 const MobileFooter = ({ onFooterClick, activeIcon }) => {
@@ -37,36 +42,24 @@ const MobileFooter = ({ onFooterClick, activeIcon }) => {
   };
   return (
     <div className="mobile-footer-container">
-      <img
+      <HouseIcon
         onClick={() => handleIconClick("icon1")}
-        className={`footer-icon1 ${
-          activeIcon === "icon1" ? "footer-active-icon" : ""
-        }`}
-        src={houseicon}
+        className={`footer-icon1 ${activeIcon === "icon1" ? "active" : ""}`}
         alt="Home"
       />
-      <img
+      <Vector
         onClick={() => handleIconClick("icon2")}
-        className={`footer-icon2 ${
-          activeIcon === "icon2" ? "footer-active-icon" : ""
-        }`}
-        src={Vector}
+        className={`footer-icon2 ${activeIcon === "icon2" ? "active" : ""}`}
         alt="Packages"
       />
-      <img
+      <MessageLeft
         onClick={() => handleIconClick("icon3")}
-        className={`footer-icon3 ${
-          activeIcon === "icon3" ? "footer-active-icon" : ""
-        }`}
-        src={messageSquare}
+        className={`footer-icon3 ${activeIcon === "icon3" ? "active" : ""}`}
         alt="Messages"
       />
-      <img
+      <ProfileIcon
         onClick={() => handleIconClick("icon4")}
-        className={`footer-icon4 ${
-          activeIcon === "icon4" ? "footer-active-icon" : ""
-        }`}
-        src={profileIcon}
+        className={`footer-icon4 ${activeIcon === "icon4" ? "active" : ""}`}
         alt="Profile"
       />
     </div>

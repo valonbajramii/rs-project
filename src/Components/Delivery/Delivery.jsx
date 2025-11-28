@@ -3,8 +3,13 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./Delivery.css";
 import chevronLeft from "../../images/chevron-left.svg";
+import { ReactComponent as MyLocationIcon } from "../../icons/MyLocationIcon.svg";
+import Three from "../../icons/Three.svg";
+import { ReactComponent as DestinationIcon } from "../../icons/Destionation-icon.svg";
 import { packagesApi } from "../../API/api";
 import { useNavigate } from "react-router-dom";
+import { BsThreeDots } from "react-icons/bs";
+import { useMediaQuery } from "react-responsive";
 
 const Delivery = ({ user, onClose, addNewDelivery }) => {
   const navigate = useNavigate();
@@ -23,6 +28,9 @@ const Delivery = ({ user, onClose, addNewDelivery }) => {
     deadline: "",
   });
 
+  const isMobile = useMediaQuery({ maxWidth: 480 });
+
+  // Remove the duplicate formValues state and use newDelivery instead
   useEffect(() => {
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
@@ -176,25 +184,55 @@ const Delivery = ({ user, onClose, addNewDelivery }) => {
 
               <div className="form-section">
                 <h3 className="section-title">Location and Destination</h3>
-                <div className="input-group">
-                  <input
-                    className="delivery-input"
-                    type="text"
-                    name="location"
-                    placeholder="Location"
-                    value={newDelivery.location}
-                    onChange={handleInputChange}
-                    required
-                  />
-                  <input
-                    className="delivery-input"
-                    type="text"
-                    name="destination"
-                    placeholder="Destination"
-                    value={newDelivery.destination}
-                    onChange={handleInputChange}
-                    required
-                  />
+                <div className="divs-icons-container">
+                  {!isMobile && (
+                    <div className="icons-container">
+                      {/* My Location Icon - blue when location has value */}
+                      <MyLocationIcon
+                        className={`delivery-my-location-icon ${
+                          newDelivery.location ? "active" : ""
+                        }`}
+                        alt="My Location"
+                      />
+
+                      {/* Three dots Icon - blue when destination has value */}
+                      <img
+                        className={`delivery-three ${
+                          newDelivery.destination ? "active" : ""
+                        }`}
+                        src={Three}
+                        alt="Route"
+                      />
+
+                      {/* Destination Icon - blue when destination has value */}
+                      <DestinationIcon
+                        className={`delivery-destination-icon ${
+                          newDelivery.destination ? "active" : ""
+                        }`}
+                        alt="Destination"
+                      />
+                    </div>
+                  )}
+                  <div className="input-group">
+                    <input
+                      className="delivery-input"
+                      type="text"
+                      name="location"
+                      placeholder="Location"
+                      value={newDelivery.location}
+                      onChange={handleInputChange}
+                      required
+                    />
+                    <input
+                      className="delivery-input"
+                      type="text"
+                      name="destination"
+                      placeholder="Destination"
+                      value={newDelivery.destination}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 

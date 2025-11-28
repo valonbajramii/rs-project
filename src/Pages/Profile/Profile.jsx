@@ -774,9 +774,9 @@ const Profile = ({ user, setUser, setShowProfile }) => {
             </div>
 
             <div className="profile-actions">
-              <button className="profile-save-button" onClick={handleSave}>
+              {/* <button className="profile-save-button" onClick={handleSave}>
                 Save Changes
-              </button>
+              </button> */}
               <button className="profile-logout-button" onClick={handleLogout}>
                 Log out
               </button>

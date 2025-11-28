@@ -41,21 +41,26 @@
 
 .main-content-container {
   display: flex;
-  /* flex: 1; */
   overflow: hidden;
   position: relative;
   margin-top: 50px;
-  /* height: 800px; */
+  height: 605px; /* Default height */
+  transition: height 0.3s ease;
+}
+
+.main-content-container.expanded {
+  height: 800px; /* Expanded height when panel is open */
 }
 
 .delivery-info-panel {
   width: 0;
   overflow: hidden;
-  transition: width 0.3s ease;
+  transition: width 0.3s ease, max-height 0.3s ease;
   background: white;
   border-left: 1px solid #eee;
   position: relative;
   margin-top: 10px;
+  max-height: 605px; /* Default height */
 }
 
 .delivery-info-panel.open {
@@ -63,6 +68,11 @@
   min-width: 400px;
   overflow-y: auto;
   border-radius: 0px 20px 20px 0px;
+  max-height: 605px; /* Default height */
+}
+
+.delivery-info-panel.open.expanded {
+  max-height: 700px; /* Expanded height */
 }
 
 .Components-container1 {
@@ -73,20 +83,22 @@
   box-sizing: border-box;
   overflow: hidden;
   margin-left: 20px;
-  max-height: 605px;
+  max-height: 605px; /* Default height */
   border-radius: 20px;
   z-index: 1;
+  transition: max-height 0.3s ease;
 }
 
-.Components-container1.panel-open {
-  border-radius: 20px 0px 00px 20px;
+.Components-container1.panel-open.expanded {
+  max-height: 700px; /* Expanded height */
+  border-radius: 20px 0px 0px 20px;
 }
 
 .Components-container2 {
   display: flex;
   justify-content: space-around;
   width: 450px;
-  height: 500px;
+  height: 100%; /* Always take full available height */
   background-color: white;
   box-sizing: border-box; /* Include padding and borders in element's total width and height */
   overflow: hidden; /* Prevent content from spilling outside the container */
@@ -103,18 +115,27 @@
   justify-content: space-around;
   background-color: #fcfcfc;
   margin-top: 15px;
+  position: relative;
 }
 
-.homepage-car-icon-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
+.homepage-car-icon-container,
 .homepage-vector-icon-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  /* padding: 8px 16px; */
+  min-height: 60px; /* Fixed height to prevent layout shift */
+}
+
+.homepage-car-icon-container img,
+.homepage-vector-icon-container img {
+  margin: 0;
+}
+
+.homepage-car-icon-container label,
+.homepage-vector-icon-container label {
+  margin: 4px 0 0 0;
 }
 
 .homepage-icons-label {
@@ -122,6 +143,8 @@
   font-family: "Poppins", sans-serif;
   font-weight: 500;
   font-size: 13px;
+  margin-top: 4px;
+  transition: color 0.2s ease;
 }
 
 .homepage-icons-label.activelabel {
@@ -132,9 +155,14 @@
 }
 
 .Components-header-icons-hr {
-  width: 100px;
-  border: 1px solid #3673e4; /* Adjust color to make it visible */
-  margin-top: 5px;
+  width: 100px; /* Slightly reduced width */
+  border: 2px solid #3673e4;
+  margin-top: 6px;
+  border-radius: 2px;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .profile-icon {
@@ -175,12 +203,12 @@
   display: flex;
   align-items: center;
   cursor: pointer;
-  margin-right: 5px;
+  margin-right: 50px;
 }
 
 .dropdown-toggle img {
   border-radius: 50%;
-  margin-right: 8px;
+  /* margin-right: 8px; */
 }
 
 .dropdown-toggle .dropdown-text {
@@ -203,7 +231,7 @@
   display: none;
   /* Add these to prevent overflow issues */
   min-width: max-content;
-  margin-right: 50px;
+  margin-right: 60px;
   white-space: nowrap;
 }
 
@@ -233,27 +261,36 @@
   border-top: 0px solid #9f9e9e;
 }
 
+.profile-dropdown {
+  width: 20px;
+}
+
 .chevron-down {
   width: 20px;
   height: 50px;
   margin-left: 8px;
 }
 
-.homepage-car-icon {
+.homepage-car-icon,
+.vector-icon {
+  width: 24px;
+  height: 24px;
+  transition: filter 0.2s ease;
+}
+
+/* .homepage-car-icon {
   width: 25px;
 }
 
 .vector-icon {
   width: 22px;
-}
+} */
 
 .header-hr {
-  height: 2px; /* Sets the line to be very thin */
-  background-color: #f0f4fa; /* Sets the color of the line */
-  border: none; /* Removes default border */
-  display: block; /* Ensure the height is applied */
-  margin: 0;
-  margin-top: 10px;
+  height: 1px;
+  background-color: #f0f4fa;
+  border: none;
+  margin: 8px 0 0 0;
 }
 
 .active-icon {
@@ -370,6 +407,8 @@ homepage-request-item:hover {
 
 .request-actions {
   display: flex;
+  justify-content: flex-end;
+  /* margin-top: 8px; */
   gap: 8px;
   margin-left: 44px; /* Adjust this to align with the text */
   padding-top: 8px;
@@ -464,13 +503,6 @@ homepage-request-item:hover {
   color: #666;
   margin: 0;
   font-size: 13px;
-}
-
-.request-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-  margin-top: 8px;
 }
 
 .messaging-container {
@@ -710,10 +742,17 @@ homepage-request-item:hover {
     margin-left: 0px;
     height: 92.5vh; /* Full screen height */
     margin: 0; /* Remove extra margin */
+    /* background-color: #2f80ed; */
+    background-color: #f9f9fa;
   }
 
   .main-content-container {
     margin-top: 0px;
+    height: 100%;
+  }
+
+  .main-content-container.expanded {
+    height: 100%; /* Expanded height when panel is open */
   }
 
   .form-view .Components-container1 {
@@ -764,10 +803,22 @@ homepage-request-item:hover {
     width: 100%;
   }
 
+  .delivery-info-panel.open {
+    height: 100%;
+    min-width: 400px;
+    overflow-y: auto;
+    border-radius: 0px 0px 0px 0px;
+    /* Default height */
+  }
+
+  .delivery-info-panel.open.expanded {
+    max-height: 92vh; /* Expanded height */
+  }
+
   .Components-container1 {
     display: flex;
     flex-direction: column;
-    margin-top: 10px;
+    margin-top: 0px;
     background-color: rgb(255, 255, 255);
     /* padding: 20px;  */
     box-sizing: border-box; /* Include padding and borders in element's total width and height */
@@ -781,6 +832,11 @@ homepage-request-item:hover {
     border-bottom-right-radius: 0; /* No rounding on bottom right corner */
     z-index: 1;
     max-height: none;
+  }
+
+  .Components-container1.panel-open.expanded {
+    max-height: 100%;
+    border-radius: 0px 0px 0px 0px;
   }
 
   .Components-container2 {

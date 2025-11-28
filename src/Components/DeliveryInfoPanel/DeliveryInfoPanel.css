@@ -9,6 +9,7 @@
   background: #fafafa;
   border-left: 1px solid #eee;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  max-height: 700px;
 }
 
 .panel-close-button {
@@ -208,10 +209,29 @@
   /* border-top: 1px solid #eee; */
 }
 
+.section-heading-owner {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  margin: 0 0 1px 0;
+
+  /* Absolute positioning */
+  position: absolute;
+  bottom: 80px; /* Match the bottom padding */
+  left: 20px;
+  right: 20px;
+}
+
 .owner-button-section {
   display: flex;
   align-items: center;
   gap: 15px;
+
+  /* Absolute positioning */
+  position: absolute;
+  bottom: 20px; /* Match the bottom padding */
+  left: 20px;
+  right: 20px;
 }
 
 .owner-button-section h2 {
@@ -322,5 +342,73 @@
 
   .dot.active {
     background: white;
+  }
+}
+
+@media (max-width: 480px) {
+  .delivery-info-panel-content {
+    padding: 5px 20px 20px 20px;
+    height: 100%;
+    overflow-y: auto;
+    position: relative;
+    width: 100%;
+    background: #fafafa;
+    border-left: none;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    max-height: 100%;
+  }
+
+  .price-label {
+    border-top: 1px solid #dad9d9;
+    padding-top: 10px;
+  }
+
+  .section-heading {
+    border-top: 1px solid #dad9d9;
+    padding-top: 10px;
+  }
+
+  .location-dots {
+    margin-bottom: 10px;
+  }
+
+  .backbutton-title-container {
+    display: flex;
+    align-items: center;
+    gap: 78px;
+    margin-bottom: 30px;
+  }
+
+  .package-title {
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+  }
+
+  .panel-close-button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+  }
+
+  .section-heading-owner {
+    font-family: "Poppins", sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    margin: 20px 0 10px 0;
+    border-top: 1px solid #dad9d9;
+    padding-top: 10px;
+
+    position: static; /* Reset to normal flow */
+    bottom: auto; /* Remove bottom positioning */
+    left: auto; /* Remove left positioning */
+    right: auto; /* Remove right positioning */
+  }
+
+  .owner-button-section {
+    position: static; /* Reset to normal flow */
+    bottom: auto; /* Remove bottom positioning */
+    left: auto; /* Remove left positioning */
+    right: auto; /* Remove right positioning */
   }
 }

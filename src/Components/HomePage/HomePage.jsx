@@ -66,6 +66,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFavoritePackageView, setShowFavoritePackageView] = useState(false);
+  const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
 
   const dropdownRef = useRef(null);
   const hasFetchedRef = useRef(false);
@@ -650,6 +651,109 @@ const HomePage = ({ user, setUser, onLogout }) => {
     setActiveIcon("options");
   }, []);
 
+  // New handlers for info panel
+  const handleSetSelectedDelivery = useCallback((delivery) => {
+    setSelectedDelivery(delivery);
+    setIsInfoPanelOpen(!!delivery);
+  }, []);
+
+  const handleCloseInfoPanel = useCallback(() => {
+    setSelectedDelivery(null);
+    setIsInfoPanelOpen(false);
+  }, []);
+
+  // const handleFooterClick = useCallback(
+  //   (view) => {
+  //     if (view === "form") {
+  //       setShowForm(true);
+  //       setIsAddPackageView(false);
+  //       setShowProfile(false);
+  //       setShowCompleteProfile(false);
+  //       setShowNotifications(false);
+  //       setShowChatView(false);
+  //       setShowFavoritePackageView(false);
+  //       setIsInMessageView(false);
+  //       setActiveIcon("icon1");
+  //     } else if (view === "options") {
+  //       setShowForm(false);
+  //       setIsAddPackageView(false);
+  //       setShowProfile(false);
+  //       setShowCompleteProfile(false);
+  //       setShowNotifications(false);
+  //       setShowChatView(false);
+  //       setShowFavoritePackageView(false);
+  //       setIsInMessageView(false);
+  //       setActiveIcon("icon2");
+  //     } else if (view === "add") {
+  //       if (!user) {
+  //         navigate("/login");
+  //         return;
+  //       }
+  //       if (!user.isProfileComplete) {
+  //         setShowCompleteProfile(true);
+  //         setShowForm(false);
+  //         setIsAddPackageView(false);
+  //         setShowProfile(false);
+  //         setActiveIcon("profile");
+  //         return;
+  //       }
+  //       setShowForm(false);
+  //       setIsAddPackageView(true);
+  //       setShowProfile(false);
+  //       setShowCompleteProfile(false);
+  //       setShowNotifications(false);
+  //       setShowChatView(false);
+  //       setShowFavoritePackageView(false);
+  //       setIsInMessageView(false);
+  //       setActiveIcon("icon3");
+  //     } else if (view === "profile") {
+  //       if (!user?.isProfileComplete) {
+  //         setShowCompleteProfile(true);
+  //       } else {
+  //         setShowProfile(true);
+  //       }
+  //       setShowForm(false);
+  //       setIsAddPackageView(false);
+  //       setShowNotifications(false);
+  //       setShowChatView(false);
+  //       setShowFavoritePackageView(false);
+  //       setIsInMessageView(false);
+  //       setActiveIcon("icon4");
+  //     } else if (view === "messages") {
+  //       setShowForm(false);
+  //       setIsAddPackageView(false);
+  //       setShowProfile(false);
+  //       setShowCompleteProfile(false);
+  //       setShowNotifications(true);
+  //       setShowChatView(false);
+  //       setShowFavoritePackageView(false);
+  //       setIsInMessageView(false);
+  //       setActiveIcon("icon5");
+  //     } else if (view === "chat") {
+  //       setShowForm(false);
+  //       setIsAddPackageView(false);
+  //       setShowProfile(false);
+  //       setShowCompleteProfile(false);
+  //       setShowNotifications(false);
+  //       setShowChatView(true);
+  //       setShowFavoritePackageView(false);
+  //       setIsInMessageView(false);
+  //       setActiveIcon("icon5");
+  //     } else if (view === "favorites") {
+  //       setShowForm(false);
+  //       setIsAddPackageView(false);
+  //       setShowProfile(false);
+  //       setShowCompleteProfile(false);
+  //       setShowNotifications(false);
+  //       setShowChatView(false);
+  //       setShowFavoritePackageView(true);
+  //       setIsInMessageView(false);
+  //       setActiveIcon("favorites");
+  //     }
+  //   },
+  //   [user, navigate]
+  // );
+
   const handleFooterClick = useCallback(
     (view) => {
       if (view === "form") {
@@ -672,28 +776,16 @@ const HomePage = ({ user, setUser, onLogout }) => {
         setShowFavoritePackageView(false);
         setIsInMessageView(false);
         setActiveIcon("icon2");
-      } else if (view === "add") {
-        if (!user) {
-          navigate("/login");
-          return;
-        }
-        if (!user.isProfileComplete) {
-          setShowCompleteProfile(true);
-          setShowForm(false);
-          setIsAddPackageView(false);
-          setShowProfile(false);
-          setActiveIcon("profile");
-          return;
-        }
+      } else if (view === "messages") {
         setShowForm(false);
-        setIsAddPackageView(true);
+        setIsAddPackageView(false);
         setShowProfile(false);
         setShowCompleteProfile(false);
-        setShowNotifications(false);
+        setShowNotifications(true);
         setShowChatView(false);
         setShowFavoritePackageView(false);
         setIsInMessageView(false);
-        setActiveIcon("icon3");
+        setActiveIcon("icon3"); // Messages should be icon3
       } else if (view === "profile") {
         if (!user?.isProfileComplete) {
           setShowCompleteProfile(true);
@@ -707,26 +799,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
         setShowFavoritePackageView(false);
         setIsInMessageView(false);
         setActiveIcon("icon4");
-      } else if (view === "messages") {
-        setShowForm(false);
-        setIsAddPackageView(false);
-        setShowProfile(false);
-        setShowCompleteProfile(false);
-        setShowNotifications(true);
-        setShowChatView(false);
-        setShowFavoritePackageView(false);
-        setIsInMessageView(false);
-        setActiveIcon("icon5");
-      } else if (view === "chat") {
-        setShowForm(false);
-        setIsAddPackageView(false);
-        setShowProfile(false);
-        setShowCompleteProfile(false);
-        setShowNotifications(false);
-        setShowChatView(true);
-        setShowFavoritePackageView(false);
-        setIsInMessageView(false);
-        setActiveIcon("icon5");
       } else if (view === "favorites") {
         setShowForm(false);
         setIsAddPackageView(false);
@@ -736,7 +808,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
         setShowChatView(false);
         setShowFavoritePackageView(true);
         setIsInMessageView(false);
-        setActiveIcon("favorites");
+        setActiveIcon("icon2"); // Favorites should use icon2 (Packages) or create a 5th icon
       }
     },
     [user, navigate]
@@ -811,7 +883,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
         <header className="homepage-header">
           <img className="homepage-sameway-logo" src={samewayLogo} />
           <div className="grouped-elements">
-            <button
+            {/* <button
               onClick={() => window.location.reload()}
               style={{ marginRight: "10px", padding: "5px 10px" }}
             >
@@ -819,7 +891,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
                 User: {user?.id} | Requests: {pendingRequests.length}
               </small>
               Refresh
-            </button>
+            </button> */}
             <div className="notifications-dropdown-container">
               <div
                 className="bell-icon-container"
@@ -988,7 +1060,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
                     }
                   }}
                 >
-                  <img src={profileImg} />
+                  <img className="profile-dropdown" src={profileImg} />
                   Profile
                 </div>
                 <hr className="dropdown-divider" />
@@ -1055,7 +1127,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
 
       <div className={`${showForm ? "form-view" : "delivery-view"}`}>
         <div className="Components-container">
-          {isMobile && !showFavoritePackageView && (
+          {isMobile && showForm && !showFavoritePackageView && (
             <div className="mobile-favorites-button-container">
               <button
                 className="mobile-favorites-button"
@@ -1068,11 +1140,15 @@ const HomePage = ({ user, setUser, onLogout }) => {
           )}
           {!isMobile && <DeliveryMap />}
           {isMobile && showForm && <DeliveryMap />}
-          <div className="main-content-container">
+          <div
+            className={`main-content-container ${
+              isInfoPanelOpen ? "expanded" : ""
+            }`}
+          >
             <div
               className={`Components-container1 ${
                 selectedDelivery ? "panel-open" : ""
-              }`}
+              } ${isInfoPanelOpen ? "expanded" : ""}`}
             >
               {showCompleteProfile ? (
                 <CompleteProfile
@@ -1113,7 +1189,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
                   user={user}
                   toggleFavorite={toggleFavorite}
                   onBack={handleBackFromFavorites}
-                  setSelectedDelivery={setSelectedDelivery}
+                  setSelectedDelivery={handleSetSelectedDelivery}
                 />
               ) : (
                 <>
@@ -1194,7 +1270,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
                         setShowForm={setShowForm}
                         setShowProfile={setShowProfile}
                         setShowCompleteProfile={setShowCompleteProfile}
-                        setSelectedDelivery={setSelectedDelivery}
+                        setSelectedDelivery={handleSetSelectedDelivery}
                         loading={loading}
                         onAddPackageClick={handleAddPackageClick}
                       />
@@ -1207,12 +1283,12 @@ const HomePage = ({ user, setUser, onLogout }) => {
               <div
                 className={`delivery-info-panel ${
                   selectedDelivery ? "open" : ""
-                }`}
+                } ${isInfoPanelOpen ? "expanded" : ""}`}
               >
                 <DeliveryInfoPanel
                   deliveryDetails={selectedDelivery}
                   user={user}
-                  onClose={() => setSelectedDelivery(null)}
+                  onClose={handleCloseInfoPanel}
                   setShowCompleteProfile={setShowCompleteProfile}
                   setShowForm={setShowForm}
                   setIsAddPackageView={setIsAddPackageView}
@@ -1260,6 +1336,7 @@ const HomePage = ({ user, setUser, onLogout }) => {
 };
 
 export default HomePage;
+
 // import React, { useState, useRef, useEffect, useCallback } from "react";
 // import "./HomePage.css";
 // import DeliveryForm from "./DeliveryForm/DeliveryForm";
@@ -1328,10 +1405,15 @@ export default HomePage;
 //   const [filteredOptions, setFilteredOptions] = useState([]);
 //   const [loading, setLoading] = useState(true);
 //   const [showFavoritePackageView, setShowFavoritePackageView] = useState(false);
+//   const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
 
 //   const dropdownRef = useRef(null);
 //   const hasFetchedRef = useRef(false);
-//   const [showForm, setShowForm] = useState(location.state?.showForm ?? true);
+
+//   // Fixed: Better state management for active views and icons
+//   const [activeView, setActiveView] = useState(
+//     location.state?.showForm === false ? "options" : "form"
+//   );
 //   const [activeIcon, setActiveIcon] = useState(
 //     location.state?.showForm === false ? "icon2" : "icon1"
 //   );
@@ -1452,7 +1534,7 @@ export default HomePage;
 //       }
 
 //       setShowCompleteProfile(false);
-//       setShowForm(true);
+//       setActiveView("form");
 //       setActiveIcon("icon1");
 //       refreshPackages();
 //     },
@@ -1466,14 +1548,13 @@ export default HomePage;
 //     }
 //     if (!user.isProfileComplete) {
 //       setShowCompleteProfile(true);
-//       setShowForm(false);
-//       setIsAddPackageView(false);
-//       setShowProfile(false);
+//       setActiveView("completeProfile");
 //       setActiveIcon("profile");
 //       return;
 //     }
-//     setShowForm(true);
 //     setIsAddPackageView(true);
+//     setActiveView("addPackage");
+//     setActiveIcon("icon3");
 //   }, [user, navigate]);
 
 //   // Load packages on component mount
@@ -1902,114 +1983,65 @@ export default HomePage;
 //     navigate("/login");
 //   }, [navigate, onLogout]);
 
+//   // Fixed: Better navigation functions
 //   const showDeliveryForm = useCallback(() => {
-//     setShowForm(true);
-//     setActiveIcon("form");
+//     setActiveView("form");
+//     setActiveIcon("icon1");
 //   }, []);
 
 //   const showDeliveryOptions = useCallback(() => {
-//     setShowForm(false);
-//     setActiveIcon("options");
+//     setActiveView("options");
+//     setActiveIcon("icon2");
+//   }, []);
+
+//   // New handlers for info panel
+//   const handleSetSelectedDelivery = useCallback((delivery) => {
+//     setSelectedDelivery(delivery);
+//     setIsInfoPanelOpen(!!delivery);
+//   }, []);
+
+//   const handleCloseInfoPanel = useCallback(() => {
+//     setSelectedDelivery(null);
+//     setIsInfoPanelOpen(false);
 //   }, []);
 
 //   const handleFooterClick = useCallback(
 //     (view) => {
-//       if (view === "form") {
-//         setShowForm(true);
-//         setIsAddPackageView(false);
-//         setShowProfile(false);
-//         setShowCompleteProfile(false);
-//         setShowNotifications(false);
-//         setShowChatView(false);
-//         setShowFavoritePackageView(false);
-//         setIsInMessageView(false);
-//         setActiveIcon("icon1");
-//       } else if (view === "options") {
-//         setShowForm(false);
-//         setIsAddPackageView(false);
-//         setShowProfile(false);
-//         setShowCompleteProfile(false);
-//         setShowNotifications(false);
-//         setShowChatView(false);
-//         setShowFavoritePackageView(false);
-//         setIsInMessageView(false);
-//         setActiveIcon("icon2");
-//       } else if (view === "add") {
-//         if (!user) {
-//           navigate("/login");
-//           return;
-//         }
-//         if (!user.isProfileComplete) {
-//           setShowCompleteProfile(true);
-//           setShowForm(false);
-//           setIsAddPackageView(false);
-//           setShowProfile(false);
-//           setActiveIcon("profile");
-//           return;
-//         }
-//         setShowForm(false);
-//         setIsAddPackageView(true);
-//         setShowProfile(false);
-//         setShowCompleteProfile(false);
-//         setShowNotifications(false);
-//         setShowChatView(false);
-//         setShowFavoritePackageView(false);
-//         setIsInMessageView(false);
-//         setActiveIcon("icon3");
-//       } else if (view === "profile") {
-//         if (!user?.isProfileComplete) {
-//           setShowCompleteProfile(true);
-//         } else {
-//           setShowProfile(true);
-//         }
-//         setShowForm(false);
-//         setIsAddPackageView(false);
-//         setShowNotifications(false);
-//         setShowChatView(false);
-//         setShowFavoritePackageView(false);
-//         setIsInMessageView(false);
-//         setActiveIcon("icon4");
-//       } else if (view === "messages") {
-//         setShowForm(false);
-//         setIsAddPackageView(false);
-//         setShowProfile(false);
-//         setShowCompleteProfile(false);
-//         setShowNotifications(true);
-//         setShowChatView(false);
-//         setShowFavoritePackageView(false);
-//         setIsInMessageView(false);
-//         setActiveIcon("icon5");
-//       } else if (view === "chat") {
-//         setShowForm(false);
-//         setIsAddPackageView(false);
-//         setShowProfile(false);
-//         setShowCompleteProfile(false);
-//         setShowNotifications(false);
-//         setShowChatView(true);
-//         setShowFavoritePackageView(false);
-//         setIsInMessageView(false);
-//         setActiveIcon("icon5");
-//       } else if (view === "favorites") {
-//         setShowForm(false);
-//         setIsAddPackageView(false);
-//         setShowProfile(false);
-//         setShowCompleteProfile(false);
-//         setShowNotifications(false);
-//         setShowChatView(false);
-//         setShowFavoritePackageView(true);
-//         setIsInMessageView(false);
-//         setActiveIcon("favorites");
+//       switch (view) {
+//         case "form":
+//           setActiveView("form");
+//           setActiveIcon("icon1");
+//           break;
+//         case "options":
+//           setActiveView("options");
+//           setActiveIcon("icon2");
+//           break;
+//         case "messages":
+//           setActiveView("messages");
+//           setActiveIcon("icon3");
+//           break;
+//         case "profile":
+//           if (!user?.isProfileComplete) {
+//             setActiveView("completeProfile");
+//           } else {
+//             setActiveView("profile");
+//           }
+//           setActiveIcon("icon4");
+//           break;
+//         case "favorites":
+//           setActiveView("favorites");
+//           setActiveIcon("icon2");
+//           break;
+//         default:
+//           setActiveView("form");
+//           setActiveIcon("icon1");
 //       }
 //     },
-//     [user, navigate]
+//     [user]
 //   );
 
 //   const handleMessagingClick = useCallback(() => {
-//     setShowChatView(true);
-//     setShowForm(false);
-//     setIsAddPackageView(false);
-//     setShowProfile(false);
-//     setShowNotifications(false);
+//     setActiveView("chat");
 //     setActiveIcon("icon5");
 //   }, []);
 
@@ -2035,13 +2067,13 @@ export default HomePage;
 
 //   const handleCompleteProfileBack = () => {
 //     setShowCompleteProfile(false);
-//     setShowForm(true);
+//     setActiveView("form");
 //     setActiveIcon("icon1");
 //   };
 
 //   const handleBackFromFavorites = useCallback(() => {
 //     setShowFavoritePackageView(false);
-//     setShowForm(false);
+//     setActiveView("options");
 //     setActiveIcon("icon2");
 //   }, []);
 
@@ -2067,21 +2099,145 @@ export default HomePage;
 //     checkAuth();
 //   }, [user, handleLogout]);
 
+//   // Determine what to render based on activeView
+//   const renderMainContent = () => {
+//     switch (activeView) {
+//       case "completeProfile":
+//         return (
+//           <CompleteProfile
+//             user={user}
+//             setUser={setUser}
+//             onProfileComplete={handleProfileComplete}
+//             onBack={handleCompleteProfileBack}
+//             isEmbedded={true}
+//           />
+//         );
+//       case "profile":
+//         return (
+//           <Profile
+//             user={user}
+//             setUser={setUser}
+//             isEmbedded={true}
+//             setShowProfile={setShowProfile}
+//           />
+//         );
+//       case "addPackage":
+//         return (
+//           <Delivery
+//             onClose={() => {
+//               setIsAddPackageView(false);
+//               setActiveView("options");
+//               setActiveIcon("icon2");
+//             }}
+//             addNewDelivery={addNewDelivery}
+//           />
+//         );
+//       case "chat":
+//         return (
+//           <Chat
+//             user={user}
+//             selectedContact={selectedChatContact}
+//             onClose={() => {
+//               setActiveView("form");
+//               setActiveIcon("icon1");
+//               setIsInMessageView(false);
+//               setShowFooter(true);
+//             }}
+//             setShowFooter={setShowFooter}
+//             setIsInMessageView={setIsInMessageView}
+//           />
+//         );
+//       case "favorites":
+//         return (
+//           <FavoritePackageView
+//             favorites={favorites}
+//             deliveryOptions={deliveryOptions}
+//             user={user}
+//             toggleFavorite={toggleFavorite}
+//             onBack={handleBackFromFavorites}
+//             setSelectedDelivery={handleSetSelectedDelivery}
+//           />
+//         );
+//       case "messages":
+//         return (
+//           <div className="mobile-messages-view">
+//             <div className="mobile-messages-tabs">
+//               <button
+//                 className={`mobile-tab ${
+//                   activeMessagesTab === "notifications" ? "active-tab" : ""
+//                 }`}
+//                 onClick={() => setActiveMessagesTab("notifications")}
+//               >
+//                 Notifications
+//                 {pendingRequests.length > 0 && (
+//                   <span className="notification-badge">
+//                     {pendingRequests.length}
+//                   </span>
+//                 )}
+//               </button>
+//               <button
+//                 className={`mobile-tab ${
+//                   activeMessagesTab === "chat" ? "active-tab" : ""
+//                 }`}
+//                 onClick={() => setActiveMessagesTab("chat")}
+//               >
+//                 Chat
+//               </button>
+//             </div>
+
+//             <div className="mobile-messages-content">
+//               {activeMessagesTab === "notifications" ? (
+//                 <MobileNotifications
+//                   pendingRequests={pendingRequests}
+//                   handleRequestAction={handleRequestAction}
+//                   getRequesterInfo={getRequesterInfo}
+//                   formatRelativeTime={formatRelativeTime}
+//                   deliveryOptions={deliveryOptions}
+//                 />
+//               ) : (
+//                 <Chat
+//                   user={user}
+//                   selectedContact={selectedChatContact}
+//                   onClose={() => {
+//                     setActiveView("form");
+//                     setActiveIcon("icon1");
+//                     setShowFooter(true);
+//                   }}
+//                   setShowFooter={setShowFooter}
+//                   setIsInMessageView={setIsInMessageView}
+//                 />
+//               )}
+//             </div>
+//           </div>
+//         );
+//       case "options":
+//         return (
+//           <DeliveryOptions
+//             deliveryOptions={filteredOptions}
+//             user={user}
+//             toggleFavorite={toggleFavorite}
+//             favorites={favorites}
+//             setIsAddPackageView={setIsAddPackageView}
+//             setShowForm={setShowForm}
+//             setShowProfile={setShowProfile}
+//             setShowCompleteProfile={setShowCompleteProfile}
+//             setSelectedDelivery={handleSetSelectedDelivery}
+//             loading={loading}
+//             onAddPackageClick={handleAddPackageClick}
+//           />
+//         );
+//       case "form":
+//       default:
+//         return <DeliveryForm updateFilterCriteria={updateFilterCriteria} />;
+//     }
+//   };
+
 //   return (
 //     <div className="Homepage-container">
 //       {!isMobile && (
 //         <header className="homepage-header">
 //           <img className="homepage-sameway-logo" src={samewayLogo} />
 //           <div className="grouped-elements">
-//             <button
-//               onClick={() => window.location.reload()}
-//               style={{ marginRight: "10px", padding: "5px 10px" }}
-//             >
-//               <small>
-//                 User: {user?.id} | Requests: {pendingRequests.length}
-//               </small>
-//               Refresh
-//             </button>
 //             <div className="notifications-dropdown-container">
 //               <div
 //                 className="bell-icon-container"
@@ -2106,13 +2262,6 @@ export default HomePage;
 //                             request.requester.split("@")[0],
 //                           profileImage: request.requesterProfileImage,
 //                         };
-//                         console.log("Request object:", request);
-//                         console.log(
-//                           "Request ID:",
-//                           request.requestId,
-//                           "Type:",
-//                           typeof request.requestId
-//                         );
 //                         return (
 //                           <div
 //                             key={index}
@@ -2157,10 +2306,6 @@ export default HomePage;
 //                                 <button
 //                                   onClick={(e) => {
 //                                     e.stopPropagation();
-//                                     console.log(
-//                                       "Approve button clicked for request:",
-//                                       request.requestId
-//                                     );
 //                                     handleRequestAction(
 //                                       request.requestId,
 //                                       "approve"
@@ -2210,14 +2355,7 @@ export default HomePage;
 //                 <div
 //                   className="dropdown-item"
 //                   onClick={() => {
-//                     setShowFavoritePackageView(true);
-//                     setShowForm(false);
-//                     setIsAddPackageView(false);
-//                     setShowProfile(false);
-//                     setShowCompleteProfile(false);
-//                     setShowNotifications(false);
-//                     setShowChatView(false);
-//                     setActiveIcon("favorites");
+//                     handleFooterClick("favorites");
 //                     setIsDropdownOpen(false);
 //                   }}
 //                 >
@@ -2237,20 +2375,11 @@ export default HomePage;
 //                 <div
 //                   className="dropdown-item"
 //                   onClick={() => {
-//                     if (!user?.isProfileComplete) {
-//                       setShowCompleteProfile(true);
-//                       setShowForm(false);
-//                       setIsAddPackageView(false);
-//                       setShowProfile(false);
-//                       setActiveIcon("profile");
-//                     } else {
-//                       setShowProfile(true);
-//                       setShowForm(false);
-//                       setActiveIcon("profile");
-//                     }
+//                     handleFooterClick("profile");
+//                     setIsDropdownOpen(false);
 //                   }}
 //                 >
-//                   <img src={profileImg} />
+//                   <img className="profile-dropdown" src={profileImg} />
 //                   Profile
 //                 </div>
 //                 <hr className="dropdown-divider" />
@@ -2264,60 +2393,11 @@ export default HomePage;
 //         </header>
 //       )}
 
-//       {isMobile && showNotifications && (
-//         <div className="mobile-messages-view">
-//           <div className="mobile-messages-tabs">
-//             <button
-//               className={`mobile-tab ${
-//                 activeMessagesTab === "notifications" ? "active-tab" : ""
-//               }`}
-//               onClick={() => setActiveMessagesTab("notifications")}
-//             >
-//               Notifications
-//               {pendingRequests.length > 0 && (
-//                 <span className="notification-badge">
-//                   {pendingRequests.length}
-//                 </span>
-//               )}
-//             </button>
-//             <button
-//               className={`mobile-tab ${
-//                 activeMessagesTab === "chat" ? "active-tab" : ""
-//               }`}
-//               onClick={() => setActiveMessagesTab("chat")}
-//             >
-//               Chat
-//             </button>
-//           </div>
-
-//           <div className="mobile-messages-content">
-//             {activeMessagesTab === "notifications" ? (
-//               <MobileNotifications
-//                 pendingRequests={pendingRequests}
-//                 handleRequestAction={handleRequestAction}
-//                 getRequesterInfo={getRequesterInfo}
-//                 formatRelativeTime={formatRelativeTime}
-//                 deliveryOptions={deliveryOptions}
-//               />
-//             ) : (
-//               <Chat
-//                 user={user}
-//                 selectedContact={selectedChatContact}
-//                 onClose={() => {
-//                   setShowNotifications(false);
-//                   setShowFooter(true);
-//                 }}
-//                 setShowFooter={setShowFooter}
-//                 setIsInMessageView={setIsInMessageView}
-//               />
-//             )}
-//           </div>
-//         </div>
-//       )}
-
-//       <div className={`${showForm ? "form-view" : "delivery-view"}`}>
+//       <div
+//         className={`${activeView === "form" ? "form-view" : "delivery-view"}`}
+//       >
 //         <div className="Components-container">
-//           {isMobile && !showFavoritePackageView && (
+//           {isMobile && activeView === "form" && activeView !== "favorites" && (
 //             <div className="mobile-favorites-button-container">
 //               <button
 //                 className="mobile-favorites-button"
@@ -2329,162 +2409,92 @@ export default HomePage;
 //             </div>
 //           )}
 //           {!isMobile && <DeliveryMap />}
-//           {isMobile && showForm && <DeliveryMap />}
-//           <div className="main-content-container">
-//             <div className="panels-wrapper">
-//               <div
-//                 className={`Components-container1 ${
-//                   selectedDelivery ? "panel-open" : ""
-//                 }`}
-//               >
-//                 {showCompleteProfile ? (
-//                   <CompleteProfile
-//                     user={user}
-//                     setUser={setUser}
-//                     onProfileComplete={handleProfileComplete}
-//                     onBack={handleCompleteProfileBack}
-//                     isEmbedded={true}
-//                   />
-//                 ) : showProfile ? (
-//                   <Profile
-//                     user={user}
-//                     setUser={setUser}
-//                     isEmbedded={true}
-//                     setShowProfile={setShowProfile}
-//                   />
-//                 ) : isAddPackageView ? (
-//                   <Delivery
-//                     onClose={() => setIsAddPackageView(false)}
-//                     addNewDelivery={addNewDelivery}
-//                   />
-//                 ) : showChatView ? (
-//                   <Chat
-//                     user={user}
-//                     selectedContact={selectedChatContact}
-//                     onClose={() => {
-//                       setShowChatView(false);
-//                       setIsInMessageView(false);
-//                       setShowFooter(true);
-//                     }}
-//                     setShowFooter={setShowFooter}
-//                     setIsInMessageView={setIsInMessageView}
-//                   />
-//                 ) : showFavoritePackageView ? (
-//                   <FavoritePackageView
-//                     favorites={favorites}
-//                     deliveryOptions={deliveryOptions}
-//                     user={user}
-//                     toggleFavorite={toggleFavorite}
-//                     onBack={handleBackFromFavorites}
-//                     setSelectedDelivery={setSelectedDelivery}
-//                   />
-//                 ) : (
-//                   <>
-//                     {!isMobile && (
-//                       <div>
-//                         <div className="Components-header">
-//                           <div
-//                             className="homepage-car-icon-container"
-//                             onClick={showDeliveryForm}
-//                             style={{ cursor: "pointer" }}
-//                           >
-//                             <img
-//                               className={`homepage-car-icon ${
-//                                 activeIcon === "form" ? "active-icon" : ""
-//                               }`}
-//                               src={carIcon}
-//                               alt="Car Icon"
-//                             />
-//                             <label
-//                               className={`homepage-icons-label ${
-//                                 activeIcon === "form" ? "activelabel" : ""
-//                               }`}
-//                             >
-//                               Direction
-//                             </label>
-//                             <hr
-//                               className={`${
-//                                 activeIcon === "form"
-//                                   ? "Components-header-icons-hr"
-//                                   : ""
-//                               }`}
-//                             />
-//                           </div>
-//                           <div
-//                             className="homepage-vector-icon-container"
-//                             onClick={showDeliveryOptions}
-//                             style={{ cursor: "pointer" }}
-//                           >
-//                             <img
-//                               className={`vector-icon ${
-//                                 activeIcon === "options" ? "active-icon" : ""
-//                               }`}
-//                               src={Vector}
-//                               alt="Vector Icon"
-//                             />
-//                             <label
-//                               className={`homepage-icons-label ${
-//                                 activeIcon === "options" ? "activelabel" : ""
-//                               }`}
-//                             >
-//                               Packages
-//                             </label>
-//                             <hr
-//                               className={`${
-//                                 activeIcon === "options"
-//                                   ? "Components-header-icons-hr"
-//                                   : ""
-//                               }`}
-//                             />
-//                           </div>
-//                         </div>
-//                         <hr className="header-hr" />
+//           {isMobile && activeView === "form" && <DeliveryMap />}
+//           <div
+//             className={`main-content-container ${
+//               isInfoPanelOpen ? "expanded" : ""
+//             }`}
+//           >
+//             <div
+//               className={`Components-container1 ${
+//                 selectedDelivery ? "panel-open" : ""
+//               } ${isInfoPanelOpen ? "expanded" : ""}`}
+//             >
+//               {/* Only show header icons for form/options views on desktop */}
+//               {!isMobile &&
+//                 (activeView === "form" || activeView === "options") && (
+//                   <div className="test-header">
+//                     <div className="Components-header">
+//                       <div
+//                         className="homepage-car-icon-container"
+//                         onClick={showDeliveryForm}
+//                         style={{ cursor: "pointer" }}
+//                       >
+//                         <img
+//                           className={`homepage-car-icon ${
+//                             activeIcon === "icon1" ? "active-icon" : ""
+//                           }`}
+//                           src={carIcon}
+//                           alt="Car Icon"
+//                         />
+//                         <label
+//                           className={`homepage-icons-label ${
+//                             activeIcon === "icon1" ? "activelabel" : ""
+//                           }`}
+//                         >
+//                           Direction
+//                         </label>
+//                         {activeIcon === "icon1" && (
+//                           <hr className="Components-header-icons-hr" />
+//                         )}
 //                       </div>
-//                     )}
-
-//                     <div className="Components-container2">
-//                       {showForm ? (
-//                         <DeliveryForm
-//                           updateFilterCriteria={updateFilterCriteria}
+//                       <div
+//                         className="homepage-vector-icon-container"
+//                         onClick={showDeliveryOptions}
+//                         style={{ cursor: "pointer" }}
+//                       >
+//                         <img
+//                           className={`vector-icon ${
+//                             activeIcon === "icon2" ? "active-icon" : ""
+//                           }`}
+//                           src={Vector}
+//                           alt="Vector Icon"
 //                         />
-//                       ) : (
-//                         <DeliveryOptions
-//                           deliveryOptions={filteredOptions}
-//                           user={user}
-//                           toggleFavorite={toggleFavorite}
-//                           favorites={favorites}
-//                           setIsAddPackageView={setIsAddPackageView}
-//                           setShowForm={setShowForm}
-//                           setShowProfile={setShowProfile}
-//                           setShowCompleteProfile={setShowCompleteProfile}
-//                           setSelectedDelivery={setSelectedDelivery}
-//                           loading={loading}
-//                           onAddPackageClick={handleAddPackageClick}
-//                         />
-//                       )}
+//                         <label
+//                           className={`homepage-icons-label ${
+//                             activeIcon === "icon2" ? "activelabel" : ""
+//                           }`}
+//                         >
+//                           Packages
+//                         </label>
+//                         {activeIcon === "icon2" && (
+//                           <hr className="Components-header-icons-hr" />
+//                         )}
+//                       </div>
 //                     </div>
-//                   </>
+//                     <hr className="header-hr" />
+//                   </div>
 //                 )}
-//               </div>
 
-//               {selectedDelivery && (
-//                 <div
-//                   className={`delivery-info-panel ${
-//                     selectedDelivery ? "open" : ""
-//                   }`}
-//                 >
-//                   <DeliveryInfoPanel
-//                     deliveryDetails={selectedDelivery}
-//                     user={user}
-//                     onClose={() => setSelectedDelivery(null)}
-//                     setShowCompleteProfile={setShowCompleteProfile}
-//                     setShowForm={setShowForm}
-//                     setIsAddPackageView={setIsAddPackageView}
-//                     setShowProfile={setShowProfile}
-//                   />
-//                 </div>
-//               )}
+//               <div className="Components-container2">{renderMainContent()}</div>
 //             </div>
+//             {selectedDelivery && (
+//               <div
+//                 className={`delivery-info-panel ${
+//                   selectedDelivery ? "open" : ""
+//                 } ${isInfoPanelOpen ? "expanded" : ""}`}
+//               >
+//                 <DeliveryInfoPanel
+//                   deliveryDetails={selectedDelivery}
+//                   user={user}
+//                   onClose={handleCloseInfoPanel}
+//                   setShowCompleteProfile={setShowCompleteProfile}
+//                   setShowForm={setShowForm}
+//                   setIsAddPackageView={setIsAddPackageView}
+//                   setShowProfile={setShowProfile}
+//                 />
+//               </div>
+//             )}
 //           </div>
 //         </div>
 

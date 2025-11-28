@@ -41,16 +41,42 @@
   width: 33px;
 }
 
-.my-location-icon,
-.three,
-.destination-icon {
-  filter: grayscale(100%);
+.my-location-icon circle {
+  transition: 0.3s;
+}
+
+.my-location-icon ellipse {
+  fill: #e0e2e5 !important;
+}
+.my-location-icon circle {
+  fill: #e0e2e5 !important;
+}
+
+.destination-icon circle {
+  fill: #e0e2e5 !important;
+}
+
+/* Sa herë input location ka vlerë → bëhet kaltër rrethi */
+
+.my-location-icon.active ellipse {
+  fill: #3673e4 !important;
+}
+.my-location-icon.active circle {
+  fill: #3673e4 !important;
+}
+
+.destination-icon.active circle {
+  fill: #3673e4 !important;
+}
+
+/* Jo aktive = gri shumë e çelur */
+.three {
+  filter: grayscale(100%) brightness(180%);
   transition: filter 0.3s ease;
 }
 
-.my-location-icon.active,
-.three.active,
-.destination-icon.active {
+/* Aktive = blu/jeshile siç e ke të konfiguruar */
+.three.active {
   filter: brightness(0) saturate(100%) invert(50%) sepia(70%) saturate(500%)
     hue-rotate(175deg) brightness(90%) contrast(100%);
 }
