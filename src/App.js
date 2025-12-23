@@ -176,14 +176,33 @@ import CompleteProfile from "./Pages/CompleteProfile/CompleteProfile";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { authApi } from "./API/api";
+import { checkBrowserSupport } from "./utils/webglCheck"; // Add this import
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showDeliveryForm, setShowDeliveryForm] = useState(false);
+  const [browserSupport, setBrowserSupport] = useState({
+    supported: true,
+    issues: [],
+  }); // Add this state
 
   useEffect(() => {
     console.log("App component mounted - checking auth state");
+
+    // Check browser support first
+    const support = checkBrowserSupport();
+    setBrowserSupport(support);
+    console.log("Browser support check:", support);
+
+    if (!support.supported) {
+      console.warn("Browser support issues:", support.issues);
+      // You could show a warning to users here if needed
+      if (support.issues.includes("WebGL not supported or disabled")) {
+        console.warn("⚠️ WebGL issues may affect map rendering");
+      }
+    }
+
     const validateUserSession = async () => {
       const token = localStorage.getItem("token");
       const storedUser = localStorage.getItem("user");
@@ -223,11 +242,39 @@ function App() {
   };
 
   if (loading) {
-    return <div className="App">Loading...</div>;
+    return (
+      <div className="App">
+        <div className="loading-screen">
+          <div className="loading-spinner"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
   }
+
+  // Add browser warning banner if needed
+  const showBrowserWarning =
+    !browserSupport.supported &&
+    browserSupport.issues.includes("WebGL not supported or disabled");
 
   return (
     <div className="App">
+      {showBrowserWarning && (
+        <div className="browser-warning">
+          <p>
+            ⚠️ Your browser may have issues displaying maps.
+            <a
+              href="https://get.webgl.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ marginLeft: "10px", color: "#2f80ed" }}
+            >
+              Check WebGL support
+            </a>
+          </p>
+        </div>
+      )}
+
       <BrowserRouter>
         <Routes>
           <Route

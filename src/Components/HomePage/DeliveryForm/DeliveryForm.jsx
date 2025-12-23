@@ -1,8 +1,8 @@
 // import React, { useState, useEffect } from "react";
 // import "./DeliveryForm.css";
-// import MyLocationIcon from "../../../icons/MyLocationIcon.svg";
+// import { ReactComponent as MyLocationIcon } from "../../../icons/MyLocationIcon.svg";
 // import Three from "../../../icons/Three.svg";
-// import destinationIcon from "../../../icons/Destionation-icon.svg";
+// import { ReactComponent as DestinationIcon } from "../../../icons/Destionation-icon.svg";
 // import Clock from "../../../icons/Clock.svg";
 // import swapIcon from "../../../icons/swapIcon.svg";
 // import { useMediaQuery } from "react-responsive";
@@ -21,21 +21,6 @@
 //   const [selectedButton, setSelectedButton] = useState("");
 
 //   const isMobile = useMediaQuery({ maxWidth: 480 });
-//   // const [isMobile, setIsMobile] = useState(false);
-
-//   // // Detect if the user is on mobile
-//   // useEffect(() => {
-//   //   const handleResize = () => {
-//   //     setIsMobile(window.innerWidth <= 768); // Mobile breakpoint
-//   //   };
-
-//   //   handleResize(); // Initial check
-//   //   window.addEventListener("resize", handleResize);
-
-//   //   return () => {
-//   //     window.removeEventListener("resize", handleResize);
-//   //   };
-//   // }, []);
 
 //   // Handler to update form values and notify the parent component
 //   const handleChange = (e) => {
@@ -53,24 +38,36 @@
 
 //   return (
 //     <div className="form-container">
-//       <h2 className="form-h2">Where are you going today?</h2>
+//       {/* Desktop layout - separate elements */}
+//       {!isMobile && (
+//         <>
+//           <h2 className="form-h2">Where are you going today?</h2>
+//         </>
+//       )}
+
+//       {/* Mobile layout - header container */}
+//       {isMobile && (
+//         <div className="mobile-header-container">
+//           <h2 className="form-h2">Where are you going today?</h2>
+//           <p className="form-p2">See All Places</p>
+//         </div>
+//       )}
+
 //       <div className="input-icons-container">
 //         <div className="form-icons-container">
-//           <img
+//           <MyLocationIcon
 //             className={`my-location-icon ${
 //               formValues.location ? "active" : ""
 //             }`}
-//             src={MyLocationIcon}
 //           />
 //           <img
 //             className={`three ${formValues.destination ? "active" : ""}`}
 //             src={Three}
 //           />
-//           <img
+//           <DestinationIcon
 //             className={`destination-icon ${
 //               formValues.destination ? "active" : ""
 //             }`}
-//             src={destinationIcon}
 //           />
 //         </div>
 //         <div className="form-inputs-container">
@@ -90,38 +87,6 @@
 //             value={formValues.destination}
 //             onChange={handleChange}
 //           />
-//           {/* <input
-//           className="form-input"
-//           type="number"
-//           name="radius"
-//           placeholder="Radius"
-//           value={formValues.radius}
-//           onChange={handleChange}
-//         />
-//         <input
-//           className="form-input"
-//           type="number"
-//           name="length"
-//           placeholder="Length"
-//           value={formValues.length}
-//           onChange={handleChange}
-//         />
-//         <input
-//           className="form-input"
-//           type="number"
-//           name="height"
-//           placeholder="Height"
-//           value={formValues.height}
-//           onChange={handleChange}
-//         />
-//         <input
-//           className="form-input"
-//           type="datetime-local"
-//           name="pickupTime"
-//           placeholder="Pickup Time"
-//           value={formValues.pickupTime}
-//           onChange={handleChange}
-//         /> */}
 //         </div>
 //         {isMobile && (
 //           <img src={swapIcon} alt="Swap Icon" className="mobile-only-icon" />
@@ -149,7 +114,6 @@
 //           Other
 //         </button>
 //       </div>
-//       {/* <hr className="form-hr" /> */}
 //       <div className="last-location-container">
 //         <img className="clock" src={Clock} />
 //         <div className="form-text-container">
@@ -157,8 +121,10 @@
 //           <p className="form-p">Rr, Nr.255 Agim Ramadani, Prishtina 10000</p>
 //         </div>
 //       </div>
-//       {/* <hr className="form-hr" /> */}
-//       <p className="form-p2">See All Places</p>
+
+//       {/* Desktop - Show "See All Places" at bottom */}
+//       {!isMobile && <p className="form-p2">See All Places</p>}
+
 //       <button className="form-confirm-button">Confirm</button>
 //     </div>
 //   );
@@ -175,8 +141,7 @@ import Clock from "../../../icons/Clock.svg";
 import swapIcon from "../../../icons/swapIcon.svg";
 import { useMediaQuery } from "react-responsive";
 
-const DeliveryForm = ({ updateFilterCriteria }) => {
-  // Local state to manage form input values
+const DeliveryForm = ({ updateFilterCriteria, onConfirmRoute }) => {
   const [formValues, setFormValues] = useState({
     location: "",
     destination: "",
@@ -187,15 +152,13 @@ const DeliveryForm = ({ updateFilterCriteria }) => {
   });
 
   const [selectedButton, setSelectedButton] = useState("");
-
   const isMobile = useMediaQuery({ maxWidth: 480 });
 
-  // Handler to update form values and notify the parent component
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormValues((prevValues) => {
       const updatedValues = { ...prevValues, [name]: value };
-      updateFilterCriteria(updatedValues); // Notify parent with updated criteria
+      updateFilterCriteria(updatedValues);
       return updatedValues;
     });
   };
@@ -204,16 +167,24 @@ const DeliveryForm = ({ updateFilterCriteria }) => {
     setSelectedButton(button);
   };
 
+  const handleConfirmClick = () => {
+    if (formValues.location && formValues.destination) {
+      if (onConfirmRoute) {
+        onConfirmRoute(formValues.location, formValues.destination);
+      }
+    } else {
+      alert("Please enter both location and destination");
+    }
+  };
+
   return (
     <div className="form-container">
-      {/* Desktop layout - separate elements */}
       {!isMobile && (
         <>
           <h2 className="form-h2">Where are you going today?</h2>
         </>
       )}
 
-      {/* Mobile layout - header container */}
       {isMobile && (
         <div className="mobile-header-container">
           <h2 className="form-h2">Where are you going today?</h2>
@@ -290,10 +261,11 @@ const DeliveryForm = ({ updateFilterCriteria }) => {
         </div>
       </div>
 
-      {/* Desktop - Show "See All Places" at bottom */}
       {!isMobile && <p className="form-p2">See All Places</p>}
 
-      <button className="form-confirm-button">Confirm</button>
+      <button className="form-confirm-button" onClick={handleConfirmClick}>
+        Confirm
+      </button>
     </div>
   );
 };

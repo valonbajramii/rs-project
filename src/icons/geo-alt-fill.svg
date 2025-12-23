@@ -1,3 +1,46 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
-  <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 16 16">
+  <defs>
+    <linearGradient id="cleanGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff4444" />
+      <stop offset="40%" stop-color="#e42f2f" />
+      <stop offset="100%" stop-color="#c21818" />
+    </linearGradient>
+    
+    <!-- Sharp shadow for crisp look -->
+    <filter id="crispShadow">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+    
+    <!-- Inner shine -->
+    <linearGradient id="innerShine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.4"/>
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Subtle background shape -->
+  <path 
+    fill="#e42f2f" 
+    opacity="0.2"
+    d="M8 16.5s6-5.686 6-10A6 6 0 0 0 2 6.5c0 4.314 6 10 6 10"
+    transform="translate(0, -0.25)"
+  />
+  
+  <!-- Main icon -->
+  <g filter="url(#crispShadow)">
+    <path 
+      fill="url(#cleanGrad)" 
+      d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"
+    />
+    
+    <!-- Inner shine overlay -->
+    <path 
+      fill="url(#innerShine)" 
+      d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10"
+    />
+  </g>
+  
+  <!-- Center circle with highlight -->
+  <circle cx="8" cy="6" r="2.2" fill="none" stroke="#ffffff" stroke-width="0.8" stroke-opacity="0.5"/>
 </svg>
