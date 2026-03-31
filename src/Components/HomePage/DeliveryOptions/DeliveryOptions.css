@@ -204,7 +204,9 @@
 .other-packages-section .delivery-option {
   background-color: white;
   opacity: 0.85;
-  transition: opacity 0.2s, transform 0.2s;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
   margin-bottom: 8px;
 }
 
@@ -452,7 +454,7 @@
   }
 
   .delivery-option {
-    grid-template-columns: 100px 1fr 60px;
+    /* grid-template-columns: 100px 1fr 60px; */
     padding: 8px;
     margin-bottom: 8px;
   }
@@ -570,7 +572,7 @@
   }
 
   .delivery-option {
-    grid-template-columns: 90px 1fr 50px;
+    /* grid-template-columns: 90px 1fr 50px; */
   }
 
   .delivery-option-image {

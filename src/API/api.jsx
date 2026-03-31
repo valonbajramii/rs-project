@@ -576,7 +576,8 @@
 
 import axios from "axios";
 
-const API_URL = "http://192.168.0.66:5210/api";
+// const API_URL = "http://192.168.1.11:5210/api";
+const API_URL = "http://192.168.1.8:5210/api";
 
 const api = axios.create({
   baseURL: API_URL,
@@ -655,7 +656,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 // Auth API
@@ -710,7 +711,7 @@ export const authApi = {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
       return response.data;
     } catch (error) {
@@ -841,7 +842,7 @@ export const packagesApi = {
     } catch (error) {
       console.error(
         "Package creation error:",
-        error.response?.data || error.message
+        error.response?.data || error.message,
       );
       throw error.response?.data || error.message;
     }
@@ -994,7 +995,7 @@ export const transportApi = {
           `/transportrequests/${requestId}/status`,
           {
             status: status,
-          }
+          },
         );
         return response.data;
       } catch (error) {
@@ -1024,7 +1025,7 @@ export const transportApi = {
               `/transportrequests/${requestId}`,
               {
                 status: status,
-              }
+              },
             );
             return response.data;
           } catch (error3) {
@@ -1033,20 +1034,20 @@ export const transportApi = {
             // For development, update mock data
             if (process.env.NODE_ENV === "development") {
               const userId = JSON.parse(
-                localStorage.getItem("user") || "{}"
+                localStorage.getItem("user") || "{}",
               ).id;
               if (userId) {
                 const userRequestsKey = `pendingRequests_${userId}`;
                 const mockRequests = JSON.parse(
-                  localStorage.getItem(userRequestsKey) || "[]"
+                  localStorage.getItem(userRequestsKey) || "[]",
                 );
 
                 const updatedRequests = mockRequests.filter(
-                  (req) => req.id != requestId
+                  (req) => req.id != requestId,
                 );
                 localStorage.setItem(
                   userRequestsKey,
-                  JSON.stringify(updatedRequests)
+                  JSON.stringify(updatedRequests),
                 );
 
                 return {
@@ -1121,7 +1122,7 @@ export const transportApi = {
         requestsArray = response.data.$values;
         console.log(
           "✅ Response has $values array, length:",
-          requestsArray.length
+          requestsArray.length,
         );
       } else {
         requestsArray = [response.data];
@@ -1192,7 +1193,7 @@ export const messagesApi = {
     } catch (error) {
       console.error(
         `Error getting conversation for user ${otherUserId}:`,
-        error
+        error,
       );
       throw error;
     }

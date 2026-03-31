@@ -5,23 +5,60 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
+    <meta name="description" content="SameWay Delivery Platform" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
 
-    <!-- HERE Maps SDK - ALL scripts MUST be same version (3.1) -->
-    <!-- Load with defer to prevent blocking -->
-    <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js" defer></script>
+    <!-- HERE Maps SDK - Load scripts in order -->
+    <script>
+      // Fix for WebGL issues
+      (function () {
+        // Create WebGL context early
+        try {
+          const canvas = document.createElement("canvas");
+          const gl =
+            canvas.getContext("webgl") ||
+            canvas.getContext("experimental-webgl");
+          if (gl) {
+            console.log("✅ WebGL context created successfully");
+          } else {
+            console.warn("⚠️ WebGL not available");
+          }
+        } catch (e) {
+          console.warn("⚠️ WebGL initialization failed:", e);
+        }
+
+        // Error handler for HERE SDK
+        window.addEventListener(
+          "error",
+          function (e) {
+            if (e.message && e.message.includes("H.Map")) {
+              console.warn("HERE Map error caught:", e.message);
+              e.preventDefault();
+              e.stopPropagation();
+              return false;
+            }
+          },
+          true
+        );
+      })();
+    </script>
+
+    <!-- Load HERE SDK with proper order and error handling -->
+    <script
+      src="https://js.api.here.com/v3/3.1/mapsjs-core.js"
+      onerror="console.error('Failed to load mapsjs-core')"
+    ></script>
     <script
       src="https://js.api.here.com/v3/3.1/mapsjs-service.js"
-      defer
+      onerror="console.error('Failed to load mapsjs-service')"
     ></script>
-    <script src="https://js.api.here.com/v3/3.1/mapsjs-ui.js" defer></script>
+    <script
+      src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"
+      onerror="console.error('Failed to load mapsjs-ui')"
+    ></script>
     <script
       src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"
-      defer
+      onerror="console.error('Failed to load mapsjs-mapevents')"
     ></script>
     <link
       rel="stylesheet"
@@ -32,59 +69,62 @@
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <title>SameWay</title>
 
-    <!-- Error handling for WebGL issues -->
+    <!-- HERE SDK Ready Check -->
     <script>
-      // Catch all errors before React does
-      window.addEventListener(
-        "error",
-        function (event) {
-          if (
-            event.error &&
-            event.error.message &&
-            event.error.message.includes("getExtension")
-          ) {
-            console.warn(
-              "⚠️ WebGL extension error detected - this is usually a timing issue"
-            );
-            console.warn("Map will retry initialization...");
-            event.preventDefault();
-          }
-        },
-        true
-      );
-    </script>
+      window.HERE_SDK_READY = false;
+      window.HERE_SDK_ERROR = null;
 
-    <!-- Simplified debug script -->
-    <script>
-      // Set a global flag when SDK is loaded
-      window.HERE_SDK_LOADED = false;
+      function checkHEREReady() {
+        if (
+          window.H &&
+          window.H.service &&
+          window.H.Map &&
+          window.H.ui &&
+          window.H.mapevents
+        ) {
+          window.HERE_SDK_READY = true;
+          console.log("✅ HERE SDK fully loaded");
 
-      // Wait for all scripts to load
-      window.addEventListener("load", function () {
-        console.log("📦 All page resources loaded");
+          // Dispatch event for React components
+          window.dispatchEvent(new Event("hereSdkReady"));
 
-        // Check if HERE SDK is available
-        const checkHERE = setInterval(function () {
-          if (window.H && window.H.service && window.H.Map && window.H.ui) {
-            clearInterval(checkHERE);
-            window.HERE_SDK_LOADED = true;
-            console.log("✅ HERE SDK fully loaded and ready");
+          return true;
+        }
+        return false;
+      }
 
-            // Dispatch custom event that React can listen to
-            const event = new CustomEvent("hereSdkLoaded", { detail: true });
-            window.dispatchEvent(event);
+      // Check immediately
+      if (!checkHEREReady()) {
+        // Check every 100ms
+        const checkInterval = setInterval(() => {
+          if (checkHEREReady()) {
+            clearInterval(checkInterval);
           }
         }, 100);
 
-        // Stop checking after 10 seconds
-        setTimeout(function () {
-          clearInterval(checkHERE);
-          if (!window.HERE_SDK_LOADED) {
-            console.error("❌ HERE SDK failed to load after 10 seconds");
+        // Timeout after 15 seconds
+        setTimeout(() => {
+          if (!window.HERE_SDK_READY) {
+            clearInterval(checkInterval);
+            window.HERE_SDK_ERROR = "HERE SDK failed to load after 15 seconds";
+            console.error(window.HERE_SDK_ERROR);
           }
-        }, 10000);
-      });
+        }, 15000);
+      }
     </script>
+
+    <style>
+      /* Prevent flash of unstyled content */
+      #root {
+        min-height: 100vh;
+      }
+
+      /* Ensure map containers have dimensions */
+      .here-map-container,
+      .map-canvas {
+        min-height: 300px;
+      }
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
