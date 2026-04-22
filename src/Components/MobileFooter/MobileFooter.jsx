@@ -10,7 +10,7 @@ import { ReactComponent as Vector } from "../../icons/Vector2.svg";
 import { ReactComponent as ProfileIcon } from "../../icons/person-fill.svg";
 import profileIcon from "../../icons/person-fill.svg";
 
-const MobileFooter = ({ onFooterClick, activeIcon }) => {
+const MobileFooter = ({ onFooterClick, activeIcon, hidden }) => {
   // const [activeIcon, setActiveIcon] = useState("icon1");
 
   // const showIcon1 = () => {
@@ -41,7 +41,7 @@ const MobileFooter = ({ onFooterClick, activeIcon }) => {
     }
   };
   return (
-    <div className="mobile-footer-container">
+    <div className={`mobile-footer-container ${hidden ? "hidden" : ""}`}>
       <HouseIcon
         onClick={() => handleIconClick("icon1")}
         className={`footer-icon1 ${activeIcon === "icon1" ? "active" : ""}`}

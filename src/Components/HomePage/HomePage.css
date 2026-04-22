@@ -524,7 +524,7 @@ homepage-request-item:hover {
   top: 0;
   left: 0;
   right: 0;
-  bottom: 80px;
+  bottom: 70px; /* keep this — leaves space for footer */
   background: white;
   z-index: 1000;
   display: flex;
@@ -894,9 +894,9 @@ homepage-request-item:hover {
   }
 
   /* Hide footer when notifications are shown */
-  .mobile-messages-view ~ .mobile-footer-container {
+  /* .mobile-messages-view ~ .mobile-footer-container {
     display: none !important;
-  }
+  } */
 
   /* Ensure notifications view takes full height */
   .mobile-messages-view {

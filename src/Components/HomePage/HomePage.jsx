@@ -4257,10 +4257,11 @@ const HomePage = ({ user, setUser, onLogout }) => {
       )}
 
       {/* Mobile Footer - Always visible except in notifications view */}
-      {isMobile && !showNotifications && (
+      {isMobile && (
         <MobileFooter
           onFooterClick={handleFooterClick}
           activeIcon={activeIcon}
+          hidden={isInMessageView}
         />
       )}
 
