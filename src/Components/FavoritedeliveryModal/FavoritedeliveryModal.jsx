@@ -4,7 +4,7 @@ import "./FavoritedeliveryModal.css";
 const FavoritedeliveryModal = ({ favorites, deliveryOptions, onClose }) => {
   // Filter the delivery options to only show favorites
   const favoriteDeliveries = deliveryOptions.filter((delivery) =>
-    favorites.includes(delivery.id)
+    favorites.includes(delivery.id),
   );
 
   return (

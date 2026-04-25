@@ -404,11 +404,55 @@
   color: #999;
 }
 
+/* @media (max-height: 1300px) {
+  .add-new-package-btn {
+    margin-bottom: 5px;
+  }
+}
+
+@media (max-height: 1044px) {
+  .add-new-package-btn {
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-height: 932px) {
+  .add-new-package-btn {
+    margin-bottom: 15px;
+  }
+}
+
+@media (max-height: 849px) {
+  .add-new-package-btn {
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-height: 790px) {
+  .add-new-package-btn {
+    margin-bottom: 25px;
+  }
+}
+
+@media (max-height: 728px) {
+  .add-new-package-btn {
+    margin-bottom: 30px;
+  }
+} */
+
 /* Mobile Responsive Styles */
 @media (max-width: 480px) {
   .delivery-option-container {
-    border-radius: 10px;
-    padding-bottom: 0px;
+    height: 100%;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  .scrollable-container {
+    flex: 1;
+    overflow-y: auto;
+    /* Leave space for the add button */
+    padding-bottom: 80px;
   }
 
   .active-route-indicator {
@@ -518,50 +562,26 @@
     padding: 2px 5px;
   }
 
+  /* .add-new-package-btn {
+    position: sticky;
+    bottom: 0;
+    margin: 0;
+    border-radius: 0;
+    width: 100%;
+    margin-bottom: 15px;
+    margin-right: 5px;
+    margin-left: 5px;
+  } */
   .add-new-package-btn {
     height: 59px;
     font-size: 15px;
-    margin-top: 20px;
     border-radius: 10px;
-    margin-bottom: 15px;
+    /* position: sticky; */
+    margin-top: 10px;
     margin-left: 10px;
     margin-right: 10px;
-  }
-
-  @media (max-height: 1300px) {
-    .add-new-package-btn {
-      margin-bottom: 5px;
-    }
-  }
-
-  @media (max-height: 1044px) {
-    .add-new-package-btn {
-      margin-bottom: 10px;
-    }
-  }
-
-  @media (max-height: 932px) {
-    .add-new-package-btn {
-      margin-bottom: 15px;
-    }
-  }
-
-  @media (max-height: 849px) {
-    .add-new-package-btn {
-      margin-bottom: 20px;
-    }
-  }
-
-  @media (max-height: 790px) {
-    .add-new-package-btn {
-      margin-bottom: 25px;
-    }
-  }
-
-  @media (max-height: 728px) {
-    .add-new-package-btn {
-      margin-bottom: 30px;
-    }
+    margin-bottom: 20px;
+    /* margin-top: 20px; */
   }
 }
 

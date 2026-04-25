@@ -941,3 +941,50 @@ us .contact-info-header .user-avatar,
     margin-bottom: 15px;
   }
 }
+
+/* ── Add these to the bottom of your existing Chat.css ── */
+
+/* Connection status dot */
+.connection-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: 6px;
+  flex-shrink: 0;
+  transition: background-color 0.3s ease;
+}
+
+.connection-dot.connected {
+  background-color: #4caf50;
+  box-shadow: 0 0 4px rgba(76, 175, 80, 0.6);
+}
+
+.connection-dot.connecting {
+  background-color: #ff9800;
+  animation: pulse-dot 1s infinite;
+}
+
+.connection-dot.disconnected {
+  background-color: #bbb;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* Empty contacts message */
+.no-contacts-msg {
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  color: #999;
+  text-align: center;
+  padding: 30px 15px;
+  line-height: 1.6;
+}

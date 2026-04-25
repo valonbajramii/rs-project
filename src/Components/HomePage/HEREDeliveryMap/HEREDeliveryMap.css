@@ -289,7 +289,12 @@
 /* Mobile adjustments */
 @media (max-width: 480px) {
   .here-map-container {
-    height: 350px;
+    position: fixed; /* Fixed so it stays behind the sheets */
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100vh; /* Full screen height */
+    z-index: 0; /* Behind the bottom sheets */
   }
 
   .sdk-loading {
