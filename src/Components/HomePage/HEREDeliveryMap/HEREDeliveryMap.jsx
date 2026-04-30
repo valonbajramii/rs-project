@@ -1256,6 +1256,8 @@ const HEREDeliveryMap = ({
   const [sdkReady, setSdkReady] = useState(false);
   const [iconsReady, setIconsReady] = useState(false);
 
+  const mapPositionedRef = useRef(false);
+  const geocodeCacheRef = useRef({});
   // ================= COMPLETE CLEANUP =================
   const cleanupMap = useCallback(() => {
     if (cleanupRef.current) return;
@@ -1338,16 +1340,12 @@ const HEREDeliveryMap = ({
   const clearPackageRoute = useCallback(() => {
     if (!mapInstanceRef.current) return;
 
-    console.log("🧹 Clearing package route...");
-
     // Remove package route line
     if (packageRouteLineRef.current) {
       try {
-        if (mapInstanceRef.current.hasObject(packageRouteLineRef.current)) {
-          mapInstanceRef.current.removeObject(packageRouteLineRef.current);
-        }
+        mapInstanceRef.current.removeObject(packageRouteLineRef.current);
       } catch (e) {
-        console.warn("Error removing package route line:", e);
+        // already removed or not on map
       }
       packageRouteLineRef.current = null;
     }
@@ -1355,30 +1353,14 @@ const HEREDeliveryMap = ({
     // Remove package-specific markers
     packageSpecificMarkersRef.current.forEach((marker) => {
       try {
-        if (marker && mapInstanceRef.current.hasObject(marker)) {
-          mapInstanceRef.current.removeObject(marker);
-        }
+        mapInstanceRef.current.removeObject(marker);
       } catch (e) {
-        console.warn("Error removing package marker:", e);
+        // already removed or not on map
       }
     });
     packageSpecificMarkersRef.current = [];
 
-    // Remove any info bubbles
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.getObjects().forEach((obj) => {
-        if (obj instanceof window.H.ui.InfoBubble) {
-          try {
-            mapInstanceRef.current.removeObject(obj);
-          } catch (e) {
-            console.warn("Error removing info bubble:", e);
-          }
-        }
-      });
-    }
-
     setLocalSelectedPackage(null);
-    console.log("✅ Package route cleared");
   }, []);
 
   // ================= SHOW PACKAGE ROUTE =================
@@ -1567,7 +1549,7 @@ const HEREDeliveryMap = ({
 
         console.log("📍 Points to show:", pointsToShow);
 
-        if (pointsToShow.length > 0) {
+        if (pointsToShow.length > 0 && !mapPositionedRef.current) {
           try {
             const bounds = new window.H.geo.Rect(
               Math.min(...pointsToShow.map((p) => p.lat)),
@@ -1580,7 +1562,7 @@ const HEREDeliveryMap = ({
               bounds: bounds,
               padding: { top: 60, left: 60, right: 60, bottom: 100 },
             });
-            console.log("✅ Map view adjusted");
+            mapPositionedRef.current = true; // ← don't reposition again
           } catch (boundsError) {
             console.warn("⚠️ Error setting map bounds:", boundsError);
           }
@@ -1632,7 +1614,7 @@ const HEREDeliveryMap = ({
         mapRef.current,
         layers.vector.normal.map,
         {
-          center: { lat: 42.6629, lng: 21.1655 },
+          center: { lat: 46.8182, lng: 8.2275 }, // ← Switzerland center
           zoom: 8,
           pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
         },
@@ -1653,15 +1635,13 @@ const HEREDeliveryMap = ({
       // Add map click handler
       const handleMapClick = (evt) => {
         const target = evt.target;
-
-        // Check if click is on a marker
         const isMarker = target instanceof window.H.map.Marker;
         const isPackageMarker =
           isMarker && target.getData && target.getData().packageId;
 
         if (!isPackageMarker) {
-          // Clicked on empty map - clear package route
-          clearPackageRoute();
+          // Only notify parent to close the info panel
+          // but DON'T clear the route line on map
           if (onPackageClick) {
             onPackageClick(null);
           }
@@ -1725,13 +1705,41 @@ const HEREDeliveryMap = ({
       // Package icon
       const createPackageIcon = (color) => {
         const svg = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
-          <rect x="6" y="6" width="20" height="20" rx="4" fill="${color}" stroke="white" stroke-width="2"/>
-          <path d="M12 12 L20 12 L20 20 L12 20 Z" fill="white" fill-opacity="0.8"/>
-        </svg>`;
+  <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 42 42">
+    <!-- Shadow -->
+    <ellipse cx="21" cy="40" rx="9" ry="3" fill="rgba(0,0,0,0.18)"/>
+
+    <!-- Bottom face of box -->
+    <polygon points="21,38 6,29 6,17 21,26" fill="${color}" opacity="0.6"/>
+    
+    <!-- Right face of box -->
+    <polygon points="21,38 36,29 36,17 21,26" fill="${color}" opacity="0.8"/>
+    
+    <!-- Top face of box -->
+    <polygon points="21,4 6,13 21,22 36,13" fill="${color}"/>
+
+    <!-- Lid split line -->
+    <line x1="6" y1="17" x2="21" y2="26" stroke="white" stroke-width="1" opacity="0.5"/>
+    <line x1="36" y1="17" x2="21" y2="26" stroke="white" stroke-width="1" opacity="0.5"/>
+    <line x1="6" y1="13" x2="36" y2="13" stroke="white" stroke-width="0.8" opacity="0.3"/>
+
+    <!-- Tape on right face (vertical) -->
+    <polygon points="21,26 21,38 24,36 24,24" fill="white" opacity="0.2"/>
+
+    <!-- Tape on top face -->
+    <polygon points="21,4 18,5.5 18,14 21,12.5 24,14 24,5.5" fill="white" opacity="0.2"/>
+
+    <!-- Outline -->
+    <polygon points="21,4 6,13 6,29 21,38 36,29 36,13" 
+             fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+    <line x1="21" y1="4" x2="21" y2="22" stroke="white" stroke-width="1.5" opacity="0.5"/>
+    <line x1="6" y1="13" x2="21" y2="22" stroke="white" stroke-width="1.5" opacity="0.5"/>
+    <line x1="36" y1="13" x2="21" y2="22" stroke="white" stroke-width="1.5" opacity="0.5"/>
+  </svg>`;
+
         return new window.H.map.Icon(
           `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`,
-          { size: { w: 32, h: 32 }, anchor: { x: 16, y: 16 } },
+          { size: { w: 42, h: 42 }, anchor: { x: 21, y: 40 } },
         );
       };
 
@@ -1749,8 +1757,9 @@ const HEREDeliveryMap = ({
       };
 
       originIconRef.current = createCircleIcon("#4285F4");
-      matchingPackageIconRef.current = createPackageIcon("#4CAF50");
-      otherPackageIconRef.current = createPackageIcon("#FF9800");
+      matchingPackageIconRef.current = createPackageIcon("#2E7D32"); // darker green for matching
+      // otherPackageIconRef.current = createPackageIcon("#3673e4"); // your app's blue for others
+      otherPackageIconRef.current = createPackageIcon("#f7a04f"); // your app's blue for others
       packageOriginIconRef.current = createSmallCircleIcon("#9C27B0");
       packageDestinationIconRef.current = createSmallCircleIcon("#E91E63");
 
@@ -1784,11 +1793,17 @@ const HEREDeliveryMap = ({
     );
   }, []);
 
+  useEffect(() => {
+    if (mapInstanceRef.current) {
+      setTimeout(() => {
+        mapInstanceRef.current?.getViewPort()?.resize();
+      }, 100);
+    }
+  }, [userLocation, destination, showRoute]);
+
   // ================= GEOCODE PACKAGES =================
   const geocodePackages = useCallback(async () => {
     if (!packages.length || !mapInstanceRef.current) return;
-
-    console.log("📍 Geocoding package locations...");
 
     const coordinates = {};
     const geocodePromises = [];
@@ -1798,7 +1813,12 @@ const HEREDeliveryMap = ({
         geocodePromises.push(
           (async () => {
             try {
-              const result = await geocodeAddress(pkg.location);
+              // ← Check cache first
+              let result = geocodeCacheRef.current[pkg.location];
+              if (!result) {
+                result = await geocodeAddress(pkg.location);
+                geocodeCacheRef.current[pkg.location] = result; // ← Store in cache
+              }
               coordinates[pkg.id] = {
                 lat: result.lat,
                 lng: result.lng,
@@ -1816,11 +1836,9 @@ const HEREDeliveryMap = ({
                       .includes(routeDestination.toLowerCase())),
               };
             } catch (error) {
-              console.warn(`Failed to geocode ${pkg.location}:`, error);
-              // Fallback coordinates
               coordinates[pkg.id] = {
-                lat: 42.6629 + (Math.random() - 0.5) * 0.5,
-                lng: 21.1655 + (Math.random() - 0.5) * 0.5,
+                lat: 46.8182 + (Math.random() - 0.5) * 0.5,
+                lng: 8.2275 + (Math.random() - 0.5) * 0.5,
                 name: pkg.name,
                 location: pkg.location,
                 destination: pkg.destination,
@@ -1833,8 +1851,35 @@ const HEREDeliveryMap = ({
     }
 
     await Promise.all(geocodePromises);
+
+    // ── OFFSET LOGIC: spread markers that share the same LOCATION STRING ──
+    const locationGroups = {};
+
+    // Group packages by their location string (exact same address)
+    Object.entries(coordinates).forEach(([id, coords]) => {
+      const key = coords.location.toLowerCase().trim(); // ← use address string not coords
+      if (!locationGroups[key]) locationGroups[key] = [];
+      locationGroups[key].push(id);
+    });
+
+    // For groups with more than 1 package, spread them in a small circle
+    Object.values(locationGroups).forEach((ids) => {
+      if (ids.length <= 1) return;
+
+      const offsetDistance = 0.0006; // ~60 meters apart, more visible
+      ids.forEach((id, index) => {
+        const angle = (2 * Math.PI * index) / ids.length;
+        coordinates[id] = {
+          ...coordinates[id],
+          lat: coordinates[id].lat + offsetDistance * Math.cos(angle),
+          lng: coordinates[id].lng + offsetDistance * Math.sin(angle),
+        };
+      });
+    });
+    // ── END OFFSET LOGIC ──
+
     setPackageCoordinates(coordinates);
-    console.log(`✅ Geocoded ${Object.keys(coordinates).length} packages`);
+    mapPositionedRef.current = false;
   }, [packages, routeLocation, routeDestination]);
 
   // ================= ADD PACKAGE MARKERS =================
@@ -1857,11 +1902,9 @@ const HEREDeliveryMap = ({
     // Remove existing package markers
     packageMarkersRef.current.forEach((marker) => {
       try {
-        if (marker && mapInstanceRef.current.hasObject(marker)) {
-          mapInstanceRef.current.removeObject(marker);
-        }
+        mapInstanceRef.current.removeObject(marker);
       } catch (e) {
-        console.warn("Error removing marker:", e);
+        // already removed, ignore
       }
     });
     packageMarkersRef.current = [];
@@ -2040,11 +2083,9 @@ const HEREDeliveryMap = ({
     // Remove old markers
     markersRef.current.forEach((m) => {
       try {
-        if (m && mapInstanceRef.current.hasObject(m)) {
-          mapInstanceRef.current.removeObject(m);
-        }
+        mapInstanceRef.current.removeObject(m);
       } catch (e) {
-        console.warn("Error removing marker:", e);
+        // already removed, ignore
       }
     });
     markersRef.current = [];
@@ -2107,14 +2148,11 @@ const HEREDeliveryMap = ({
     setRouteLoading(true);
 
     // Remove existing route
-    if (
-      routeLineRef.current &&
-      mapInstanceRef.current.hasObject(routeLineRef.current)
-    ) {
+    if (routeLineRef.current) {
       try {
         mapInstanceRef.current.removeObject(routeLineRef.current);
       } catch (e) {
-        console.warn("Error removing route line:", e);
+        // already removed, ignore
       }
       routeLineRef.current = null;
     }
@@ -2266,7 +2304,7 @@ const HEREDeliveryMap = ({
       )}
 
       {/* Package count indicator */}
-      {mapInitialized &&
+      {/* {mapInitialized &&
         Object.keys(packageCoordinates).length > 0 &&
         iconsReady && (
           <div className="package-count-indicator">
@@ -2300,7 +2338,7 @@ const HEREDeliveryMap = ({
               </div>
             </div>
           </div>
-        )}
+        )} */}
 
       {/* Package route info */}
       {localSelectedPackage && (
@@ -2311,12 +2349,10 @@ const HEREDeliveryMap = ({
               className="close-package-route-btn"
               onClick={() => {
                 clearPackageRoute();
-                // Also clear selection in parent
                 if (onPackageClick) {
                   onPackageClick(null);
                 }
               }}
-              aria-label="Close package route"
             >
               ×
             </button>

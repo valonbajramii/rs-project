@@ -218,7 +218,7 @@ const Register = ({ onRegister }) => {
       const registrationData = {
         FullName: formData.fullName,
         Email: formData.email,
-        DateOfBirth: new Date(formData.dateOfBirth).toISOString(),
+        DateOfBirth: formData.dateOfBirth + "T00:00:00Z",
         Password: password,
         ConfirmPassword: confirmPassword,
       };
@@ -240,7 +240,7 @@ const Register = ({ onRegister }) => {
       setError(
         error.response?.data?.title ||
           error.message ||
-          "Registration failed. Please check your details."
+          "Registration failed. Please check your details.",
       );
     }
   };

@@ -25,9 +25,16 @@ const MobileNotifications = ({
       <div className="mobile-notifications-list">
         {pendingRequests.length > 0 ? (
           pendingRequests.map((request, index) => {
-            const requesterUser = getRequesterInfo(request.requester);
+            const requesterUser = {
+              email: request.requester,
+              name:
+                request.requesterName ||
+                request.requester?.split("@")[0] ||
+                "Unknown",
+              profileImage: request.requesterProfileImage || null,
+            };
             const delivery = deliveryOptions.find(
-              (d) => d.id === request.deliveryId
+              (d) => d.id === request.deliveryId,
             );
 
             return (

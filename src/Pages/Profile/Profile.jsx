@@ -516,11 +516,11 @@ const Profile = ({ user, setUser, setShowProfile }) => {
       // Add text fields
       formData.append(
         "MobileNumber",
-        profileData.mobileNumber || user.mobileNumber || ""
+        profileData.mobileNumber || user.mobileNumber || "",
       );
       formData.append(
         "StreetAddress",
-        profileData.address || user.streetAddress || ""
+        profileData.address || user.streetAddress || "",
       );
       formData.append("City", profileData.city || user.city || "");
       formData.append("State", profileData.state || user.state || "");
@@ -673,8 +673,8 @@ const Profile = ({ user, setUser, setShowProfile }) => {
               name="dateOfBirth"
               placeholder="Date of Birth"
               value={
-                user?.DateOfBirth
-                  ? new Date(user.DateOfBirth).toISOString().split("T")[0]
+                user?.DateOfBirth || user?.dateOfBirth
+                  ? (user?.DateOfBirth || user?.dateOfBirth).split("T")[0]
                   : ""
               }
               readOnly

@@ -1029,7 +1029,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
             {/* Map Views */}
             {!isMobile && (
               <HEREDeliveryMap
-                key={`map-${showForm}`}
                 userLocation={userLocation}
                 destination={destination}
                 onMapClick={handleMapClick}
@@ -1051,7 +1050,6 @@ const HomePage = ({ user, setUser, onLogout }) => {
               !showFavoritePackageView &&
               !isAddPackageView && (
                 <HEREDeliveryMap
-                  key="mobile-map"
                   userLocation={userLocation}
                   destination={destination}
                   onMapClick={handleMapClick}

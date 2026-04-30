@@ -276,6 +276,10 @@
   background: #1c6bd6;
 }
 
+.here-map-container {
+  transition: opacity 0.2s ease;
+}
+
 /* Animations */
 @keyframes spin {
   0% {
